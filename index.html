@@ -1,29 +1,71 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <title>YM2151 Web Test</title>
+</head>
 <body>
-<button onclick="playSine()">Play 1s Sine</button>
-<script src="sine_test.js"></script>
-<script>
-Module.onRuntimeInitialized = async () => {
-    window.playSine = () => {
-        const bufferPtr = Module._generate_sine();
-        const sampleCount = 44100;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const audioBuffer = audioCtx.createBuffer(1, sampleCount, 44100);
-        const channelData = audioBuffer.getChannelData(0);
+    <h1>YM2151 Sine Wave Test</h1>
+    <button onclick="playSine()">Play Sine Wave</button>
 
-        for (let i = 0; i < sampleCount; i++) {
-            channelData[i] = Module.HEAPF32[bufferPtr/4 + i];  // float32
+    <script>
+        let Module;
+        let audioContext;
+
+        // Emscriptenモジュール読み込み完了後の処理
+        var Module = {
+            onRuntimeInitialized: function() {
+                console.log("Emscripten ready!");
+            }
+        };
+
+        function playSine() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            console.log("Generating sine wave...");
+            
+            // C関数を呼び出してポインタ取得
+            const bufferPtr = Module._generate_sine();
+            console.log("Buffer pointer:", bufferPtr);
+            
+            // サンプル数を計算
+            const sampleRate = 44100;
+            const duration = 1;
+            const numSamples = sampleRate * duration;
+            
+            // Emscriptenのヒープからデータをコピー
+            const buffer = new Float32Array(
+                Module.HEAPF32.buffer, 
+                bufferPtr, 
+                numSamples
+            );
+            
+            console.log("First 10 samples:", Array.from(buffer.slice(0, 10)));
+            
+            // AudioBufferを作成
+            const audioBuffer = audioContext.createBuffer(1, numSamples, sampleRate);
+            const channelData = audioBuffer.getChannelData(0);
+            
+            // データをコピー
+            for (let i = 0; i < numSamples; i++) {
+                channelData[i] = buffer[i];
+            }
+            
+            // 再生
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+            
+            console.log("Playing...");
+            
+            // メモリ解放
+            Module._free_buffer(bufferPtr);
         }
-
-        const source = audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioCtx.destination);
-        source.start();
-
-        Module._free_buffer(bufferPtr);
-    }
-}
-</script>
+    </script>
+    
+    <script src="sine_test.js"></script>
 </body>
 </html>
