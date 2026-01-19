@@ -3,24 +3,20 @@ name: Build and Deploy Nuked-OPM WASM
 on:
   push:
     branches:
-      - main  # main に push で自動デプロイ
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ リポジトリチェックアウト
     - uses: actions/checkout@v3
 
-    # 2️⃣ emcc セットアップ（v2 に修正）
     - name: Setup Emscripten
-      uses: emscripten-core/setup-emsdk@v2
+      uses: mymindstorm/setup-emsdk@v14
       with:
         version: latest
 
-    # 3️⃣ Nuked-OPM ソースが repo にある前提
-    #    (sine_test.c と同階層に opm.c / opm.h を置く)
     - name: Build WASM
       run: |
         emcc sine_test.c opm.c -O3 \
@@ -29,7 +25,6 @@ jobs:
           -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" \
           -o sine_test.js
 
-    # 4️⃣ GitHub Pages にデプロイ
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
