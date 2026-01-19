@@ -1,0 +1,32 @@
+name: Fetch Nuked-OPM
+
+on:
+  workflow_dispatch: # 手動で実行
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ リポジトリチェックアウト
+    - uses: actions/checkout@v3
+
+    # 2️⃣ Nuked-OPM ソース取得
+    - name: Clone Nuked-OPM
+      run: |
+        git clone https://github.com/nukeykt/Nuked-OPM.git tmp_nuked
+        mkdir -p nuked_opm
+        cp tmp_nuked/opm.c nuked_opm/
+        cp tmp_nuked/opm.h nuked_opm/
+
+    # 3️⃣ commit + push
+    - name: Commit and push Nuked-OPM sources
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add nuked_opm/opm.c nuked_opm/opm.h
+        git commit -m "Add Nuked-OPM C core"
+        git push
+      env:
+        # GitHub Actions 標準の TOKEN を使用
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
