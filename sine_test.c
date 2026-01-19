@@ -5,26 +5,27 @@
 
 #define SAMPLE_RATE 44100
 #define DURATION_SEC 1
-#define BUSY_CYCLES 128  // YM2151のビジー期間
+#define BUSY_CYCLES 128
 
 static opm_t chip;
 
 // YM2151レジスタ書き込み + ビジー待機
 void write_opm(uint8_t reg, uint8_t data) {
     int32_t dummy[2];
+    uint8_t sh1, sh2, so;
     
-    OPM_Write(&chip, 0, reg);   // アドレス書き込み
+    OPM_Write(&chip, 0, reg);
     
     // 128クロック消費
     for (int i = 0; i < BUSY_CYCLES; i++) {
-        OPM_Clock(&chip, dummy);
+        OPM_Clock(&chip, dummy, &sh1, &sh2, &so);
     }
     
-    OPM_Write(&chip, 1, data);  // データ書き込み
+    OPM_Write(&chip, 1, data);
     
     // 再び128クロック消費
     for (int i = 0; i < BUSY_CYCLES; i++) {
-        OPM_Clock(&chip, dummy);
+        OPM_Clock(&chip, dummy, &sh1, &sh2, &so);
     }
 }
 
@@ -58,9 +59,10 @@ float* generate_sine() {
     setup_sine_wave();
     
     int32_t sample_buf[2];
+    uint8_t sh1, sh2, so;
     
     for (int i = 0; i < total_samples; i++) {
-        OPM_Clock(&chip, sample_buf);
+        OPM_Clock(&chip, sample_buf, &sh1, &sh2, &so);
         buffer[i] = (sample_buf[0] + sample_buf[1]) / 65536.0f;
     }
     
