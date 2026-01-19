@@ -1,32 +1,42 @@
-name: Build and Deploy Nuked-OPM WASM
+name: Build and Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
     steps:
     - uses: actions/checkout@v3
-
+    
     - name: Setup Emscripten
       uses: mymindstorm/setup-emsdk@v14
       with:
-        version: latest
-
-    - name: Build WASM
+        version: 'latest'
+    
+    - name: Build with Emscripten
       run: |
         emcc sine_test.c opm.c -O3 \
           -s WASM=1 \
           -s EXPORTED_FUNCTIONS="['_generate_sine','_free_buffer']" \
           -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" \
           -o sine_test.js
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
+        path: '.'
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
