@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 #include <emscripten.h>
 #include "opm.h"
 
@@ -36,8 +37,6 @@ void setup_sine_wave() {
     write_opm(0x20, 0xC7);
     
     // 全オペレータ(M1,M2,C1,C2)のTLを設定 - M1以外は最小音量に
-    // オペレータ順: M1=0, M2=1, C1=2, C2=3
-    // レジスタ 0x60+オペレータ番号
     write_opm(0x60, 0x00);  // M1 TL=0 (最大音量)
     write_opm(0x68, 0x7F);  // M2 TL=127 (最小音量)
     write_opm(0x70, 0x7F);  // C1 TL=127 (最小音量)
@@ -73,11 +72,27 @@ int generate_sine() {
     int32_t sample_buf[2];
     uint8_t sh1, sh2, so;
     
+    // まず生波形を生成
     for (int i = 0; i < total_samples; i++) {
         OPM_Clock(&chip, sample_buf, &sh1, &sh2, &so);
-        // YM2151の出力レンジに合わせてスケーリング
-        float sample = (sample_buf[0] + sample_buf[1]) / 2.0f;
-        global_buffer[i] = sample / 8192.0f;  // 調整値
+        global_buffer[i] = (sample_buf[0] + sample_buf[1]) / 2.0f;
+    }
+    
+    // 最大振幅を検出
+    float max_amplitude = 0.0f;
+    for (int i = 0; i < total_samples; i++) {
+        float abs_sample = fabsf(global_buffer[i]);
+        if (abs_sample > max_amplitude) {
+            max_amplitude = abs_sample;
+        }
+    }
+    
+    // ノーマライズ（最大振幅を0.8に設定してクリッピング防止）
+    if (max_amplitude > 0.0f) {
+        float normalize_factor = 0.8f / max_amplitude;
+        for (int i = 0; i < total_samples; i++) {
+            global_buffer[i] *= normalize_factor;
+        }
     }
     
     return total_samples;
