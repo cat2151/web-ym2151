@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button onclick="playSine()">Play 1s Sine</button>
+<script src="sine_test.js"></script>
+<script>
+Module.onRuntimeInitialized = async () => {
+    window.playSine = () => {
+        const bufferPtr = Module._generate_sine();
+        const sampleCount = 44100;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioBuffer = audioCtx.createBuffer(1, sampleCount, 44100);
+        const channelData = audioBuffer.getChannelData(0);
+
+        for (let i = 0; i < sampleCount; i++) {
+            channelData[i] = Module.HEAPF32[bufferPtr/4 + i];  // float32
+        }
+
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioCtx.destination);
+        source.start();
+
+        Module._free_buffer(bufferPtr);
+    }
+}
+</script>
+</body>
+</html>
