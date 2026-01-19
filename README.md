@@ -6,6 +6,9 @@
 
 ### compile
 ```bash
-emcc sine_test.c -O3 -s WASM=1 -s EXPORTED_FUNCTIONS="['_generate_sine','_free_buffer']" -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" -o sine_test.js
+emcc sine_test.c -O3 \
+  -s WASM=1 \
+  -s EXPORTED_FUNCTIONS="['_generate_sine','_free_buffer']" \
+  -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" \
+  -o sine_test.js
 ```
-
