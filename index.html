@@ -3,59 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <title>YM2151 Web Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>YM2151 Sine Wave Test</h1>
-    <button onclick="playSine()">Play Sine Wave</button>
-
+    
+    <div class="controls">
+        <button onclick="playSine(1.0)">Play 1 sec</button>
+        <button onclick="playSine(0.5)">Play 0.5 sec</button>
+        <button onclick="playSine(2.0)">Play 2 sec</button>
+    </div>
+    
+    <div class="info" id="info">
+        Click a button to generate and play a sine wave
+    </div>
+    
     <script>
         let audioContext;
-
+        const OPM_CLOCK = 3579545;
+        const CLOCK_STEP = 64;
+        const OPM_SAMPLE_RATE = OPM_CLOCK / CLOCK_STEP;  // 約55930 Hz
+        
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
+                document.getElementById('info').innerHTML = 
+                    `OPM Sample Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>Ready to play`;
             }
         };
-
-        function playSine() {
+        
+        function playSine(durationSec = 1.0) {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-
-            console.log("Generating sine wave...");
             
-            const numSamples = Module._generate_sine();
-            console.log("Generated samples:", numSamples);
+            console.log(`Generating ${durationSec} sec sine wave...`);
             
-            const buffer = new Float32Array(numSamples);
-            for (let i = 0; i < numSamples; i++) {
+            // OPMのサンプルレートでサンプル数を計算
+            const numSamples = Math.floor(OPM_SAMPLE_RATE * durationSec);
+            
+            // C側の関数を呼び出し
+            const actualSamples = Module._generate_sine(numSamples);
+            console.log("Generated samples:", actualSamples);
+            
+            if (actualSamples === 0) {
+                console.error("Failed to generate samples");
+                document.getElementById('info').innerHTML = 
+                    '<span style="color: red;">Failed to generate samples</span>';
+                return;
+            }
+            
+            // サンプルデータを取得
+            const buffer = new Float32Array(actualSamples);
+            for (let i = 0; i < actualSamples; i++) {
                 buffer[i] = Module._get_sample(i);
             }
             
             console.log("First 10 samples:", Array.from(buffer.slice(0, 10)));
             
-            const audioBuffer = audioContext.createBuffer(1, numSamples, 44100);
+            // AudioBufferを作成（OPMのサンプルレートを使用）
+            const audioBuffer = audioContext.createBuffer(1, actualSamples, OPM_SAMPLE_RATE);
             audioBuffer.getChannelData(0).set(buffer);
             
+            // 再生
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(audioContext.destination);
             source.start();
             
             console.log("Playing...");
-
-            // playSine関数内、console.logの後に追加
-            // 簡易周波数検出（ゼロクロス法）
+            
+            // 周波数推定（ゼロクロス法）
             let zeroCrossings = 0;
-            for (let i = 1; i < numSamples; i++) {
+            for (let i = 1; i < actualSamples; i++) {
                 if (buffer[i-1] <= 0 && buffer[i] > 0) {
                     zeroCrossings++;
                 }
             }
-            const DURATION_SEC = 1.0;
-            let estimatedFreq = zeroCrossings / DURATION_SEC;
-            console.log("Estimated frequency:", estimatedFreq, "Hz");
+            const estimatedFreq = zeroCrossings / durationSec;
+            console.log("Estimated frequency:", estimatedFreq.toFixed(2), "Hz");
             
+            // 情報表示を更新
+            document.getElementById('info').innerHTML = 
+                `Playing ${durationSec} sec<br>` +
+                `Samples: ${actualSamples}<br>` +
+                `Sample Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>` +
+                `Estimated Frequency: ${estimatedFreq.toFixed(2)} Hz (should be ~440 Hz for A4)`;
+            
+            // バッファ解放
             Module._free_buffer();
         }
     </script>
