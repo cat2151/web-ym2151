@@ -11,12 +11,9 @@
     <script>
         let audioContext;
 
-        // Emscriptenモジュール設定
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
-                console.log("HEAPF32:", typeof Module.HEAPF32);
-                console.log("HEAP32:", typeof Module.HEAP32);
             }
         };
 
@@ -27,29 +24,19 @@
 
             console.log("Generating sine wave...");
             
-            // C関数を呼び出してポインタ取得
-            const bufferPtr = Module._generate_sine();
-            console.log("Buffer pointer:", bufferPtr);
+            const numSamples = Module._generate_sine();
+            console.log("Generated samples:", numSamples);
             
-            // サンプル数を計算
-            const sampleRate = 44100;
-            const duration = 1;
-            const numSamples = sampleRate * duration;
-            
-            // Emscriptenのヒープから直接Float32Arrayを作成
-            // bufferPtrはバイト単位なので、float(4バイト)で割る必要がある
-            const buffer = new Float32Array(Module.HEAP8.buffer, bufferPtr, numSamples);
+            const buffer = new Float32Array(numSamples);
+            for (let i = 0; i < numSamples; i++) {
+                buffer[i] = Module._get_sample(i);
+            }
             
             console.log("First 10 samples:", Array.from(buffer.slice(0, 10)));
             
-            // AudioBufferを作成
-            const audioBuffer = audioContext.createBuffer(1, numSamples, sampleRate);
-            const channelData = audioBuffer.getChannelData(0);
+            const audioBuffer = audioContext.createBuffer(1, numSamples, 44100);
+            audioBuffer.getChannelData(0).set(buffer);
             
-            // データをコピー
-            channelData.set(buffer);
-            
-            // 再生
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(audioContext.destination);
@@ -57,8 +44,7 @@
             
             console.log("Playing...");
             
-            // メモリ解放
-            Module._free_buffer(bufferPtr);
+            Module._free_buffer();
         }
     </script>
     
