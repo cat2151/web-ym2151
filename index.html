@@ -15,6 +15,8 @@
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
+                console.log("HEAPF32:", typeof Module.HEAPF32);
+                console.log("HEAP32:", typeof Module.HEAP32);
             }
         };
 
@@ -34,12 +36,9 @@
             const duration = 1;
             const numSamples = sampleRate * duration;
             
-            // Emscriptenのヒープからデータをコピー
-            const buffer = new Float32Array(
-                Module.HEAPF32.buffer, 
-                bufferPtr, 
-                numSamples
-            );
+            // Emscriptenのヒープから直接Float32Arrayを作成
+            // bufferPtrはバイト単位なので、float(4バイト)で割る必要がある
+            const buffer = new Float32Array(Module.HEAP8.buffer, bufferPtr, numSamples);
             
             console.log("First 10 samples:", Array.from(buffer.slice(0, 10)));
             
@@ -48,9 +47,7 @@
             const channelData = audioBuffer.getChannelData(0);
             
             // データをコピー
-            for (let i = 0; i < numSamples; i++) {
-                channelData[i] = buffer[i];
-            }
+            channelData.set(buffer);
             
             // 再生
             const source = audioContext.createBufferSource();
