@@ -43,6 +43,23 @@
         const CLOCK_STEP = 64;
         const OPM_SAMPLE_RATE = OPM_CLOCK / CLOCK_STEP;  // 約55930 Hz
         
+        // レジスタ設定 (A4サイン波)
+        const registers = [
+            { reg: 0x20, data: 0xC7 },  // RL=11, FB=0, CON=7
+            { reg: 0x60, data: 0x00 },  // M1 TL=0 (Max)
+            { reg: 0x68, data: 0x7F },  // M2 TL=min
+            { reg: 0x70, data: 0x7F },  // C1 TL=min
+            { reg: 0x78, data: 0x7F },  // C2 TL=min
+            { reg: 0x40, data: 0x01 },  // DT1=0, MUL=1
+            { reg: 0x80, data: 0x1F },  // KS=0, AR=31
+            { reg: 0xA0, data: 0x00 },  // AMS-EN=0, D1R=0
+            { reg: 0xC0, data: 0x00 },  // DT2=0, D2R=0
+            { reg: 0xE0, data: 0x00 },  // D1L=0, RR=0
+            { reg: 0x28, data: 0x48 },  // KC = A4
+            { reg: 0x30, data: 0x00 },  // KF = 0
+            { reg: 0x08, data: 0x78 }   // Key On
+        ];
+        
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
@@ -61,9 +78,23 @@
             // OPMのサンプルレートでサンプル数を計算
             const numSamples = Math.floor(OPM_SAMPLE_RATE * durationSec);
             
+            // [reg, data, reg, data, ...] に変換
+            const regDataPairs = new Uint8Array(registers.length * 2);
+            registers.forEach((r, i) => {
+                regDataPairs[i * 2] = r.reg;
+                regDataPairs[i * 2 + 1] = r.data;
+            });
+            
+            // Wasmメモリに転送
+            const pairPtr = Module._malloc(regDataPairs.length);
+            Module.HEAPU8.set(regDataPairs, pairPtr);
+            
             // C側の関数を呼び出し
-            const actualSamples = Module._generate_sine(numSamples);
+            const actualSamples = Module._generate_sound(pairPtr, registers.length, numSamples);
             console.log("Generated samples:", actualSamples);
+            
+            // メモリ解放
+            Module._free(pairPtr);
             
             if (actualSamples === 0) {
                 console.error("Failed to generate samples");
