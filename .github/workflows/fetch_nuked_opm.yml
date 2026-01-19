@@ -15,16 +15,15 @@ jobs:
     - name: Clone Nuked-OPM
       run: |
         git clone https://github.com/nukeykt/Nuked-OPM.git tmp_nuked
-        mkdir -p nuked_opm
-        cp tmp_nuked/opm.c nuked_opm/
-        cp tmp_nuked/opm.h nuked_opm/
+        cp tmp_nuked/opm.c .
+        cp tmp_nuked/opm.h .
 
     # 3️⃣ commit + push
     - name: Commit and push Nuked-OPM sources
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add nuked_opm/opm.c nuked_opm/opm.h
+        git add opm.c opm.h
         git commit -m "Add Nuked-OPM C core"
         git push
       env:
