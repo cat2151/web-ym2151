@@ -1,14 +1,8 @@
 # web-ym2151
 
-## 状況
-- 動かない可能性が非常に高いです
-- LLMに生成させただけで未確認です
+ブラウザで440Hzの音を鳴らします
 
-### compile
-```bash
-emcc sine_test.c -O3 \
-  -s WASM=1 \
-  -s EXPORTED_FUNCTIONS="['_generate_sine','_free_buffer']" \
-  -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" \
-  -o sine_test.js
-```
+これを、他projectのcoding agentが参照して実装に役立てることができるか？の検証用です
+
+実用には、ここから大規模な追加実装や、アーキテクチャの変更が必要です
+
