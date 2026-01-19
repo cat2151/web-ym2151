@@ -1,14 +1,11 @@
 name: Build and Deploy
-
 on:
   push:
     branches: [ main ]
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -23,12 +20,7 @@ jobs:
         version: 'latest'
     
     - name: Build with Emscripten
-      run: |
-        emcc sine_test.c opm.c -O3 \
-          -s WASM=1 \
-          -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
-          -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8']" \
-          -o sine_test.js
+      run: ./build.sh --skip-install --build-only
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
