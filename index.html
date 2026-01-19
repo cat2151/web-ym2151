@@ -9,10 +9,9 @@
     <button onclick="playSine()">Play Sine Wave</button>
 
     <script>
-        let Module;
         let audioContext;
 
-        // Emscriptenモジュール読み込み完了後の処理
+        // Emscriptenモジュール設定
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
