@@ -181,8 +181,8 @@ build_project() {
     # GitHub Actionsと同じビルドコマンド
     emcc sine_test.c opm.c -O3 \
       -s WASM=1 \
-      -s EXPORTED_FUNCTIONS="['_generate_sine','_free_buffer']" \
-      -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue']" \
+      -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
+      -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8']" \
       -o sine_test.js
     
     if [ $? -ne 0 ]; then
