@@ -133,6 +133,7 @@
         }
 
         function playSine() {
+            console.log("start...");
             const textarea = document.getElementById('jsonEditor');
             let currentData = null;
             let currentEvents = [];
@@ -174,23 +175,21 @@
                 Module.HEAPU8[baseAddr + 5] = parseInt(evt.data);
             });
             
+            console.log("generate...");
             // C側を実行: 戻り値は「生成されたフレーム数」
-            // C側で numFramesRaw * 2 のバッファ(L/R)を確保するように修正済み
             const actualFrames = Module._generate_sound(dataPtr, currentEvents.length, numFramesRaw);
             Module._free(dataPtr);
             
             if (actualFrames <= 0) {
                 console.error("Failed to generate samples");
                 return;
+            } else {
+                console.log("generated");
             }
-            
-            // --- ステレオ対応処理 ---
             
             const rawLeft = new Float32Array(actualFrames);
             const rawRight = new Float32Array(actualFrames);
-            
             // C側のバッファは [L0, R0, L1, R1, ...] の順で並んでいる
-            // C側を修正したため、1フレーム進むごとにインデックスは2つ進む
             for (let i = 0; i < actualFrames; i++) {
                 rawLeft[i] = Module._get_sample(i * 2);
                 rawRight[i] = Module._get_sample(i * 2 + 1);
@@ -210,7 +209,9 @@
                 `Playing Stereo<br>` +
                 `${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
 
-                Module._free_buffer();
+            Module._free_buffer();
+
+            console.log("finished");
         }
     </script>
 </body>
