@@ -2,149 +2,216 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>YM2151 Web Test</title>
+    <title>YM2151 Web Editor (Stereo Fixed)</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .controls {
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-        }
-        .info {
-            margin-top: 20px;
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .controls { margin: 20px 0; padding: 15px; background: #eef; border-radius: 5px; }
+        select { padding: 10px; font-size: 16px; margin-right: 10px; min-width: 200px; }
+        button { padding: 10px 30px; font-size: 16px; margin: 5px; cursor: pointer; font-weight: bold;}
+        .duration-display { margin-left: 10px; font-size: 14px; color: #555; }
+        textarea { 
+            width: 100%; 
+            height: 300px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 14px; 
             padding: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
+            box-sizing: border-box;
+            margin-top: 10px;
+            border: 1px solid #ccc;
         }
+        .info { margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        h1 { margin-bottom: 5px; }
+        .editor-label { margin-top: 20px; font-weight: bold; display: block; }
     </style>
 </head>
 <body>
-    <h1>YM2151 Sine Wave Test</h1>
+    <h1>YM2151 JSON Editor (Stereo Fixed)</h1>
     
     <div class="controls">
-        <button onclick="playSine(1.0)">Play 1 sec</button>
-        <button onclick="playSine(0.5)">Play 0.5 sec</button>
-        <button onclick="playSine(2.0)">Play 2 sec</button>
+        <label for="presetSelect"><strong>Load Preset: </strong></label>
+        <select id="presetSelect" onchange="loadToEditor()">
+            <option value="" disabled selected>Loading presets...</option>
+        </select>
+        <br><br>
+        
+        <button onclick="playSine()">Play Stereo</button>
+        <span id="durationInfo" class="duration-display"></span>
     </div>
+
+    <label class="editor-label" for="jsonEditor">Edit Events JSON:</label>
+    <textarea id="jsonEditor" spellcheck="false"></textarea>
     
     <div class="info" id="info">
-        Click a button to generate and play a sine wave
+        Initializing...
     </div>
+    
+    <!-- 外部スクリプト読み込み -->
+    <script src="sine_test.js"></script> 
     
     <script>
         let audioContext;
         const OPM_CLOCK = 3579545;
         const CLOCK_STEP = 64;
-        const OPM_SAMPLE_RATE = OPM_CLOCK / CLOCK_STEP;  // 約55930 Hz
+        const OPM_SAMPLE_RATE = OPM_CLOCK / CLOCK_STEP; // 約55930Hz
         
-        // レジスタ設定 (A4サイン波)
-        const registers = [
-            { reg: 0x20, data: 0xC7 },  // RL=11, FB=0, CON=7
-            { reg: 0x60, data: 0x00 },  // M1 TL=0 (Max)
-            { reg: 0x68, data: 0x7F },  // M2 TL=min
-            { reg: 0x70, data: 0x7F },  // C1 TL=min
-            { reg: 0x78, data: 0x7F },  // C2 TL=min
-            { reg: 0x40, data: 0x01 },  // DT1=0, MUL=1
-            { reg: 0x80, data: 0x1F },  // KS=0, AR=31
-            { reg: 0xA0, data: 0x00 },  // AMS-EN=0, D1R=0
-            { reg: 0xC0, data: 0x00 },  // DT2=0, D2R=0
-            { reg: 0xE0, data: 0x00 },  // D1L=0, RR=0
-            { reg: 0x28, data: 0x48 },  // KC = A4
-            { reg: 0x30, data: 0x00 },  // KF = 0
-            { reg: 0x08, data: 0x78 }   // Key On
-        ];
-        
+        let loadedPresets = [];
+
         var Module = {
             onRuntimeInitialized: function() {
                 console.log("Emscripten ready!");
                 document.getElementById('info').innerHTML = 
-                    `OPM Sample Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>Ready to play`;
+                    `OPM Internal Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>` +
+                    `Waiting for presets...`;
+                loadPresets();
             }
         };
+
+        async function loadPresets() {
+            try {
+                const response = await fetch('presets.json');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                loadedPresets = await response.json();
+                
+                const select = document.getElementById('presetSelect');
+                select.innerHTML = ''; 
+
+                if (!Array.isArray(loadedPresets) || loadedPresets.length === 0) {
+                    const option = document.createElement('option');
+                    option.text = "No presets found";
+                    select.add(option);
+                    return;
+                }
+
+                loadedPresets.forEach((preset, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.text = preset.name || `Preset ${index + 1}`;
+                    select.add(option);
+                });
+                
+                if(loadedPresets.length > 0) {
+                    select.value = 0;
+                    loadToEditor();
+                }
+
+                document.getElementById('info').innerHTML += "<br>Presets loaded.";
+
+            } catch (error) {
+                console.error('Error loading presets:', error);
+                document.getElementById('info').innerHTML = 
+                    `<span style="color: red;">Error loading 'presets.json'.</span>`;
+            }
+        }
+
+        function loadToEditor() {
+            const select = document.getElementById('presetSelect');
+            const selectedIndex = select.value;
+            if (selectedIndex === "" || !loadedPresets[selectedIndex]) return;
+
+            const editObj = {
+                events: loadedPresets[selectedIndex].events
+            };
+
+            const textarea = document.getElementById('jsonEditor');
+            textarea.value = JSON.stringify(editObj, null, 2);
+            updateDurationDisplay(editObj.events);
+        }
         
-        function playSine(durationSec = 1.0) {
+        function calculateDuration(events) {
+            if (!events || events.length === 0) return 1.0;
+            let maxTime = 0.0;
+            events.forEach(evt => {
+                const t = parseFloat(evt.time);
+                if (!isNaN(t) && t > maxTime) maxTime = t;
+            });
+            return maxTime + 1.0;
+        }
+
+        function updateDurationDisplay(events) {
+            const d = calculateDuration(events);
+            document.getElementById('durationInfo').innerText = `(Calculated Duration: ${d.toFixed(2)} sec)`;
+        }
+
+        function playSine() {
+            const textarea = document.getElementById('jsonEditor');
+            let currentData = null;
+            let currentEvents = [];
+
+            try {
+                currentData = JSON.parse(textarea.value);
+                if (!currentData.events || !Array.isArray(currentData.events)) {
+                    throw new Error("JSON must contain an 'events' array.");
+                }
+                currentEvents = currentData.events;
+                if (currentEvents.length === 0) {
+                    alert("Events array is empty.");
+                    return;
+                }
+            } catch (e) {
+                alert("Invalid JSON format:\n" + e.message);
+                return;
+            }
+
+            const durationSec = calculateDuration(currentEvents);
+            updateDurationDisplay(currentEvents);
+
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
             
-            console.log(`Generating ${durationSec} sec sine wave...`);
+            // OPM_SAMPLE_RATE ベースでの生成サンプル数（フレーム数）
+            const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
             
-            // OPMのサンプルレートでサンプル数を計算
-            const numSamples = Math.floor(OPM_SAMPLE_RATE * durationSec);
+            const STRUCT_SIZE = 8;
+            const bufferSize = currentEvents.length * STRUCT_SIZE;
+            const dataPtr = Module._malloc(bufferSize);
+            const view = new DataView(Module.HEAPU8.buffer);
             
-            // [reg, data, reg, data, ...] に変換
-            const regDataPairs = new Uint8Array(registers.length * 2);
-            registers.forEach((r, i) => {
-                regDataPairs[i * 2] = r.reg;
-                regDataPairs[i * 2 + 1] = r.data;
+            currentEvents.forEach((evt, i) => {
+                const baseAddr = dataPtr + (i * STRUCT_SIZE);
+                view.setFloat32(baseAddr, parseFloat(evt.time), true);
+                Module.HEAPU8[baseAddr + 4] = parseInt(evt.addr);
+                Module.HEAPU8[baseAddr + 5] = parseInt(evt.data);
             });
             
-            // Wasmメモリに転送
-            const pairPtr = Module._malloc(regDataPairs.length);
-            Module.HEAPU8.set(regDataPairs, pairPtr);
+            // C側を実行: 戻り値は「生成されたフレーム数」
+            // C側で numFramesRaw * 2 のバッファ(L/R)を確保するように修正済み
+            const actualFrames = Module._generate_sound(dataPtr, currentEvents.length, numFramesRaw);
+            Module._free(dataPtr);
             
-            // C側の関数を呼び出し
-            const actualSamples = Module._generate_sound(pairPtr, registers.length, numSamples);
-            console.log("Generated samples:", actualSamples);
-            
-            // メモリ解放
-            Module._free(pairPtr);
-            
-            if (actualSamples === 0) {
+            if (actualFrames <= 0) {
                 console.error("Failed to generate samples");
-                document.getElementById('info').innerHTML = 
-                    '<span style="color: red;">Failed to generate samples</span>';
                 return;
             }
             
-            // サンプルデータを取得
-            const buffer = new Float32Array(actualSamples);
-            for (let i = 0; i < actualSamples; i++) {
-                buffer[i] = Module._get_sample(i);
+            // --- ステレオ対応処理 ---
+            
+            const rawLeft = new Float32Array(actualFrames);
+            const rawRight = new Float32Array(actualFrames);
+            
+            // C側のバッファは [L0, R0, L1, R1, ...] の順で並んでいる
+            // C側を修正したため、1フレーム進むごとにインデックスは2つ進む
+            for (let i = 0; i < actualFrames; i++) {
+                rawLeft[i] = Module._get_sample(i * 2);
+                rawRight[i] = Module._get_sample(i * 2 + 1);
             }
             
-            console.log("First 10 samples:", Array.from(buffer.slice(0, 10)));
+            const audioBuffer = audioContext.createBuffer(2, rawLeft.length, OPM_SAMPLE_RATE);
             
-            // AudioBufferを作成（OPMのサンプルレートを使用）
-            const audioBuffer = audioContext.createBuffer(1, actualSamples, OPM_SAMPLE_RATE);
-            audioBuffer.getChannelData(0).set(buffer);
+            audioBuffer.getChannelData(0).set(rawLeft);
+            audioBuffer.getChannelData(1).set(rawRight);
             
-            // 再生
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(audioContext.destination);
             source.start();
             
-            console.log("Playing...");
-            
-            // 周波数推定（ゼロクロス法）
-            let zeroCrossings = 0;
-            for (let i = 1; i < actualSamples; i++) {
-                if (buffer[i-1] <= 0 && buffer[i] > 0) {
-                    zeroCrossings++;
-                }
-            }
-            const estimatedFreq = zeroCrossings / durationSec;
-            console.log("Estimated frequency:", estimatedFreq.toFixed(2), "Hz");
-            
-            // 情報表示を更新
             document.getElementById('info').innerHTML = 
-                `Playing ${durationSec} sec<br>` +
-                `Samples: ${actualSamples}<br>` +
-                `Sample Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>` +
-                `Estimated Frequency: ${estimatedFreq.toFixed(2)} Hz (should be ~440 Hz for A4)`;
-            
-            // バッファ解放
-            Module._free_buffer();
+                `Playing Stereo<br>` +
+                `${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
+
+                Module._free_buffer();
         }
     </script>
-    
-    <script src="sine_test.js"></script>
 </body>
 </html>

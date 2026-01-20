@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Sine Wave (A4 - 440Hz)",
+    "events": [
+      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
+      { "time": 0.0, "addr": "0x60", "data": "0x00" },
+      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x40", "data": "0x01" },
+      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
+      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
+      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
+      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
+      { "time": 0.0, "addr": "0x28", "data": "0x4A" },
+      { "time": 0.0, "addr": "0x30", "data": "0x00" },
+      { "time": 0.0, "addr": "0x08", "data": "0x78" }
+    ]
+  },
+  {
+    "name": "Sine Wave (A5 - High Pitch)",
+    "events": [
+      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
+      { "time": 0.0, "addr": "0x60", "data": "0x00" },
+      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
+      { "time": 0.0, "addr": "0x40", "data": "0x01" },
+      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
+      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
+      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
+      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
+      { "time": 0.0, "addr": "0x28", "data": "0x5A" },
+      { "time": 0.0, "addr": "0x30", "data": "0x00" },
+      { "time": 0.0, "addr": "0x08", "data": "0x78" }
+    ]
+  }
+]
