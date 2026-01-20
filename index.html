@@ -133,7 +133,6 @@
         }
 
         function playSine() {
-            console.log("start...");
             const textarea = document.getElementById('jsonEditor');
             let currentData = null;
             let currentEvents = [];
@@ -210,8 +209,6 @@
                 `${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
 
             Module._free_buffer();
-
-            console.log("finished");
         }
     </script>
 </body>
