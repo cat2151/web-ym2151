@@ -20,7 +20,7 @@ jobs:
         version: 'latest'
     
     - name: Build with Emscripten
-      run: ./build.sh --skip-install --build-only
+      run: ./build.sh --build-only
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
