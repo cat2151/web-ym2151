@@ -44,6 +44,57 @@ print_section() {
 }
 
 # =============================================================================
+# Windowsファイルシステムチェック
+# =============================================================================
+
+check_not_windows_filesystem() {
+    print_section "実行環境チェック"
+    
+    local current_path=$(pwd)
+    
+    # /mnt/で始まるパスをチェック（WSL）
+    if [[ "$current_path" == /mnt/* ]]; then
+        print_error "Windowsファイルシステム上で実行しようとしている"
+        print_error "現在のパス: $current_path"
+        echo ""
+        print_info "これは腰抜けのやることだ"
+        print_info "Emscriptenはパーミッションやシンボリックリンクの問題で失敗する"
+        echo ""
+        print_info "以下のコマンドでLinux側にコピーしてから実行しろ:"
+        echo "  cp -r $current_path ~/web-ym2151"
+        echo "  cd ~/web-ym2151"
+        echo "  ./build.sh"
+        return 1
+    fi
+    
+    # /cygdrive/で始まるパスをチェック（Cygwin）
+    if [[ "$current_path" == /cygdrive/* ]]; then
+        print_error "Windowsファイルシステム上で実行しようとしている"
+        print_error "現在のパス: $current_path"
+        echo ""
+        print_info "Linux側のパスで実行しろ"
+        return 1
+    fi
+    
+    # dfコマンドでファイルシステムタイプをチェック
+    if command -v df &> /dev/null; then
+        local fs_type=$(df -T "$current_path" 2>/dev/null | tail -n 1 | awk '{print $2}')
+        
+        # drvfs, 9p, vboxsf などはWindowsマウント
+        if [[ "$fs_type" == "drvfs" ]] || [[ "$fs_type" == "9p" ]] || [[ "$fs_type" == "vboxsf" ]]; then
+            print_error "Windowsファイルシステム上で実行しようとしている"
+            print_error "ファイルシステムタイプ: $fs_type"
+            echo ""
+            print_info "Linux側のパス（ext4など）で実行しろ"
+            return 1
+        fi
+    fi
+    
+    print_info "実行環境は適切だ（Linuxネイティブファイルシステム）"
+    return 0
+}
+
+# =============================================================================
 # システム依存関係チェック
 # =============================================================================
 
@@ -178,7 +229,6 @@ build_project() {
     
     print_info "コンパイル中..."
     
-    # GitHub Actionsと同じビルドコマンド
     emcc sine_test.c opm.c -O3 \
       -s WASM=1 \
       -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
@@ -286,6 +336,11 @@ main() {
     done
     
     print_section "web-ym2151 ビルドスクリプト"
+    
+    # Windowsファイルシステムチェック（最優先）
+    if ! check_not_windows_filesystem; then
+        exit 1
+    fi
     
     # システム依存関係チェック
     if ! check_dependencies; then
