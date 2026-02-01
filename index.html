@@ -44,13 +44,15 @@
     </div>
 
     <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
-    <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params)
-Example:
-TL=00 AR=1F DR=17 SR=09 RR=05 SL=00 KS=0 MUL=01 DT1=3
-TL=00 AR=1F DR=0F SR=00 RR=07 SL=01 KS=0 MUL=0E DT1=3
-TL=00 AR=1F DR=11 SR=00 RR=06 SL=02 KS=0 MUL=01 DT1=3
-TL=00 AR=1F DR=0C SR=00 RR=07 SL=00 KS=0 MUL=01 DT1=3
-CON=7 FL=0 NOTE=4A"></textarea>
+    <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params). See below for format."></textarea>
+    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+        Example format:<br>
+        TL=00 AR=1F DR=17 SR=09 RR=05 SL=00 KS=0 MUL=01 DT1=3<br>
+        TL=00 AR=1F DR=0F SR=00 RR=07 SL=01 KS=0 MUL=0E DT1=3<br>
+        TL=00 AR=1F DR=11 SR=00 RR=06 SL=02 KS=0 MUL=01 DT1=3<br>
+        TL=00 AR=1F DR=0C SR=00 RR=07 SL=00 KS=0 MUL=01 DT1=3<br>
+        CON=7 FL=0 NOTE=4A
+    </div>
     
     <label class="editor-label" for="jsonEditor">Edit Events JSON:</label>
     <textarea id="jsonEditor" spellcheck="false"></textarea>
@@ -372,6 +374,7 @@ CON=7 FL=0 NOTE=4A"></textarea>
             
             const events = [];
             const operators = [];
+            // Default note 0x4A = MIDI note 74 (D5, ~587 Hz on YM2151)
             let globalParams = { con: 7, fl: 0, note: 0x4A };
             
             // Parse each line
@@ -463,12 +466,10 @@ CON=7 FL=0 NOTE=4A"></textarea>
             // KF (Key Fraction) (0x30 for channel 0)
             events.push({ time: 0.0, addr: "0x30", data: "0x00" });
             
-            // Key On (0x08) - Channel 0, all operators
-            // Bits 7-6: 01 (Key On command)
-            // Bits 5-3: Channel (0)
-            // Bits 2-0: Which operators to key on (111 = all operators 2,1,0; but we want all 4)
-            // Actually: Bits 5-3 is slot mask, bits 2-0 is channel
-            // 0x78 = 01111000 = channel 0, operators M1+C1+M2+C2 all on
+            // Key On (0x08)
+            // Bits 6-3: Slot mask (which operators to key on: M1=bit3, C1=bit4, M2=bit5, C2=bit6)
+            // Bits 2-0: Channel number
+            // 0x78 = 01111000 = channel 0, all 4 operators on
             events.push({ time: 0.0, addr: "0x08", data: "0x78" });
             
             return { events };
@@ -482,7 +483,7 @@ CON=7 FL=0 NOTE=4A"></textarea>
             const parts = line.toUpperCase().split(/\s+/);
             
             for (const part of parts) {
-                const match = part.match(/^([A-Z0-9]+)=([0-9A-F]+)$/i);
+                const match = part.match(/^([A-Z0-9]+)=([0-9A-F]+)$/);
                 if (match) {
                     const key = match[1];
                     const value = parseInt(match[2], 16);
@@ -524,8 +525,8 @@ CON=7 FL=0 NOTE=4A"></textarea>
                 // Operator registers
                 else {
                     // Determine operator index from address
-                    // Formula: addr = base + (op * 8) + channel
-                    // For channel 0: addr = base + (op * 8)
+                    // Formula: addr = base + (op * 8) + channel_offset
+                    // For channel 0, channel_offset = 0, so: addr = base + (op * 8)
                     const bases = [0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0];
                     
                     for (const base of bases) {
