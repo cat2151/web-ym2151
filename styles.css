@@ -43,6 +43,11 @@ body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 
     color: #2e7d32;
     border: 1px solid #81c784;
 }
+.slot-corrupt {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef5350;
+}
 .slot-item small {
     color: #666;
     font-size: 10px;

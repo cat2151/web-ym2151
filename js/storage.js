@@ -251,34 +251,52 @@ function loadFromSlot(slotNumber) {
 function getAllSlots() {
     const slots = [];
     
-    for (let i = 1; i <= 8; i++) {
-        const key = STORAGE_KEYS.SLOT_PREFIX + i;
-        const slotDataStr = localStorage.getItem(key);
-        
-        if (slotDataStr) {
-            try {
-                const slotData = JSON.parse(slotDataStr);
-                slots.push({
-                    number: i,
-                    name: slotData.name || `Slot ${i}`,
-                    timestamp: slotData.timestamp,
-                    isEmpty: false
-                });
-            } catch (e) {
-                console.error(`Error parsing slot ${i}:`, e);
+    try {
+        for (let i = 1; i <= 8; i++) {
+            const key = STORAGE_KEYS.SLOT_PREFIX + i;
+            const slotDataStr = localStorage.getItem(key);
+            
+            if (slotDataStr) {
+                try {
+                    const slotData = JSON.parse(slotDataStr);
+                    slots.push({
+                        number: i,
+                        name: slotData.name || `Slot ${i}`,
+                        timestamp: slotData.timestamp,
+                        isEmpty: false,
+                        isCorrupt: false
+                    });
+                } catch (e) {
+                    console.error(`Error parsing slot ${i}:`, e);
+                    // Mark as corrupted, not empty, so users know to clear/resave
+                    slots.push({
+                        number: i,
+                        name: `Slot ${i} (Corrupted)`,
+                        timestamp: null,
+                        isEmpty: false,
+                        isCorrupt: true
+                    });
+                }
+            } else {
                 slots.push({
                     number: i,
                     name: `Slot ${i}`,
                     timestamp: null,
-                    isEmpty: true
+                    isEmpty: true,
+                    isCorrupt: false
                 });
             }
-        } else {
+        }
+    } catch (error) {
+        // If localStorage access fails entirely (privacy mode, etc.), return empty slots
+        console.error('Error accessing localStorage:', error);
+        for (let i = 1; i <= 8; i++) {
             slots.push({
                 number: i,
                 name: `Slot ${i}`,
                 timestamp: null,
-                isEmpty: true
+                isEmpty: true,
+                isCorrupt: false
             });
         }
     }
@@ -377,15 +395,6 @@ function handleClearSlot() {
 }
 
 /**
- * Escape HTML to prevent XSS
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-/**
  * Refresh and display slot information
  */
 function refreshSlotInfo() {
@@ -394,23 +403,61 @@ function refreshSlotInfo() {
     
     if (!infoDiv) return;
     
-    let html = '<div class="slot-info-header"><strong>Saved Slots:</strong></div>';
-    html += '<div class="slot-grid">';
+    // Clear existing content
+    infoDiv.innerHTML = '';
+    
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'slot-info-header';
+    const headerStrong = document.createElement('strong');
+    headerStrong.textContent = 'Saved Slots:';
+    header.appendChild(headerStrong);
+    infoDiv.appendChild(header);
+    
+    // Create grid
+    const grid = document.createElement('div');
+    grid.className = 'slot-grid';
     
     slots.forEach(slot => {
-        const statusClass = slot.isEmpty ? 'slot-empty' : 'slot-filled';
-        const statusText = slot.isEmpty ? 'Empty' : escapeHtml(slot.name);
-        const timeText = slot.timestamp ? 
-            `<br><small>${escapeHtml(new Date(slot.timestamp).toLocaleString())}</small>` : '';
+        const slotDiv = document.createElement('div');
         
-        html += `<div class="slot-item ${statusClass}">
-            <strong>Slot ${slot.number}</strong><br>
-            ${statusText}${timeText}
-        </div>`;
+        // Determine status class and text
+        let statusClass, statusText;
+        if (slot.isCorrupt) {
+            statusClass = 'slot-corrupt';
+            statusText = 'Corrupted';
+        } else if (slot.isEmpty) {
+            statusClass = 'slot-empty';
+            statusText = 'Empty';
+        } else {
+            statusClass = 'slot-filled';
+            statusText = slot.name;
+        }
+        
+        slotDiv.className = `slot-item ${statusClass}`;
+        
+        // Add slot number
+        const slotNumber = document.createElement('strong');
+        slotNumber.textContent = `Slot ${slot.number}`;
+        slotDiv.appendChild(slotNumber);
+        slotDiv.appendChild(document.createElement('br'));
+        
+        // Add status text
+        const statusTextNode = document.createTextNode(statusText);
+        slotDiv.appendChild(statusTextNode);
+        
+        // Add timestamp if available
+        if (slot.timestamp) {
+            slotDiv.appendChild(document.createElement('br'));
+            const timeSmall = document.createElement('small');
+            timeSmall.textContent = new Date(slot.timestamp).toLocaleString();
+            slotDiv.appendChild(timeSmall);
+        }
+        
+        grid.appendChild(slotDiv);
     });
     
-    html += '</div>';
-    infoDiv.innerHTML = html;
+    infoDiv.appendChild(grid);
 }
 
 // Initialize slot info display when DOM is ready
