@@ -351,38 +351,21 @@ function handleSaveSlot() {
     }
 }
 
-/**
- * Handle clear button click
- */
-function handleClearSlot() {
-    const select = document.getElementById('clearSlotSelect');
-    const slotNumber = parseInt(select.value);
-    
-    if (isNaN(slotNumber)) {
-        window.alert('Please select a slot to clear.');
-        return;
-    }
-    
-    if (!window.confirm(`Are you sure you want to clear slot ${slotNumber}?`)) {
-        return;
-    }
-    
-    const success = clearSlot(slotNumber);
-    
-    if (success) {
-        window.alert(`Slot ${slotNumber} cleared!`);
-        refreshSlotInfo();
-    }
-}
-
 // Store current tone state for preview/restore
 let previewBackup = null;
 let lastPreviewedSlot = null;
+let autoRestoreTimeout = null;
 
 /**
  * Preview a slot by temporarily loading it and playing
  */
 function previewSlot(slotNumber) {
+    // Clear any existing auto-restore timeout
+    if (autoRestoreTimeout) {
+        clearTimeout(autoRestoreTimeout);
+        autoRestoreTimeout = null;
+    }
+    
     // Backup current state if not already backed up
     if (!previewBackup) {
         const toneEditor = document.getElementById('toneEditor');
@@ -440,6 +423,13 @@ function previewSlot(slotNumber) {
             playSine();
         }
         
+        // Auto-restore after 3 seconds (can be adjusted)
+        autoRestoreTimeout = setTimeout(() => {
+            if (previewBackup) {
+                restoreBackup();
+            }
+        }, 3000);
+        
         console.log(`Previewing slot ${slotNumber}: ${slotData.name}`);
     } catch (error) {
         console.error(`Error previewing slot ${slotNumber}:`, error);
@@ -452,6 +442,12 @@ function previewSlot(slotNumber) {
  */
 function restoreBackup() {
     if (!previewBackup) return;
+    
+    // Clear auto-restore timeout if it exists
+    if (autoRestoreTimeout) {
+        clearTimeout(autoRestoreTimeout);
+        autoRestoreTimeout = null;
+    }
     
     const toneEditor = document.getElementById('toneEditor');
     const jsonEditor = document.getElementById('jsonEditor');
@@ -488,6 +484,12 @@ function restoreBackup() {
 function loadPreviewedSlot() {
     if (lastPreviewedSlot === null) return;
     
+    // Clear auto-restore timeout since user chose to keep the preview
+    if (autoRestoreTimeout) {
+        clearTimeout(autoRestoreTimeout);
+        autoRestoreTimeout = null;
+    }
+    
     // Clear the backup since we're committing to this tone
     previewBackup = null;
     hideLoadPreviewedButton();
@@ -512,12 +514,6 @@ function showLoadPreviewedButton() {
         loadBtn.textContent = '✓ Load Previewed Tone';
         loadBtn.title = 'Keep the previewed tone';
         buttonDiv.appendChild(loadBtn);
-        
-        const restoreBtn = document.createElement('button');
-        restoreBtn.onclick = restoreBackup;
-        restoreBtn.textContent = '↶ Restore Original';
-        restoreBtn.title = 'Restore the tone before preview';
-        buttonDiv.appendChild(restoreBtn);
         
         const storageControls = document.querySelector('.storage-controls');
         if (storageControls) {
