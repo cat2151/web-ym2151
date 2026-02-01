@@ -18,6 +18,9 @@ body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 
     margin-top: 15px;
     padding-top: 10px;
 }
+.slot-info-header {
+    margin-top: 10px;
+}
 .slot-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

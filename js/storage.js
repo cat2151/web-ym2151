@@ -377,6 +377,15 @@ function handleClearSlot() {
 }
 
 /**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
  * Refresh and display slot information
  */
 function refreshSlotInfo() {
@@ -385,14 +394,14 @@ function refreshSlotInfo() {
     
     if (!infoDiv) return;
     
-    let html = '<div style="margin-top: 10px;"><strong>Saved Slots:</strong></div>';
+    let html = '<div class="slot-info-header"><strong>Saved Slots:</strong></div>';
     html += '<div class="slot-grid">';
     
     slots.forEach(slot => {
         const statusClass = slot.isEmpty ? 'slot-empty' : 'slot-filled';
-        const statusText = slot.isEmpty ? 'Empty' : slot.name;
+        const statusText = slot.isEmpty ? 'Empty' : escapeHtml(slot.name);
         const timeText = slot.timestamp ? 
-            `<br><small>${new Date(slot.timestamp).toLocaleString()}</small>` : '';
+            `<br><small>${escapeHtml(new Date(slot.timestamp).toLocaleString())}</small>` : '';
         
         html += `<div class="slot-item ${statusClass}">
             <strong>Slot ${slot.number}</strong><br>
@@ -407,7 +416,16 @@ function refreshSlotInfo() {
 // Initialize slot info display when DOM is ready
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', function() {
-        // Wait a bit to ensure storage module is initialized
-        setTimeout(refreshSlotInfo, 100);
+        // Check if slotInfo element exists and refresh
+        const checkAndRefresh = function() {
+            const infoDiv = document.getElementById('slotInfo');
+            if (infoDiv) {
+                refreshSlotInfo();
+            }
+        };
+        
+        // Try immediately and also after a short delay as fallback
+        checkAndRefresh();
+        setTimeout(checkAndRefresh, 100);
     });
 }
