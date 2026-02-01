@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (timeoutId) clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
                 onToneEditorChange();
-                autoSave(); // Auto-save after change
-            }, 500);
+                autoSave();
+            }, 1000); // Use consistent 1000ms delay
         });
     }
     

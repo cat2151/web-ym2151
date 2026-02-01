@@ -54,6 +54,6 @@ function loadToEditor() {
     // Try to parse and populate tone editor from JSON
     parseJsonToToneEditor(editObj.events);
     
-    // Auto-save when preset is loaded
-    autoSave();
+    // Note: We don't auto-save when loading a preset to avoid overwriting
+    // the user's saved work. Auto-save only occurs on user edits.
 }

@@ -52,7 +52,10 @@ function loadFromStorage() {
                 console.log('Tone editor loaded from local storage');
                 
                 // Trigger tone editor change to update JSON
-                onToneEditorChange();
+                // We call this directly here since this is initial load, not user input
+                if (typeof onToneEditorChange === 'function') {
+                    onToneEditorChange();
+                }
             }
         } else if (savedJsonEditor) {
             // Load JSON editor if no tone editor saved
@@ -65,8 +68,12 @@ function loadFromStorage() {
                 try {
                     const data = JSON.parse(savedJsonEditor);
                     if (data.events && Array.isArray(data.events)) {
-                        parseJsonToToneEditor(data.events);
-                        updateDurationDisplay(data.events);
+                        if (typeof parseJsonToToneEditor === 'function') {
+                            parseJsonToToneEditor(data.events);
+                        }
+                        if (typeof updateDurationDisplay === 'function') {
+                            updateDurationDisplay(data.events);
+                        }
                     }
                 } catch (e) {
                     console.error('Error parsing saved JSON:', e);
