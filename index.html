@@ -20,6 +20,45 @@
         <span id="durationInfo" class="duration-display"></span>
     </div>
 
+    <div class="storage-controls">
+        <div class="storage-section">
+            <label for="saveSlotSelect"><strong>Save to Slot: </strong></label>
+            <select id="saveSlotSelect">
+                <option value="1">Slot 1</option>
+                <option value="2">Slot 2</option>
+                <option value="3">Slot 3</option>
+                <option value="4">Slot 4</option>
+                <option value="5">Slot 5</option>
+                <option value="6">Slot 6</option>
+                <option value="7">Slot 7</option>
+                <option value="8">Slot 8</option>
+            </select>
+            <button onclick="handleSaveSlot()" title="Save current tone to selected slot">💾 Save</button>
+        </div>
+        
+        <div class="storage-section">
+            <label for="loadSlotSelect"><strong>Load from Slot: </strong></label>
+            <select id="loadSlotSelect">
+                <option value="1">Slot 1</option>
+                <option value="2">Slot 2</option>
+                <option value="3">Slot 3</option>
+                <option value="4">Slot 4</option>
+                <option value="5">Slot 5</option>
+                <option value="6">Slot 6</option>
+                <option value="7">Slot 7</option>
+                <option value="8">Slot 8</option>
+            </select>
+            <button onclick="handleLoadSlot()" title="Load tone from selected slot">📂 Load</button>
+            <button onclick="handleClearSlot()" title="Clear selected slot">🗑️ Clear</button>
+        </div>
+        
+        <div class="storage-section">
+            <button onclick="refreshSlotInfo()" title="Refresh slot information">🔄 Refresh Slots</button>
+        </div>
+        
+        <div id="slotInfo" class="slot-info"></div>
+    </div>
+
     <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
     <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params). See below for format."></textarea>
     <div style="font-size: 12px; color: #666; margin-top: 5px;">
