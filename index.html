@@ -35,7 +35,7 @@
         <br><br>
         
         <button onclick="playSine()">Play Stereo</button>
-        <button onclick="exportWav()">Export WAV</button>
+        <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
         <span id="durationInfo" class="duration-display"></span>
     </div>
 
@@ -275,7 +275,7 @@
                 }
                 currentEvents = currentData.events;
                 if (currentEvents.length === 0) {
-                    alert("Events array is empty.");
+                    alert("Events array is empty. Please add events before exporting.");
                     return;
                 }
             } catch (e) {
@@ -307,7 +307,7 @@
             
             if (actualFrames <= 0) {
                 console.error("Failed to generate samples for WAV export");
-                alert("Failed to generate audio samples");
+                alert("Failed to generate audio samples. Please verify your event data is valid.");
                 return;
             }
             
@@ -337,11 +337,12 @@
             document.body.appendChild(a);
             a.click();
             
-            // Cleanup
+            // Cleanup after a short delay to ensure download starts
+            const CLEANUP_DELAY_MS = 100;
             setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-            }, 100);
+            }, CLEANUP_DELAY_MS);
             
             console.log(`WAV export complete: ${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)`);
             document.getElementById('info').innerHTML = 
