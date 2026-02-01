@@ -43,6 +43,8 @@ function loadFromStorage() {
     try {
         // Load tone editor
         const savedToneEditor = localStorage.getItem(STORAGE_KEYS.TONE_EDITOR);
+        const savedJsonEditor = localStorage.getItem(STORAGE_KEYS.JSON_EDITOR);
+        
         if (savedToneEditor) {
             const toneEditor = document.getElementById('toneEditor');
             if (toneEditor) {
@@ -52,25 +54,22 @@ function loadFromStorage() {
                 // Trigger tone editor change to update JSON
                 onToneEditorChange();
             }
-        } else {
+        } else if (savedJsonEditor) {
             // Load JSON editor if no tone editor saved
-            const savedJsonEditor = localStorage.getItem(STORAGE_KEYS.JSON_EDITOR);
-            if (savedJsonEditor) {
-                const jsonEditor = document.getElementById('jsonEditor');
-                if (jsonEditor) {
-                    jsonEditor.value = savedJsonEditor;
-                    console.log('JSON editor loaded from local storage');
-                    
-                    // Try to parse and update tone editor from JSON
-                    try {
-                        const data = JSON.parse(savedJsonEditor);
-                        if (data.events && Array.isArray(data.events)) {
-                            parseJsonToToneEditor(data.events);
-                            updateDurationDisplay(data.events);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing saved JSON:', e);
+            const jsonEditor = document.getElementById('jsonEditor');
+            if (jsonEditor) {
+                jsonEditor.value = savedJsonEditor;
+                console.log('JSON editor loaded from local storage');
+                
+                // Try to parse and update tone editor from JSON
+                try {
+                    const data = JSON.parse(savedJsonEditor);
+                    if (data.events && Array.isArray(data.events)) {
+                        parseJsonToToneEditor(data.events);
+                        updateDurationDisplay(data.events);
                     }
+                } catch (e) {
+                    console.error('Error parsing saved JSON:', e);
                 }
             }
         }
