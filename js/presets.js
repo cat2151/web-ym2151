@@ -53,4 +53,7 @@ function loadToEditor() {
     
     // Try to parse and populate tone editor from JSON
     parseJsonToToneEditor(editObj.events);
+    
+    // Auto-save when preset is loaded
+    autoSave();
 }
