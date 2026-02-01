@@ -48,7 +48,7 @@
                             - Rust版のソースを参考に。tableがある
                             - 上位bitはoctave
     - 機能の案、wav fileをexport
-    - 機能の案、local storageに保存して自動load、json export、json import
+    - 機能の案、入力JSONについて、local storageに保存して自動load、json export、json import
 - 方向性の案
     - wavlpfから利用できるレベルのライブラリに
         - 音色getライブラリ
