@@ -133,7 +133,8 @@
             document.getElementById('durationInfo').innerText = `(Calculated Duration: ${d.toFixed(2)} sec)`;
         }
 
-        function playSine() {
+        // Shared function to parse events and generate audio buffers
+        function generateAudioBuffers() {
             const textarea = document.getElementById('jsonEditor');
             let currentData = null;
             let currentEvents = [];
@@ -146,20 +147,16 @@
                 currentEvents = currentData.events;
                 if (currentEvents.length === 0) {
                     alert("Events array is empty.");
-                    return;
+                    return null;
                 }
             } catch (e) {
                 alert("Invalid JSON format:\n" + e.message);
-                return;
+                return null;
             }
 
             const durationSec = calculateDuration(currentEvents);
             updateDurationDisplay(currentEvents);
 
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            
             // OPM_SAMPLE_RATE ベースでの生成サンプル数（フレーム数）
             const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
             
@@ -175,17 +172,17 @@
                 Module.HEAPU8[baseAddr + 5] = parseInt(evt.data);
             });
             
-            console.log("generate...");
+            console.log("Generating audio...");
             // C側を実行: 戻り値は「生成されたフレーム数」
             const actualFrames = Module._generate_sound(dataPtr, currentEvents.length, numFramesRaw);
             Module._free(dataPtr);
             
             if (actualFrames <= 0) {
                 console.error("Failed to generate samples");
-                return;
-            } else {
-                console.log("generated");
+                return null;
             }
+            
+            console.log("Audio generated");
             
             const rawLeft = new Float32Array(actualFrames);
             const rawRight = new Float32Array(actualFrames);
@@ -195,10 +192,28 @@
                 rawRight[i] = Module._get_sample(i * 2 + 1);
             }
             
-            const audioBuffer = audioContext.createBuffer(2, rawLeft.length, OPM_SAMPLE_RATE);
+            return {
+                left: rawLeft,
+                right: rawRight,
+                frames: actualFrames,
+                duration: durationSec
+            };
+        }
+
+        function playSine() {
+            const audioData = generateAudioBuffers();
+            if (!audioData) {
+                return;
+            }
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
             
-            audioBuffer.getChannelData(0).set(rawLeft);
-            audioBuffer.getChannelData(1).set(rawRight);
+            const audioBuffer = audioContext.createBuffer(2, audioData.left.length, OPM_SAMPLE_RATE);
+            
+            audioBuffer.getChannelData(0).set(audioData.left);
+            audioBuffer.getChannelData(1).set(audioData.right);
             
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
@@ -207,7 +222,7 @@
             
             document.getElementById('info').innerHTML = 
                 `Playing Stereo<br>` +
-                `${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
+                `${audioData.frames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
 
             Module._free_buffer();
         }
@@ -249,8 +264,10 @@
                 // Convert float [-1.0, 1.0] to 16-bit PCM [-32768, 32767]
                 const sampleL = Math.max(-1, Math.min(1, leftChannel[i]));
                 const sampleR = Math.max(-1, Math.min(1, rightChannel[i]));
-                view.setInt16(offset, sampleL * 0x7FFF, true);
-                view.setInt16(offset + 2, sampleR * 0x7FFF, true);
+                const intSampleL = sampleL < 0 ? sampleL * 0x8000 : sampleL * 0x7FFF;
+                const intSampleR = sampleR < 0 ? sampleR * 0x8000 : sampleR * 0x7FFF;
+                view.setInt16(offset, intSampleL, true);
+                view.setInt16(offset + 2, intSampleR, true);
                 offset += 4;
             }
 
@@ -264,64 +281,23 @@
         }
 
         function exportWav() {
-            const textarea = document.getElementById('jsonEditor');
-            let currentData = null;
-            let currentEvents = [];
-
-            try {
-                currentData = JSON.parse(textarea.value);
-                if (!currentData.events || !Array.isArray(currentData.events)) {
-                    throw new Error("JSON must contain an 'events' array.");
+            const audioData = generateAudioBuffers();
+            if (!audioData) {
+                // Ensure any internal audio buffers are released and update UI status
+                if (typeof Module._free_buffer === 'function') {
+                    Module._free_buffer();
                 }
-                currentEvents = currentData.events;
-                if (currentEvents.length === 0) {
-                    alert("Events array is empty. Please add events before exporting.");
-                    return;
+                const infoEl = document.getElementById('info');
+                if (infoEl) {
+                    infoEl.innerHTML = "WAV export failed.<br>No audio samples were generated. Please verify your event data is valid.";
                 }
-            } catch (e) {
-                alert("Invalid JSON format:\n" + e.message);
                 return;
-            }
-
-            const durationSec = calculateDuration(currentEvents);
-            updateDurationDisplay(currentEvents);
-
-            // Generate audio buffer
-            const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
-            
-            const STRUCT_SIZE = 8;
-            const bufferSize = currentEvents.length * STRUCT_SIZE;
-            const dataPtr = Module._malloc(bufferSize);
-            const view = new DataView(Module.HEAPU8.buffer);
-            
-            currentEvents.forEach((evt, i) => {
-                const baseAddr = dataPtr + (i * STRUCT_SIZE);
-                view.setFloat32(baseAddr, parseFloat(evt.time), true);
-                Module.HEAPU8[baseAddr + 4] = parseInt(evt.addr);
-                Module.HEAPU8[baseAddr + 5] = parseInt(evt.data);
-            });
-            
-            console.log("Generating WAV...");
-            const actualFrames = Module._generate_sound(dataPtr, currentEvents.length, numFramesRaw);
-            Module._free(dataPtr);
-            
-            if (actualFrames <= 0) {
-                console.error("Failed to generate samples for WAV export");
-                alert("Failed to generate audio samples. Please verify your event data is valid.");
-                return;
-            }
-            
-            const rawLeft = new Float32Array(actualFrames);
-            const rawRight = new Float32Array(actualFrames);
-            for (let i = 0; i < actualFrames; i++) {
-                rawLeft[i] = Module._get_sample(i * 2);
-                rawRight[i] = Module._get_sample(i * 2 + 1);
             }
             
             Module._free_buffer();
             
             // Encode as WAV
-            const wavBuffer = encodeWAV(rawLeft, rawRight, OPM_SAMPLE_RATE);
+            const wavBuffer = encodeWAV(audioData.left, audioData.right, OPM_SAMPLE_RATE);
             const blob = new Blob([wavBuffer], { type: 'audio/wav' });
             
             // Create download link
@@ -331,24 +307,37 @@
             a.href = url;
             
             // Generate filename with timestamp
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 23);
             a.download = `ym2151_${timestamp}.wav`;
             
             document.body.appendChild(a);
             a.click();
             
             // Cleanup after a short delay to ensure download starts
-            const CLEANUP_DELAY_MS = 100;
+            const CLEANUP_DELAY_MS = 500;
             setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                try {
+                    if (a && a.parentNode === document.body) {
+                        document.body.removeChild(a);
+                    }
+                } catch (err) {
+                    console.error('Failed to remove temporary download link:', err);
+                }
+
+                try {
+                    if (window.URL && typeof URL.revokeObjectURL === 'function') {
+                        URL.revokeObjectURL(url);
+                    }
+                } catch (err) {
+                    console.error('Failed to revoke object URL:', err);
+                }
             }, CLEANUP_DELAY_MS);
             
-            console.log(`WAV export complete: ${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)`);
+            console.log(`WAV export complete: ${audioData.frames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)`);
             document.getElementById('info').innerHTML = 
                 `WAV Exported<br>` +
-                `${actualFrames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>` +
-                `Duration: ${durationSec.toFixed(2)} seconds`;
+                `${audioData.frames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>` +
+                `Duration: ${audioData.duration.toFixed(2)} seconds`;
         }
     </script>
 </body>
