@@ -6,6 +6,9 @@ const STORAGE_KEYS = {
     JSON_EDITOR: 'ym2151_json_editor'
 };
 
+// Auto-save debounce delay in milliseconds
+const AUTOSAVE_DEBOUNCE_MS = 1000;
+
 /**
  * Save tone editor content to local storage
  */
@@ -19,6 +22,19 @@ function saveToneEditorToStorage() {
         }
     } catch (error) {
         console.error('Error saving tone editor to local storage:', error);
+        
+        // Provide user-facing feedback, with a clearer message for quota errors
+        let message = 'Failed to save tone editor content.';
+        if (error && (error.name === 'QuotaExceededError' ||
+            error.code === 22 || // Safari / older WebKit
+            error.code === 1014)) { // Firefox
+            message += ' Your browser\'s local storage is full. Please clear some saved data and try again.';
+        } else {
+            message += ' Please try again.';
+        }
+        
+        // Use a simple alert to ensure the user is notified
+        window.alert(message);
     }
 }
 
@@ -35,6 +51,19 @@ function saveJsonEditorToStorage() {
         }
     } catch (error) {
         console.error('Error saving JSON editor to local storage:', error);
+        
+        // Provide user-facing feedback, with a clearer message for quota errors
+        let message = 'Failed to save JSON editor content.';
+        if (error && (error.name === 'QuotaExceededError' ||
+            error.code === 22 || // Safari / older WebKit
+            error.code === 1014)) { // Firefox
+            message += ' Your browser\'s local storage is full. Please clear some saved data and try again.';
+        } else {
+            message += ' Please try again.';
+        }
+        
+        // Use a simple alert to ensure the user is notified
+        window.alert(message);
     }
 }
 
@@ -43,11 +72,11 @@ function saveJsonEditorToStorage() {
  */
 function loadFromStorage() {
     try {
-        // Load tone editor
+        // Load saved tone and JSON editor content from local storage
         const savedToneEditor = localStorage.getItem(STORAGE_KEYS.TONE_EDITOR);
         const savedJsonEditor = localStorage.getItem(STORAGE_KEYS.JSON_EDITOR);
         
-        if (savedToneEditor) {
+        if (savedToneEditor !== null) {
             const toneEditor = document.getElementById('toneEditor');
             if (toneEditor) {
                 toneEditor.value = savedToneEditor;
@@ -59,7 +88,8 @@ function loadFromStorage() {
                     onToneEditorChange();
                 }
             }
-        } else if (savedJsonEditor) {
+            return true; // Indicate that saved data was found
+        } else if (savedJsonEditor !== null) {
             // Load JSON editor if no tone editor saved
             const jsonEditor = document.getElementById('jsonEditor');
             if (jsonEditor) {
@@ -81,12 +111,13 @@ function loadFromStorage() {
                     console.error('Error parsing saved JSON:', e);
                 }
             }
+            return true; // Indicate that saved data was found
         }
         
-        return savedToneEditor || savedJsonEditor;
+        return false; // No saved data found
     } catch (error) {
         console.error('Error loading from local storage:', error);
-        return null;
+        return false;
     }
 }
 
@@ -101,18 +132,4 @@ function clearStorage() {
     } catch (error) {
         console.error('Error clearing local storage:', error);
     }
-}
-
-/**
- * Auto-save function with debouncing
- */
-let autoSaveTimeout = null;
-function autoSave() {
-    if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-    }
-    autoSaveTimeout = setTimeout(() => {
-        saveToneEditorToStorage();
-        saveJsonEditorToStorage();
-    }, 1000); // Save 1 second after user stops typing
 }
