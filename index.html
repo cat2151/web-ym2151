@@ -38,8 +38,8 @@
         </div>
         
         <div class="storage-section">
-            <label for="loadSlotSelect"><strong>Load from Slot: </strong></label>
-            <select id="loadSlotSelect">
+            <button onclick="handleClearSlot()" title="Clear selected slot">🗑️ Clear Slot</button>
+            <select id="clearSlotSelect">
                 <option value="" disabled selected>Select a slot...</option>
                 <option value="1">Slot 1</option>
                 <option value="2">Slot 2</option>
@@ -50,8 +50,6 @@
                 <option value="7">Slot 7</option>
                 <option value="8">Slot 8</option>
             </select>
-            <button onclick="handleLoadSlot()" title="Load tone from selected slot">📂 Load</button>
-            <button onclick="handleClearSlot()" title="Clear selected slot">🗑️ Clear</button>
         </div>
         
         <div class="storage-section">

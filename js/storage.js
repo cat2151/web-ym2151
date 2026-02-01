@@ -352,29 +352,10 @@ function handleSaveSlot() {
 }
 
 /**
- * Handle load button click
- */
-function handleLoadSlot() {
-    const select = document.getElementById('loadSlotSelect');
-    const slotNumber = parseInt(select.value);
-    
-    if (isNaN(slotNumber)) {
-        window.alert('Please select a slot to load from.');
-        return;
-    }
-    
-    const success = loadFromSlot(slotNumber);
-    
-    if (success) {
-        window.alert(`Loaded from slot ${slotNumber}!`);
-    }
-}
-
-/**
  * Handle clear button click
  */
 function handleClearSlot() {
-    const select = document.getElementById('loadSlotSelect');
+    const select = document.getElementById('clearSlotSelect');
     const slotNumber = parseInt(select.value);
     
     if (isNaN(slotNumber)) {
@@ -392,6 +373,169 @@ function handleClearSlot() {
         window.alert(`Slot ${slotNumber} cleared!`);
         refreshSlotInfo();
     }
+}
+
+// Store current tone state for preview/restore
+let previewBackup = null;
+let lastPreviewedSlot = null;
+
+/**
+ * Preview a slot by temporarily loading it and playing
+ */
+function previewSlot(slotNumber) {
+    // Backup current state if not already backed up
+    if (!previewBackup) {
+        const toneEditor = document.getElementById('toneEditor');
+        const jsonEditor = document.getElementById('jsonEditor');
+        previewBackup = {
+            toneEditor: toneEditor.value,
+            jsonEditor: jsonEditor.value
+        };
+    }
+    
+    // Load the slot data
+    const key = STORAGE_KEYS.SLOT_PREFIX + slotNumber;
+    const slotDataStr = localStorage.getItem(key);
+    
+    if (!slotDataStr) {
+        window.alert(`Slot ${slotNumber} is empty.`);
+        return;
+    }
+    
+    try {
+        const slotData = JSON.parse(slotDataStr);
+        const toneEditor = document.getElementById('toneEditor');
+        const jsonEditor = document.getElementById('jsonEditor');
+        
+        // Load slot data into editors
+        if (toneEditor && slotData.toneEditor !== undefined) {
+            toneEditor.value = slotData.toneEditor;
+            if (typeof onToneEditorChange === 'function') {
+                onToneEditorChange();
+            }
+        }
+        
+        if (jsonEditor && slotData.jsonEditor !== undefined) {
+            jsonEditor.value = slotData.jsonEditor;
+            try {
+                const data = JSON.parse(slotData.jsonEditor);
+                if (data.events && Array.isArray(data.events)) {
+                    if (typeof updateDurationDisplay === 'function') {
+                        updateDurationDisplay(data.events);
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing JSON from slot:', e);
+            }
+        }
+        
+        // Store which slot was previewed
+        lastPreviewedSlot = slotNumber;
+        
+        // Show the "Load Previewed" button
+        showLoadPreviewedButton();
+        
+        // Play the preview
+        if (typeof playSine === 'function') {
+            playSine();
+        }
+        
+        console.log(`Previewing slot ${slotNumber}: ${slotData.name}`);
+    } catch (error) {
+        console.error(`Error previewing slot ${slotNumber}:`, error);
+        window.alert(`Failed to preview slot ${slotNumber}.`);
+    }
+}
+
+/**
+ * Restore the backed up tone state
+ */
+function restoreBackup() {
+    if (!previewBackup) return;
+    
+    const toneEditor = document.getElementById('toneEditor');
+    const jsonEditor = document.getElementById('jsonEditor');
+    
+    if (toneEditor) {
+        toneEditor.value = previewBackup.toneEditor;
+        if (typeof onToneEditorChange === 'function') {
+            onToneEditorChange();
+        }
+    }
+    
+    if (jsonEditor) {
+        jsonEditor.value = previewBackup.jsonEditor;
+        try {
+            const data = JSON.parse(previewBackup.jsonEditor);
+            if (data.events && Array.isArray(data.events)) {
+                if (typeof updateDurationDisplay === 'function') {
+                    updateDurationDisplay(data.events);
+                }
+            }
+        } catch (e) {
+            // Ignore parse errors for backup
+        }
+    }
+    
+    previewBackup = null;
+    hideLoadPreviewedButton();
+    console.log('Restored backup');
+}
+
+/**
+ * Load the last previewed slot permanently
+ */
+function loadPreviewedSlot() {
+    if (lastPreviewedSlot === null) return;
+    
+    // Clear the backup since we're committing to this tone
+    previewBackup = null;
+    hideLoadPreviewedButton();
+    
+    console.log(`Loaded slot ${lastPreviewedSlot} permanently`);
+    window.alert(`Slot ${lastPreviewedSlot} loaded!`);
+}
+
+/**
+ * Show the "Load Previewed" button
+ */
+function showLoadPreviewedButton() {
+    let buttonDiv = document.getElementById('loadPreviewedButtonDiv');
+    if (!buttonDiv) {
+        buttonDiv = document.createElement('div');
+        buttonDiv.id = 'loadPreviewedButtonDiv';
+        buttonDiv.className = 'storage-section';
+        buttonDiv.style.marginTop = '10px';
+        
+        const loadBtn = document.createElement('button');
+        loadBtn.onclick = loadPreviewedSlot;
+        loadBtn.textContent = '✓ Load Previewed Tone';
+        loadBtn.title = 'Keep the previewed tone';
+        buttonDiv.appendChild(loadBtn);
+        
+        const restoreBtn = document.createElement('button');
+        restoreBtn.onclick = restoreBackup;
+        restoreBtn.textContent = '↶ Restore Original';
+        restoreBtn.title = 'Restore the tone before preview';
+        buttonDiv.appendChild(restoreBtn);
+        
+        const storageControls = document.querySelector('.storage-controls');
+        if (storageControls) {
+            storageControls.appendChild(buttonDiv);
+        }
+    }
+    buttonDiv.style.display = 'block';
+}
+
+/**
+ * Hide the "Load Previewed" button
+ */
+function hideLoadPreviewedButton() {
+    const buttonDiv = document.getElementById('loadPreviewedButtonDiv');
+    if (buttonDiv) {
+        buttonDiv.style.display = 'none';
+    }
+    lastPreviewedSlot = null;
 }
 
 /**
@@ -435,6 +579,13 @@ function refreshSlotInfo() {
         }
         
         slotDiv.className = `slot-item ${statusClass}`;
+        
+        // Add click handler for filled slots
+        if (!slot.isEmpty && !slot.isCorrupt) {
+            slotDiv.style.cursor = 'pointer';
+            slotDiv.title = 'Click to preview';
+            slotDiv.onclick = () => previewSlot(slot.number);
+        }
         
         // Add slot number
         const slotNumber = document.createElement('strong');

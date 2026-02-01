@@ -42,6 +42,11 @@ body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 
     background: #e8f5e9;
     color: #2e7d32;
     border: 1px solid #81c784;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+.slot-filled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 .slot-corrupt {
     background: #ffebee;
