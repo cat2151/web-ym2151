@@ -12,7 +12,8 @@ const STORAGE_KEYS = {
 function saveToneEditorToStorage() {
     try {
         const toneEditor = document.getElementById('toneEditor');
-        if (toneEditor && toneEditor.value.trim()) {
+        if (toneEditor) {
+            // Save even if empty to allow users to clear saved content
             localStorage.setItem(STORAGE_KEYS.TONE_EDITOR, toneEditor.value);
             console.log('Tone editor saved to local storage');
         }
@@ -27,7 +28,8 @@ function saveToneEditorToStorage() {
 function saveJsonEditorToStorage() {
     try {
         const jsonEditor = document.getElementById('jsonEditor');
-        if (jsonEditor && jsonEditor.value.trim()) {
+        if (jsonEditor) {
+            // Save even if empty to allow users to clear saved content
             localStorage.setItem(STORAGE_KEYS.JSON_EDITOR, jsonEditor.value);
             console.log('JSON editor saved to local storage');
         }

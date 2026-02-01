@@ -27,9 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
         toneEditor.addEventListener('input', function() {
             if (timeoutId) clearTimeout(timeoutId);
             timeoutId = setTimeout(() => {
+                // Update JSON from tone editor
                 onToneEditorChange();
-                autoSave();
-            }, 1000); // Use consistent 1000ms delay
+                // Save both editors to local storage
+                saveToneEditorToStorage();
+                saveJsonEditorToStorage();
+            }, 1000);
         });
     }
     
@@ -39,7 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
         jsonEditor.addEventListener('input', function() {
             if (jsonTimeoutId) clearTimeout(jsonTimeoutId);
             jsonTimeoutId = setTimeout(() => {
-                autoSave();
+                // Save only JSON editor
+                saveJsonEditorToStorage();
             }, 1000);
         });
     }
