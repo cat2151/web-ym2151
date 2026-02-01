@@ -1,16 +1,6 @@
 // Audio generation and WAV export module
 let audioContext;
 
-function calculateDuration(events) {
-    if (!events || events.length === 0) return 1.0;
-    let maxTime = 0.0;
-    events.forEach(evt => {
-        const t = parseFloat(evt.time);
-        if (!isNaN(t) && t > maxTime) maxTime = t;
-    });
-    return maxTime + 1.0;
-}
-
 // Shared function to parse events and generate audio buffers
 function generateAudioBuffers() {
     const textarea = document.getElementById('jsonEditor');
