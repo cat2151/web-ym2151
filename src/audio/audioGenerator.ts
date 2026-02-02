@@ -22,6 +22,12 @@ export interface AudioData {
  * @returns AudioData or null if generation fails
  */
 export function generateAudioBuffers(): AudioData | null {
+    // Check if Emscripten Module is initialized
+    if (typeof Module === 'undefined' || !Module._generate_sound) {
+        console.warn('WASM Module not yet initialized. Please wait for initialization to complete.');
+        return null;
+    }
+    
     const textarea = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
     if (!textarea) {
         return null;

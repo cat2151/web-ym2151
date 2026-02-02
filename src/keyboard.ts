@@ -9,7 +9,7 @@ import { playSine } from './audio';
 let keyboardListenersInitialized = false;
 
 /**
- * Check if the current focus is on an editable element (input, textarea, etc.)
+ * Check if the current focus is on an editable element (input, textarea, select, etc.)
  */
 function isEditableElement(element: EventTarget | null): boolean {
     if (!element || !(element instanceof HTMLElement)) {
@@ -17,7 +17,7 @@ function isEditableElement(element: EventTarget | null): boolean {
     }
     
     const tagName = element.tagName.toLowerCase();
-    if (tagName === 'input' || tagName === 'textarea') {
+    if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
         return true;
     }
     
@@ -43,8 +43,14 @@ export function setupKeyboardShortcuts(): void {
     keyboardListenersInitialized = true;
     
     document.addEventListener('keydown', (event: KeyboardEvent) => {
-        // Check for CTRL+S (always prevent default browser save and play)
-        if (event.ctrlKey && event.key === 's') {
+        // Check for CTRL+S or CMD+S (always prevent default browser save and play)
+        // Exclude SHIFT/ALT to avoid overriding CTRL+SHIFT+S (Save As)
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            !event.shiftKey &&
+            !event.altKey &&
+            event.key === 's'
+        ) {
             event.preventDefault();
             playSine();
             return;
@@ -53,15 +59,28 @@ export function setupKeyboardShortcuts(): void {
         // For ENTER-based shortcuts, only trigger if not in an editable element
         const inEditableElement = isEditableElement(event.target);
         
-        // Check for SHIFT+ENTER
-        if (event.shiftKey && event.key === 'Enter' && !inEditableElement) {
+        // Check for SHIFT+ENTER (without other modifier keys)
+        if (
+            event.shiftKey &&
+            !event.ctrlKey &&
+            !event.metaKey &&
+            !event.altKey &&
+            event.key === 'Enter' &&
+            !inEditableElement
+        ) {
             event.preventDefault();
             playSine();
             return;
         }
         
-        // Check for CTRL+ENTER (or CMD+ENTER on Mac)
-        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !inEditableElement) {
+        // Check for CTRL+ENTER or CMD+ENTER (without SHIFT/ALT)
+        if (
+            (event.ctrlKey || event.metaKey) &&
+            !event.shiftKey &&
+            !event.altKey &&
+            event.key === 'Enter' &&
+            !inEditableElement
+        ) {
             event.preventDefault();
             playSine();
             return;
