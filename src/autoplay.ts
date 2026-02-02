@@ -22,6 +22,8 @@ export function saveAutoPlayPreference(enabled: boolean): void {
     localStorage.setItem(AUTO_PLAY_STORAGE_KEY, enabled.toString());
 }
 
+let checkboxElement: HTMLInputElement | null = null;
+
 /**
  * Initialize auto-play checkbox
  */
@@ -29,11 +31,14 @@ export function initializeAutoPlayCheckbox(): void {
     const checkbox = document.getElementById('autoPlayCheckbox') as HTMLInputElement;
     if (!checkbox) return;
     
+    // Cache the checkbox element
+    checkboxElement = checkbox;
+    
     // Load saved preference
     checkbox.checked = getAutoPlayPreference();
     
     // Save preference when changed
-    checkbox.addEventListener('change', function() {
+    checkbox.addEventListener('change', () => {
         saveAutoPlayPreference(checkbox.checked);
     });
 }
@@ -42,8 +47,7 @@ export function initializeAutoPlayCheckbox(): void {
  * Trigger auto-play if enabled
  */
 export function triggerAutoPlay(): void {
-    const checkbox = document.getElementById('autoPlayCheckbox') as HTMLInputElement;
-    if (checkbox && checkbox.checked) {
+    if (checkboxElement && checkboxElement.checked) {
         playSine();
     }
 }
