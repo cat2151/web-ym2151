@@ -9,6 +9,7 @@ import { onToneEditorChange } from './tone-editor';
 import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
+import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -22,6 +23,9 @@ export function initializeApplication(): void {
             `OPM Internal Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>` +
             `Waiting for presets...`;
     }
+    
+    // Initialize auto-play checkbox
+    initializeAutoPlayCheckbox();
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)
@@ -61,6 +65,8 @@ export function setupEditorListeners(): void {
                 // Save both editors to local storage
                 saveToneEditorToStorage();
                 saveJsonEditorToStorage();
+                // Trigger auto-play if enabled
+                triggerAutoPlay();
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
@@ -72,6 +78,8 @@ export function setupEditorListeners(): void {
             jsonTimeoutId = window.setTimeout(() => {
                 // Save only JSON editor
                 saveJsonEditorToStorage();
+                // Trigger auto-play if enabled
+                triggerAutoPlay();
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }

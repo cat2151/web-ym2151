@@ -12,6 +12,7 @@ export * from './storage';
 export * from './tone-editor';
 export * from './audio';
 export * from './keyboard';
+export * from './autoplay';
 export * from './app';
 
 // Import necessary functions for global scope
