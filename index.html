@@ -64,16 +64,10 @@
         Initializing...
     </div>
     
-    <!-- Application modules (loaded before Emscripten) -->
-    <script src="js/constants.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/tone-editor.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/presets.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/emscripten-wrapper.js"></script>
+    <!-- Load compiled TypeScript modules -->
+    <script type="module" src="dist/index.js"></script>
     
-    <!-- External WASM script (loaded last to use Module from emscripten-wrapper.js) -->
+    <!-- External WASM script (loaded last to use Module from TypeScript) -->
     <script src="sine_test.js"></script>
 </body>
 </html>
