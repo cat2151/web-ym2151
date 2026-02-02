@@ -5,6 +5,9 @@
 
 import { playSine } from './audio';
 
+// Flag to ensure listeners are only added once
+let keyboardListenersInitialized = false;
+
 /**
  * Check if the current focus is on an editable element (input, textarea, etc.)
  */
@@ -33,6 +36,12 @@ function isEditableElement(element: EventTarget | null): boolean {
  * - CTRL+ENTER: Play (when not in an editable element)
  */
 export function setupKeyboardShortcuts(): void {
+    // Prevent duplicate event listeners
+    if (keyboardListenersInitialized) {
+        return;
+    }
+    keyboardListenersInitialized = true;
+    
     document.addEventListener('keydown', (event: KeyboardEvent) => {
         // Check for CTRL+S (always prevent default browser save and play)
         if (event.ctrlKey && event.key === 's') {
