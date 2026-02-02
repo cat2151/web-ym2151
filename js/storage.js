@@ -10,10 +10,19 @@ const STORAGE_KEYS = {
 // Auto-save debounce delay in milliseconds
 const AUTOSAVE_DEBOUNCE_MS = 1000;
 
+// Flag to pause auto-save during preview operations
+let autoSavePaused = false;
+
 /**
  * Save tone editor content to local storage
  */
 function saveToneEditorToStorage() {
+    // Skip auto-save during preview to avoid overwriting backup
+    if (autoSavePaused) {
+        console.log('Auto-save paused during preview');
+        return;
+    }
+    
     try {
         const toneEditor = document.getElementById('toneEditor');
         if (toneEditor) {
@@ -43,6 +52,12 @@ function saveToneEditorToStorage() {
  * Save JSON editor content to local storage
  */
 function saveJsonEditorToStorage() {
+    // Skip auto-save during preview to avoid overwriting backup
+    if (autoSavePaused) {
+        console.log('Auto-save paused during preview');
+        return;
+    }
+    
     try {
         const jsonEditor = document.getElementById('jsonEditor');
         if (jsonEditor) {
@@ -202,33 +217,8 @@ function loadFromSlot(slotNumber) {
         
         const slotData = JSON.parse(slotDataStr);
         
-        const toneEditor = document.getElementById('toneEditor');
-        const jsonEditor = document.getElementById('jsonEditor');
-        
-        if (toneEditor && slotData.toneEditor !== undefined) {
-            toneEditor.value = slotData.toneEditor;
-            
-            // Trigger tone editor change to update JSON
-            if (typeof onToneEditorChange === 'function') {
-                onToneEditorChange();
-            }
-        }
-        
-        if (jsonEditor && slotData.jsonEditor !== undefined) {
-            jsonEditor.value = slotData.jsonEditor;
-            
-            // Update duration display
-            try {
-                const data = JSON.parse(slotData.jsonEditor);
-                if (data.events && Array.isArray(data.events)) {
-                    if (typeof updateDurationDisplay === 'function') {
-                        updateDurationDisplay(data.events);
-                    }
-                }
-            } catch (e) {
-                console.error('Error parsing JSON from slot:', e);
-            }
-        }
+        // Use helper function to load content
+        loadEditorContent(slotData, true);
         
         console.log(`Loaded from slot ${slotNumber}: ${slotData.name}`);
         
@@ -325,6 +315,41 @@ function clearSlot(slotNumber) {
 }
 
 /**
+ * Load editor content from slot data (helper function to reduce duplication)
+ * @param {Object} slotData - Slot data object
+ * @param {boolean} triggerCallbacks - Whether to trigger callbacks (default: true)
+ */
+function loadEditorContent(slotData, triggerCallbacks = true) {
+    const toneEditor = document.getElementById('toneEditor');
+    const jsonEditor = document.getElementById('jsonEditor');
+    
+    if (toneEditor && slotData.toneEditor !== undefined) {
+        toneEditor.value = slotData.toneEditor;
+        
+        if (triggerCallbacks && typeof onToneEditorChange === 'function') {
+            onToneEditorChange();
+        }
+    }
+    
+    if (jsonEditor && slotData.jsonEditor !== undefined) {
+        jsonEditor.value = slotData.jsonEditor;
+        
+        if (triggerCallbacks) {
+            try {
+                const data = JSON.parse(slotData.jsonEditor);
+                if (data.events && Array.isArray(data.events)) {
+                    if (typeof updateDurationDisplay === 'function') {
+                        updateDurationDisplay(data.events);
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing JSON from slot:', e);
+            }
+        }
+    }
+}
+
+/**
  * Handle save button click
  */
 function handleSaveSlot() {
@@ -376,41 +401,24 @@ function previewSlot(slotNumber) {
         };
     }
     
+    // Pause auto-save to prevent overwriting the backup
+    autoSavePaused = true;
+    
     // Load the slot data
     const key = STORAGE_KEYS.SLOT_PREFIX + slotNumber;
     const slotDataStr = localStorage.getItem(key);
     
     if (!slotDataStr) {
         window.alert(`Slot ${slotNumber} is empty.`);
+        autoSavePaused = false; // Resume auto-save
         return;
     }
     
     try {
         const slotData = JSON.parse(slotDataStr);
-        const toneEditor = document.getElementById('toneEditor');
-        const jsonEditor = document.getElementById('jsonEditor');
         
-        // Load slot data into editors
-        if (toneEditor && slotData.toneEditor !== undefined) {
-            toneEditor.value = slotData.toneEditor;
-            if (typeof onToneEditorChange === 'function') {
-                onToneEditorChange();
-            }
-        }
-        
-        if (jsonEditor && slotData.jsonEditor !== undefined) {
-            jsonEditor.value = slotData.jsonEditor;
-            try {
-                const data = JSON.parse(slotData.jsonEditor);
-                if (data.events && Array.isArray(data.events)) {
-                    if (typeof updateDurationDisplay === 'function') {
-                        updateDurationDisplay(data.events);
-                    }
-                }
-            } catch (e) {
-                console.error('Error parsing JSON from slot:', e);
-            }
-        }
+        // Use helper function to load content
+        loadEditorContent(slotData, true);
         
         // Store which slot was previewed
         lastPreviewedSlot = slotNumber;
@@ -434,6 +442,7 @@ function previewSlot(slotNumber) {
     } catch (error) {
         console.error(`Error previewing slot ${slotNumber}:`, error);
         window.alert(`Failed to preview slot ${slotNumber}.`);
+        autoSavePaused = false; // Resume auto-save on error
     }
 }
 
@@ -449,32 +458,15 @@ function restoreBackup() {
         autoRestoreTimeout = null;
     }
     
-    const toneEditor = document.getElementById('toneEditor');
-    const jsonEditor = document.getElementById('jsonEditor');
-    
-    if (toneEditor) {
-        toneEditor.value = previewBackup.toneEditor;
-        if (typeof onToneEditorChange === 'function') {
-            onToneEditorChange();
-        }
-    }
-    
-    if (jsonEditor) {
-        jsonEditor.value = previewBackup.jsonEditor;
-        try {
-            const data = JSON.parse(previewBackup.jsonEditor);
-            if (data.events && Array.isArray(data.events)) {
-                if (typeof updateDurationDisplay === 'function') {
-                    updateDurationDisplay(data.events);
-                }
-            }
-        } catch (e) {
-            // Ignore parse errors for backup
-        }
-    }
+    // Use helper function to restore content
+    loadEditorContent(previewBackup, true);
     
     previewBackup = null;
     hideLoadPreviewedButton();
+    
+    // Resume auto-save after restore
+    autoSavePaused = false;
+    
     console.log('Restored backup');
 }
 
@@ -493,6 +485,11 @@ function loadPreviewedSlot() {
     // Clear the backup since we're committing to this tone
     previewBackup = null;
     hideLoadPreviewedButton();
+    
+    // Resume auto-save and save the loaded preview
+    autoSavePaused = false;
+    saveToneEditorToStorage();
+    saveJsonEditorToStorage();
     
     console.log(`Loaded slot ${lastPreviewedSlot} permanently`);
     window.alert(`Slot ${lastPreviewedSlot} loaded!`);
