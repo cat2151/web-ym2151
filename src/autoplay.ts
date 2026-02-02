@@ -47,7 +47,9 @@ export function initializeAutoPlayCheckbox(): void {
  * Trigger auto-play if enabled
  */
 export function triggerAutoPlay(): void {
-    if (checkboxElement && checkboxElement.checked) {
+    // Use cached element if available, otherwise query DOM as fallback
+    const checkbox = checkboxElement || document.getElementById('autoPlayCheckbox') as HTMLInputElement;
+    if (checkbox && checkbox.checked) {
         playSine();
     }
 }
