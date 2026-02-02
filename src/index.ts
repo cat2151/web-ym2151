@@ -8,6 +8,7 @@ export * from './constants';
 export * from './types';
 export * from './ui';
 export * from './presets';
+export * from './preset-tones';
 export * from './storage';
 export * from './tone-editor';
 export * from './audio';
@@ -25,6 +26,7 @@ import {
 } from './storage';
 import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor } from './presets';
+import { loadToneToEditor } from './preset-tones';
 import { updateDurationDisplay } from './ui';
 import { initializeApplication } from './app';
 
@@ -41,6 +43,7 @@ declare global {
         onToneEditorChange: typeof onToneEditorChange;
         parseJsonToToneEditor: typeof updateToneEditorFromJson;
         loadToEditor: typeof loadToEditor;
+        loadToneToEditor: typeof loadToneToEditor;
         updateDurationDisplay: typeof updateDurationDisplay;
     }
 }
@@ -61,5 +64,6 @@ if (typeof window !== 'undefined') {
     window.onToneEditorChange = onToneEditorChange;
     window.parseJsonToToneEditor = updateToneEditorFromJson; // Keep original name for compatibility
     window.loadToEditor = loadToEditor;
+    window.loadToneToEditor = loadToneToEditor;
     window.updateDurationDisplay = updateDurationDisplay;
 }

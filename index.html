@@ -9,9 +9,15 @@
     <h1>YM2151 JSON Editor</h1>
     
     <div class="controls">
-        <label for="presetSelect"><strong>Load Preset: </strong></label>
+        <label for="presetSelect"><strong>Load Preset JSON: </strong></label>
         <select id="presetSelect" onchange="loadToEditor()">
             <option value="" disabled selected>Loading presets...</option>
+        </select>
+        <br><br>
+        
+        <label for="presetToneSelect"><strong>Load Preset Tone: </strong></label>
+        <select id="presetToneSelect" onchange="loadToneToEditor()">
+            <option value="" disabled selected>Loading preset tones...</option>
         </select>
         <br><br>
         
