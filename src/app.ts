@@ -9,6 +9,7 @@ import { onToneEditorChange } from './tone-editor';
 import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
+import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -22,6 +23,9 @@ export function initializeApplication(): void {
             `OPM Internal Rate: ${OPM_SAMPLE_RATE.toFixed(0)} Hz<br>` +
             `Waiting for presets...`;
     }
+    
+    // Initialize auto-play checkbox
+    initializeAutoPlayCheckbox();
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)
@@ -61,6 +65,8 @@ export function setupEditorListeners(): void {
                 // Save both editors to local storage
                 saveToneEditorToStorage();
                 saveJsonEditorToStorage();
+                // Trigger auto-play if enabled
+                triggerAutoPlay();
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
@@ -70,8 +76,25 @@ export function setupEditorListeners(): void {
         jsonEditor.addEventListener('input', function() {
             if (jsonTimeoutId) clearTimeout(jsonTimeoutId);
             jsonTimeoutId = window.setTimeout(() => {
+                // Validate JSON before triggering auto-play to avoid alert spam
+                let isValidJson = true;
+                const jsonInputElement = jsonEditor as HTMLTextAreaElement | HTMLInputElement;
+                const jsonText = jsonInputElement.value;
+                try {
+                    const parsed = JSON.parse(jsonText);
+                    // Also validate it has the expected structure
+                    if (!parsed.events || !Array.isArray(parsed.events)) {
+                        isValidJson = false;
+                    }
+                } catch (e) {
+                    isValidJson = false;
+                }
                 // Save only JSON editor
                 saveJsonEditorToStorage();
+                // Trigger auto-play if enabled and JSON is valid
+                if (isValidJson) {
+                    triggerAutoPlay();
+                }
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
