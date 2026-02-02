@@ -4,6 +4,7 @@
 - 最低限の実装をした状態です
   - 440Hzが鳴ります
 - 機能追加中
+- **New**: TypeScriptに移行し、Single Responsibility Principleに従ってコードを分割しました
 
 ## 概要
 - ブラウザで440Hzの音を鳴らします
@@ -15,7 +16,50 @@
 - 実用には、ここから大規模な追加実装や、アーキテクチャの変更が必要です
 
 ## install / build
+
+### C/WASM ビルド
 - Windowsの場合は、WSLかつ、/mnt/ でないほう（~/ など）でのみbuildできます。/mnt/ 配下で失敗するのは、Emscriptenの仕様です
+
+```bash
+# Emscripten + WASM ビルド
+./build.sh --build-only
+```
+
+### TypeScript ビルド
+```bash
+# 依存関係のインストール
+npm install
+
+# TypeScript → JavaScript コンパイル
+npm run build
+
+# 開発時の自動ビルド
+npm run watch
+
+# ビルド成果物のクリーン
+npm run clean
+```
+
+### 実行
+```bash
+# ローカルサーバー起動
+./build.sh --server-only
+# または
+python3 -m http.server 8000
+```
+
+ブラウザで http://localhost:8000/ にアクセス
+
+## アーキテクチャ
+
+TypeScript化により、コードベースは以下のように整理されました：
+
+- **src/storage/** - ストレージ機能（旧storage.js 783行を責任ごとに分割）
+- **src/tone-editor/** - トーンエディタ機能
+- **src/audio/** - オーディオ生成・再生・エクスポート機能
+- **src/** - その他のコアモジュール
+
+詳細は [TYPESCRIPT.md](./TYPESCRIPT.md) を参照してください。
 
 ## いろいろ
 - 開発方針の軸、優先度を、体験の検証ができるよう実装、とする
