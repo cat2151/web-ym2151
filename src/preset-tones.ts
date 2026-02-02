@@ -24,7 +24,7 @@ export async function loadPresetTones(): Promise<void> {
         const select = document.getElementById('presetToneSelect') as HTMLSelectElement | null;
         if (!select) return;
         
-        select.innerHTML = ''; 
+        select.innerHTML = '';
 
         if (!Array.isArray(loadedPresetTones) || loadedPresetTones.length === 0) {
             const option = document.createElement('option');
@@ -80,8 +80,8 @@ export function loadToneToEditor(): void {
         toneEditor.value = loadedPresetTones[selectedIndex].tone;
         
         // Trigger the tone editor change event to update JSON
-        if (typeof (window as any).onToneEditorChange === 'function') {
-            (window as any).onToneEditorChange();
+        if (window.onToneEditorChange) {
+            window.onToneEditorChange();
         }
     }
 }
