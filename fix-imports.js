@@ -10,7 +10,15 @@ function fixImportsInFile(filePath) {
     let content = fs.readFileSync(filePath, 'utf8');
     let modified = false;
     
-    // Fix relative imports without .js extension
+    // First, fix directory imports (e.g., './storage' -> './storage/index.js')
+    // This must be done BEFORE adding .js extensions to avoid './storage.js'
+    const dirImportPattern = /(from\s+['"])(\.\/(storage|audio|tone-editor))(['"];)/g;
+    content = content.replace(dirImportPattern, (match, prefix, dirPath, dir, suffix) => {
+        modified = true;
+        return `${prefix}${dirPath}/index.js${suffix}`;
+    });
+    
+    // Then, fix relative imports without .js extension
     const patterns = [
         // import ... from './module'
         /from\s+['"](\.[^'"]+)['"];/g,
@@ -31,13 +39,6 @@ function fixImportsInFile(filePath) {
             modified = true;
             return match.replace(importPath, newPath);
         });
-    });
-    
-    // Fix directory imports (e.g., './storage' -> './storage/index.js')
-    const dirImportPattern = /(from\s+['"])(\.\/(storage|audio|tone-editor))(['"];)/g;
-    content = content.replace(dirImportPattern, (match, prefix, dirPath, dir, suffix) => {
-        modified = true;
-        return `${prefix}${dirPath}/index.js${suffix}`;
     });
     
     if (modified) {

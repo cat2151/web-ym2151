@@ -8,8 +8,8 @@ import { parseParamLine, getDefaultOperatorParams } from './parser';
 import { generateEvents } from './eventGenerator';
 import { updateDurationDisplay } from '../ui';
 
-// Export JSON parser
-export { updateToneEditorFromJson as parseJsonToToneEditor } from './jsonParser';
+// Export both JSON parser functions with their original names
+export { parseJsonToToneEditor, updateToneEditorFromJson } from './jsonParser';
 
 /**
  * Parse tone editor textarea and generate YM2151 register events

@@ -21,7 +21,7 @@ import {
     exportAllSlots, 
     importAllSlots 
 } from './storage';
-import { onToneEditorChange, parseJsonToToneEditor } from './tone-editor';
+import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor } from './presets';
 import { updateDurationDisplay } from './ui';
 import { initializeApplication } from './app';
@@ -37,7 +37,7 @@ declare global {
         exportAllSlots: typeof exportAllSlots;
         importAllSlots: typeof importAllSlots;
         onToneEditorChange: typeof onToneEditorChange;
-        parseJsonToToneEditor: typeof parseJsonToToneEditor;
+        parseJsonToToneEditor: typeof updateToneEditorFromJson;
         loadToEditor: typeof loadToEditor;
         updateDurationDisplay: typeof updateDurationDisplay;
     }
@@ -57,7 +57,7 @@ if (typeof window !== 'undefined') {
     window.exportAllSlots = exportAllSlots;
     window.importAllSlots = importAllSlots;
     window.onToneEditorChange = onToneEditorChange;
-    window.parseJsonToToneEditor = parseJsonToToneEditor;
+    window.parseJsonToToneEditor = updateToneEditorFromJson; // Keep original name for compatibility
     window.loadToEditor = loadToEditor;
     window.updateDurationDisplay = updateDurationDisplay;
 }
