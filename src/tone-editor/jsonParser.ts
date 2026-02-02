@@ -3,7 +3,7 @@
  * Reverse operation: parses JSON events to populate tone editor
  */
 
-import { YM2151Event, OperatorParams } from '../types';
+import { YM2151Event } from '../types';
 import { toHex } from '../ui';
 
 /**

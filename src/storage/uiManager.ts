@@ -3,7 +3,7 @@
  * Handles UI updates and user interactions for storage features
  */
 
-import { getAllSlots } from './slotManager';
+import { getAllSlots, saveToSlot } from './slotManager';
 import { previewSlot } from './previewManager';
 
 /**
@@ -27,15 +27,12 @@ export function handleSaveSlot(): void {
         return;
     }
     
-    // Import saveToSlot dynamically to avoid circular dependency
-    import('./slotManager').then(({ saveToSlot }) => {
-        const success = saveToSlot(slotNumber, slotName || `Slot ${slotNumber}`);
-        
-        if (success) {
-            window.alert(`Saved to slot ${slotNumber}!`);
-            refreshSlotInfo();
-        }
-    });
+    const success = saveToSlot(slotNumber, slotName || `Slot ${slotNumber}`);
+    
+    if (success) {
+        window.alert(`Saved to slot ${slotNumber}!`);
+        refreshSlotInfo();
+    }
 }
 
 /**

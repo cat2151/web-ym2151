@@ -6,8 +6,10 @@
 import { JsonEditorData, OperatorParams, GlobalParams } from '../types';
 import { parseParamLine, getDefaultOperatorParams } from './parser';
 import { generateEvents } from './eventGenerator';
-import { updateToneEditorFromJson } from './jsonParser';
 import { updateDurationDisplay } from '../ui';
+
+// Export JSON parser
+export { updateToneEditorFromJson as parseJsonToToneEditor } from './jsonParser';
 
 /**
  * Parse tone editor textarea and generate YM2151 register events
@@ -69,6 +71,3 @@ export function onToneEditorChange(): void {
         updateDurationDisplay(result.events);
     }
 }
-
-// Export JSON parser for use in other modules
-export { updateToneEditorFromJson as parseJsonToToneEditor } from './jsonParser';
