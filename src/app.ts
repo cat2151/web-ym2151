@@ -76,10 +76,25 @@ export function setupEditorListeners(): void {
         jsonEditor.addEventListener('input', function() {
             if (jsonTimeoutId) clearTimeout(jsonTimeoutId);
             jsonTimeoutId = window.setTimeout(() => {
+                // Validate JSON before triggering auto-play to avoid alert spam
+                let isValidJson = true;
+                const jsonInputElement = jsonEditor as HTMLTextAreaElement | HTMLInputElement;
+                const jsonText = jsonInputElement.value;
+                try {
+                    const parsed = JSON.parse(jsonText);
+                    // Also validate it has the expected structure
+                    if (!parsed.events || !Array.isArray(parsed.events)) {
+                        isValidJson = false;
+                    }
+                } catch (e) {
+                    isValidJson = false;
+                }
                 // Save only JSON editor
                 saveJsonEditorToStorage();
-                // Trigger auto-play if enabled
-                triggerAutoPlay();
+                // Trigger auto-play if enabled and JSON is valid
+                if (isValidJson) {
+                    triggerAutoPlay();
+                }
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
