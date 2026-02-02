@@ -6,6 +6,7 @@
 import { loadPresets } from './presets';
 import { loadFromStorage, saveToneEditorToStorage, saveJsonEditorToStorage } from './storage';
 import { onToneEditorChange } from './tone-editor';
+import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
 
@@ -46,6 +47,9 @@ export function initializeApplication(): void {
 export function setupEditorListeners(): void {
     const toneEditor = document.getElementById('toneEditor');
     const jsonEditor = document.getElementById('jsonEditor');
+    
+    // Setup keyboard shortcuts
+    setupKeyboardShortcuts();
     
     if (toneEditor) {
         let timeoutId: number | null = null;
