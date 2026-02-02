@@ -615,6 +615,8 @@ function exportAllSlots() {
             slots: []
         };
         
+        let corruptedCount = 0;
+        
         // Collect all slot data
         for (let i = 1; i <= 8; i++) {
             const key = STORAGE_KEYS.SLOT_PREFIX + i;
@@ -628,13 +630,18 @@ function exportAllSlots() {
                         data: slotData
                     });
                 } catch (e) {
+                    corruptedCount++;
                     console.warn(`Skipping corrupted slot ${i}:`, e);
                 }
             }
         }
         
         if (allSlotsData.slots.length === 0) {
-            window.alert('No slots to export. All slots are empty.');
+            if (corruptedCount > 0) {
+                window.alert(`No slots to export. ${corruptedCount} slot(s) are corrupted and cannot be exported.`);
+            } else {
+                window.alert('No slots to export. All slots are empty.');
+            }
             return;
         }
         
@@ -653,7 +660,13 @@ function exportAllSlots() {
         URL.revokeObjectURL(url);
         
         console.log(`Exported ${allSlotsData.slots.length} slots`);
-        window.alert(`Successfully exported ${allSlotsData.slots.length} slot(s)!`);
+        
+        // Show success message with information about skipped slots
+        let successMessage = `Successfully exported ${allSlotsData.slots.length} slot(s)!`;
+        if (corruptedCount > 0) {
+            successMessage += `\n${corruptedCount} corrupted slot(s) were skipped.`;
+        }
+        window.alert(successMessage);
     } catch (error) {
         console.error('Error exporting slots:', error);
         window.alert('Failed to export slots. ' + (error.message || 'Please try again.'));
