@@ -604,6 +604,167 @@ function refreshSlotInfo() {
     infoDiv.appendChild(grid);
 }
 
+/**
+ * Export all 8 slots to a JSON file
+ */
+function exportAllSlots() {
+    try {
+        const allSlotsData = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            slots: []
+        };
+        
+        let corruptedCount = 0;
+        
+        // Collect all slot data
+        for (let i = 1; i <= 8; i++) {
+            const key = STORAGE_KEYS.SLOT_PREFIX + i;
+            const slotDataStr = localStorage.getItem(key);
+            
+            if (slotDataStr) {
+                try {
+                    const slotData = JSON.parse(slotDataStr);
+                    allSlotsData.slots.push({
+                        slotNumber: i,
+                        data: slotData
+                    });
+                } catch (e) {
+                    corruptedCount++;
+                    console.warn(`Skipping corrupted slot ${i}:`, e);
+                }
+            }
+        }
+        
+        if (allSlotsData.slots.length === 0) {
+            if (corruptedCount > 0) {
+                window.alert(`No slots to export. ${corruptedCount} slot(s) are corrupted and cannot be exported.`);
+            } else {
+                window.alert('No slots to export. All slots are empty.');
+            }
+            return;
+        }
+        
+        // Create JSON blob and download
+        const jsonStr = JSON.stringify(allSlotsData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create temporary download link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ym2151-slots-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log(`Exported ${allSlotsData.slots.length} slots`);
+        
+        // Show success message with information about skipped slots
+        let successMessage = `Successfully exported ${allSlotsData.slots.length} slot(s)!`;
+        if (corruptedCount > 0) {
+            successMessage += `\n${corruptedCount} corrupted slot(s) were skipped.`;
+        }
+        window.alert(successMessage);
+    } catch (error) {
+        console.error('Error exporting slots:', error);
+        window.alert('Failed to export slots. ' + (error.message || 'Please try again.'));
+    }
+}
+
+/**
+ * Import all slots from a JSON file
+ */
+function importAllSlots() {
+    try {
+        // Create file input element
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        
+        input.onchange = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Validate imported data structure
+                    if (!importedData.slots || !Array.isArray(importedData.slots)) {
+                        throw new Error('Invalid file format: missing slots array');
+                    }
+                    
+                    // Confirm before overwriting
+                    const message = `This will import ${importedData.slots.length} slot(s).\nExisting slots with the same numbers will be overwritten.\n\nContinue?`;
+                    if (!window.confirm(message)) {
+                        return;
+                    }
+                    
+                    let importedCount = 0;
+                    let errorCount = 0;
+                    
+                    // Import each slot
+                    importedData.slots.forEach(slot => {
+                        try {
+                            const slotNumber = slot.slotNumber;
+                            
+                            if (slotNumber < 1 || slotNumber > 8) {
+                                console.warn(`Invalid slot number: ${slotNumber}`);
+                                errorCount++;
+                                return;
+                            }
+                            
+                            if (!slot.data) {
+                                console.warn(`No data for slot ${slotNumber}`);
+                                errorCount++;
+                                return;
+                            }
+                            
+                            // Save to localStorage
+                            const key = STORAGE_KEYS.SLOT_PREFIX + slotNumber;
+                            localStorage.setItem(key, JSON.stringify(slot.data));
+                            importedCount++;
+                        } catch (e) {
+                            console.error(`Error importing slot ${slot.slotNumber}:`, e);
+                            errorCount++;
+                        }
+                    });
+                    
+                    // Refresh the UI
+                    refreshSlotInfo();
+                    
+                    // Show result
+                    let resultMessage = `Successfully imported ${importedCount} slot(s)!`;
+                    if (errorCount > 0) {
+                        resultMessage += `\n${errorCount} slot(s) failed to import.`;
+                    }
+                    window.alert(resultMessage);
+                    
+                    console.log(`Import complete: ${importedCount} successful, ${errorCount} failed`);
+                } catch (error) {
+                    console.error('Error parsing imported file:', error);
+                    window.alert('Failed to import slots. ' + (error.message || 'Invalid file format.'));
+                }
+            };
+            
+            reader.onerror = function() {
+                window.alert('Failed to read file. Please try again.');
+            };
+            
+            reader.readAsText(file);
+        };
+        
+        // Trigger file selection
+        input.click();
+    } catch (error) {
+        console.error('Error importing slots:', error);
+        window.alert('Failed to import slots. ' + (error.message || 'Please try again.'));
+    }
+}
+
 // Initialize slot info display when DOM is ready
 if (typeof window !== 'undefined') {
     window.addEventListener('DOMContentLoaded', function() {

@@ -37,6 +37,12 @@
             <button onclick="handleSaveSlot()" title="Save current tone to selected slot">💾 Save</button>
         </div>
         
+        <div class="storage-section">
+            <label><strong>Manage All Slots: </strong></label>
+            <button onclick="exportAllSlots()" title="Export all 8 slots to a JSON file">📥 Export All Slots</button>
+            <button onclick="importAllSlots()" title="Import slots from a JSON file">📤 Import All Slots</button>
+        </div>
+        
         <div id="slotInfo" class="slot-info"></div>
     </div>
 
