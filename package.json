@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Browser-based YM2151 sound chip emulator and tone editor",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node fix-imports.js",
     "watch": "tsc --watch",
     "clean": "rm -rf dist"
   },
