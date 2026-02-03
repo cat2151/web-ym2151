@@ -4,6 +4,6 @@
 
 export { generateAudioBuffers } from './audioGenerator';
 export { encodeWAV } from './wavEncoder';
-export { playSine } from './audioPlayer';
+export { playAudio } from './audioPlayer';
 export { exportWav } from './wavExporter';
 export type { AudioData } from './audioGenerator';

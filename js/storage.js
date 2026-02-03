@@ -427,8 +427,8 @@ function previewSlot(slotNumber) {
         showLoadPreviewedButton();
         
         // Play the preview
-        if (typeof playSine === 'function') {
-            playSine();
+        if (typeof playAudio === 'function') {
+            playAudio();
         }
         
         // Auto-restore after 3 seconds (can be adjusted)
