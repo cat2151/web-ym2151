@@ -8,11 +8,20 @@ import { midiNoteToYM2151, getMidiNoteName } from './tone-editor/midiConverter';
 import { parseToneEditorToJson } from './tone-editor';
 import { playAudio } from './audio/audioPlayer';
 
+// Track preview timeout to prevent race conditions
+let previewTimeoutId: number | null = null;
+let isPreviewInProgress = false;
+
 /**
  * Preview the current tone with a specified MIDI note
  * Generates a short test note (1 second duration)
  */
 export function previewTone(): void {
+    // Prevent concurrent previews
+    if (isPreviewInProgress) {
+        return;
+    }
+    
     const midiNoteInput = document.getElementById('previewMidiNote') as HTMLInputElement | null;
     const previewInfoEl = document.getElementById('previewInfo');
     const jsonEditor = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
@@ -49,6 +58,15 @@ export function previewTone(): void {
     // Save current JSON editor content
     const originalContent = jsonEditor.value;
     
+    // Mark preview as in progress
+    isPreviewInProgress = true;
+    
+    // Clear any existing timeout
+    if (previewTimeoutId !== null) {
+        clearTimeout(previewTimeoutId);
+        previewTimeoutId = null;
+    }
+    
     // Temporarily set preview JSON
     jsonEditor.value = JSON.stringify({ events: previewEvents }, null, 2);
     
@@ -63,11 +81,13 @@ export function previewTone(): void {
         playAudio();
         
         // Restore original content after a short delay
-        setTimeout(() => {
+        previewTimeoutId = window.setTimeout(() => {
             jsonEditor.value = originalContent;
             if (previewInfoEl) {
                 previewInfoEl.textContent = '';
             }
+            isPreviewInProgress = false;
+            previewTimeoutId = null;
         }, 100);
     } catch (error) {
         // Restore original content on error
@@ -75,6 +95,8 @@ export function previewTone(): void {
         if (previewInfoEl) {
             previewInfoEl.textContent = 'Preview failed: ' + (error as Error).message;
         }
+        isPreviewInProgress = false;
+        previewTimeoutId = null;
     }
 }
 
@@ -85,12 +107,12 @@ export function previewTone(): void {
 function createPreviewEvents(toneEvents: YM2151Event[], note: number): YM2151Event[] {
     const events: YM2151Event[] = [];
     
-    // Copy all tone setup events except the note and key-on
+    // Copy all tone setup events except the note, key-on, and key fraction
     for (const event of toneEvents) {
         const addr = typeof event.addr === 'string' ? parseInt(event.addr, 16) : event.addr;
         
-        // Skip existing note (0x28) and key-on (0x08) events
-        if (addr === 0x28 || addr === 0x08) {
+        // Skip existing note (0x28), key-on (0x08), and key fraction (0x30) events
+        if (addr === 0x28 || addr === 0x08 || addr === 0x30) {
             continue;
         }
         

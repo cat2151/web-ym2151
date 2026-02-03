@@ -96,6 +96,7 @@ h1 { margin-bottom: 5px; }
     padding: 5px;
     font-size: 14px;
     margin: 0 5px;
+    width: 60px;
 }
 .preview-info {
     margin-left: 10px;
