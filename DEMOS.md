@@ -22,7 +22,7 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 **Technical**:
 - Uses channels 0, 1, 2 for polyphonic playback
 - Notes triggered with slight delays (0ms, 50ms, 100ms) for cleaner sound
-- Key-on mask: 0x7C (channels 0, 1, 2)
+- Key-on via register 0x08 per channel (0x78 for ch 0, 0x79 for ch 1, 0x7A for ch 2)
 
 ### F Major Chord (F4-A4-C5)
 **Purpose**: Demonstrates another major chord  
