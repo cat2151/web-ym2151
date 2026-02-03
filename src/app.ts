@@ -11,6 +11,7 @@ import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
 import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
+import { updatePreviewNoteName } from './preview';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -55,9 +56,17 @@ export function initializeApplication(): void {
 export function setupEditorListeners(): void {
     const toneEditor = document.getElementById('toneEditor');
     const jsonEditor = document.getElementById('jsonEditor');
+    const previewMidiNote = document.getElementById('previewMidiNote');
     
     // Setup keyboard shortcuts
     setupKeyboardShortcuts();
+    
+    // Setup preview MIDI note input listener
+    if (previewMidiNote) {
+        previewMidiNote.addEventListener('input', updatePreviewNoteName);
+        // Initialize the display
+        updatePreviewNoteName();
+    }
     
     if (toneEditor) {
         let timeoutId: number | null = null;

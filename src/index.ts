@@ -14,6 +14,7 @@ export * from './tone-editor';
 export * from './audio';
 export * from './keyboard';
 export * from './autoplay';
+export * from './preview';
 export * from './app';
 
 // Import necessary functions for global scope
@@ -28,6 +29,7 @@ import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor } from './presets';
 import { loadToneToEditor } from './preset-tones';
 import { updateDurationDisplay } from './ui';
+import { previewTone, updatePreviewNoteName } from './preview';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
@@ -45,6 +47,8 @@ declare global {
         loadToEditor: typeof loadToEditor;
         loadToneToEditor: typeof loadToneToEditor;
         updateDurationDisplay: typeof updateDurationDisplay;
+        previewTone: typeof previewTone;
+        updatePreviewNoteName: typeof updatePreviewNoteName;
     }
 }
 
@@ -66,4 +70,6 @@ if (typeof window !== 'undefined') {
     window.loadToEditor = loadToEditor;
     window.loadToneToEditor = loadToneToEditor;
     window.updateDurationDisplay = updateDurationDisplay;
+    window.previewTone = previewTone;
+    window.updatePreviewNoteName = updatePreviewNoteName;
 }

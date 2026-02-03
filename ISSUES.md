@@ -10,9 +10,9 @@ This document lists unimplemented features mentioned in README.md that should be
 
 ---
 
-## 1. Enhanced Tone Editor Preview Functionality ❌
+## 1. Enhanced Tone Editor Preview Functionality ✅
 
-**Status**: Not Implemented  
+**Status**: Implemented (Mono preview only)  
 **README Reference**: Lines 86-95
 
 ### Description
@@ -21,22 +21,23 @@ Add preview functionality to the tone editor with:
 - Note number selection (1-8 notes for mono to 8-poly playback)
 - Generate test notes automatically (append to JSON events)
 
-### Requirements
-1. **Mono Preview** (Priority: High)
-   - Single note playback for testing tone
-   - Note number: 0x00-0x7F (MIDI-compatible)
-   - Simple UI: single note number input
+### Implementation Status
+✅ **Completed:**
+- MIDI note input (0-127 range)
+- Real-time note name display (e.g., "A4 = 0x4A")
+- Preview button that generates 1-second test tone
+- Automatic YM2151 note value conversion
+- Temporary JSON replacement for preview playback
 
-2. **Polyphonic Preview** (Priority: Low, future)
-   - 2-8 simultaneous notes
-   - Multiple note number inputs
-   - Channel allocation
+❌ **Future Work:**
+- Polyphonic preview (2-8 simultaneous notes)
+- Multiple note number inputs
+- Channel allocation for poly
 
-### Implementation Notes
-- MIDI note number to YM2151 register conversion needed
-- Reference existing Rust implementation tables (mentioned in README)
-- Octave: upper bits of note value
-- Should auto-generate key-on/key-off events
+### Usage
+1. Enter tone parameters in the tone editor
+2. Select MIDI note number (default: 69 = A4)
+3. Click "🎵 Preview" to hear the tone
 
 ---
 
@@ -68,28 +69,31 @@ Alternative to current line-based editor:
 
 ---
 
-## 3. MIDI Note Number Conversion ❌
+## 3. MIDI Note Number Conversion ✅
 
-**Status**: Not Implemented  
+**Status**: Implemented  
 **README Reference**: Lines 91-94
 
 ### Description
 Simplified MIDI note number to YM2151 register conversion.
 
-### Requirements
-1. **Conversion Function**
-   - Input: MIDI note number (0-127)
-   - Output: YM2151 note register value
-   - Reference table from Rust version
+### Implementation Details
+- **File**: `src/tone-editor/midiConverter.ts`
+- **Functions**:
+  - `midiNoteToYM2151(midiNote)`: Convert MIDI to YM2151 chromatic value
+  - `ym2151ToMidiNote(ym2151Note)`: Reverse conversion
+  - `getMidiNoteName(midiNote)`: Get note name (e.g., "A4")
+  - `getYM2151NoteName(ym2151Note)`: Get note name from YM2151 value
 
-2. **Octave Handling**
-   - Upper bits = octave
-   - Lower bits = note within octave
+### Conversion Formula
+- Simple chromatic scale: YM2151 = MIDI + 5
+- C4 (MIDI 60) = 0x41 (65)
+- A4 (MIDI 69) = 0x4A (74)
 
-### Implementation Notes
-- Needed for preview feature (#1)
-- JavaScript implementation (reference Rust source for table)
-- Should be in tone-editor module
+### Validation
+- ✓ All C Major Scale notes match DEMOS.md values
+- ✓ Bidirectional conversion works correctly
+- ✓ Matches existing presets.json format
 
 ---
 
@@ -159,14 +163,32 @@ These were mentioned in README but are now implemented:
 ## Implementation Priority
 
 ### High Priority
-1. MIDI Note Number Conversion (#3) - Foundation for preview
-2. Enhanced Tone Editor Preview (#1) - Improves user experience
+1. ✅ MIDI Note Number Conversion (#3) - **COMPLETED**
+2. ✅ Enhanced Tone Editor Preview (#1) - **COMPLETED** (mono only)
 
 ### Medium Priority  
 3. Grid-based Parameter Editor (#2) - Alternative UI approach
 
 ### Low Priority
 4. Library Extraction (#4) - For advanced use cases
+
+---
+
+## Recent Additions
+
+### Preview Functionality (Implemented 2026-02-03)
+- **UI Location**: Below tone editor, above JSON editor
+- **Components**:
+  - MIDI note input with range validation (0-127)
+  - Real-time note name display with YM2151 value
+  - Preview button for 1-second tone test
+- **Implementation**: `src/preview.ts`
+- **Integration**: Temporary JSON replacement during preview
+
+### MIDI Converter (Implemented 2026-02-03)
+- **Implementation**: `src/tone-editor/midiConverter.ts`
+- **Export**: Available from `tone-editor` module
+- **Constants**: `MIDI_NOTES` and `YM2151_NOTES` for common values
 
 ---
 

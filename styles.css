@@ -85,6 +85,24 @@ textarea {
 h1 { margin-bottom: 5px; }
 .editor-label { margin-top: 20px; font-weight: bold; display: block; }
 .example-format { font-size: 12px; color: #666; margin-top: 5px; }
+.preview-controls { 
+    margin: 15px 0; 
+    padding: 12px; 
+    background: #f0f8ff; 
+    border-radius: 5px; 
+    border: 1px solid #b3d9ff;
+}
+.preview-controls input[type="number"] {
+    padding: 5px;
+    font-size: 14px;
+    margin: 0 5px;
+}
+.preview-info {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+}
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
@@ -171,6 +189,22 @@ h1 { margin-bottom: 5px; }
     }
     
     .example-format {
+        color: #aaa;
+    }
+    
+    .preview-controls {
+        background: #2a3a3a;
+        border-color: #4a6a7a;
+        color: #e0e0e0;
+    }
+    
+    .preview-controls input[type="number"] {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border: 1px solid #444;
+    }
+    
+    .preview-info {
         color: #aaa;
     }
 }
