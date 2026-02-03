@@ -35,8 +35,8 @@ export function previewTone(): void {
     const ym2151Note = midiNoteToYM2151(midiNote);
     
     // Get current tone from editor
-    const toneData = parseToneEditorToJson();
-    if (!toneData) {
+    const parsedTone = parseToneEditorToJson();
+    if (!parsedTone) {
         if (previewInfoEl) {
             previewInfoEl.textContent = 'Please enter tone parameters first';
         }
@@ -44,7 +44,7 @@ export function previewTone(): void {
     }
     
     // Create preview events with the specified note
-    const previewEvents = createPreviewEvents(toneData.events, ym2151Note);
+    const previewEvents = createPreviewEvents(parsedTone.events, ym2151Note);
     
     // Save current JSON editor content
     const originalContent = jsonEditor.value;
