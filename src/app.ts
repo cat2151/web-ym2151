@@ -4,6 +4,7 @@
  */
 
 import { loadPresets } from './presets';
+import { loadPresetTones } from './preset-tones';
 import { loadFromStorage, saveToneEditorToStorage, saveJsonEditorToStorage } from './storage';
 import { onToneEditorChange } from './tone-editor';
 import { setupKeyboardShortcuts } from './keyboard';
@@ -36,6 +37,9 @@ export function initializeApplication(): void {
     };
     
     loadPresets()
+        .then(function() {
+            return loadPresetTones();
+        })
         .then(function() {
             tryLoadFromStorage();
         })

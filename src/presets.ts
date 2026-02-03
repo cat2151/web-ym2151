@@ -24,7 +24,7 @@ export async function loadPresets(): Promise<void> {
         const select = document.getElementById('presetSelect') as HTMLSelectElement | null;
         if (!select) return;
         
-        select.innerHTML = ''; 
+        select.innerHTML = '';
 
         if (!Array.isArray(loadedPresets) || loadedPresets.length === 0) {
             const option = document.createElement('option');
@@ -81,13 +81,13 @@ export function loadToEditor(): void {
         textarea.value = JSON.stringify(editObj, null, 2);
     }
     
-    if (typeof (window as any).updateDurationDisplay === 'function') {
-        (window as any).updateDurationDisplay(editObj.events);
+    if (window.updateDurationDisplay) {
+        window.updateDurationDisplay(editObj.events as any);
     }
     
     // Try to parse and populate tone editor from JSON
-    if (typeof (window as any).parseJsonToToneEditor === 'function') {
-        (window as any).parseJsonToToneEditor(editObj.events);
+    if (window.parseJsonToToneEditor) {
+        window.parseJsonToToneEditor(editObj.events as any);
     }
     
     // Note: We don't auto-save when loading a preset to avoid overwriting
