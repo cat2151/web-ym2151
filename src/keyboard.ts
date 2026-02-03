@@ -3,7 +3,7 @@
  * Sets up keyboard shortcuts for play functionality
  */
 
-import { playSine } from './audio';
+import { playAudio } from './audio';
 
 // Flag to ensure listeners are only added once
 let keyboardListenersInitialized = false;
@@ -52,7 +52,7 @@ export function setupKeyboardShortcuts(): void {
             event.key === 's'
         ) {
             event.preventDefault();
-            playSine();
+            playAudio();
             return;
         }
         
@@ -69,7 +69,7 @@ export function setupKeyboardShortcuts(): void {
             !inEditableElement
         ) {
             event.preventDefault();
-            playSine();
+            playAudio();
             return;
         }
         
@@ -82,7 +82,7 @@ export function setupKeyboardShortcuts(): void {
             !inEditableElement
         ) {
             event.preventDefault();
-            playSine();
+            playAudio();
             return;
         }
     });

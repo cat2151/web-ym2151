@@ -11,7 +11,7 @@ let audioContext: AudioContext | null = null;
 /**
  * Play audio from current JSON editor content
  */
-export function playSine(): void {
+export function playAudio(): void {
     const audioData = generateAudioBuffers();
     if (!audioData) {
         return;

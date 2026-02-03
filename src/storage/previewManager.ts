@@ -104,8 +104,8 @@ export function previewSlot(slotNumber: number): void {
         showLoadPreviewedButton();
         
         // Play the preview
-        if (typeof (window as any).playSine === 'function') {
-            (window as any).playSine();
+        if (typeof (window as any).playAudio === 'function') {
+            (window as any).playAudio();
         }
         
         // Auto-restore after configured timeout

@@ -17,7 +17,7 @@ export * from './autoplay';
 export * from './app';
 
 // Import necessary functions for global scope
-import { playSine, exportWav } from './audio';
+import { playAudio, exportWav } from './audio';
 import { 
     handleSaveSlot, 
     refreshSlotInfo, 
@@ -34,7 +34,7 @@ import { initializeApplication } from './app';
 declare global {
     interface Window {
         Module: any;
-        playSine: typeof playSine;
+        playAudio: typeof playAudio;
         exportWav: typeof exportWav;
         handleSaveSlot: typeof handleSaveSlot;
         refreshSlotInfo: typeof refreshSlotInfo;
@@ -55,7 +55,7 @@ if (typeof window !== 'undefined') {
     };
     
     // Expose functions to global scope for HTML onclick handlers
-    window.playSine = playSine;
+    window.playAudio = playAudio;
     window.exportWav = exportWav;
     window.handleSaveSlot = handleSaveSlot;
     window.refreshSlotInfo = refreshSlotInfo;

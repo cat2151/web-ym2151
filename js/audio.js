@@ -68,7 +68,7 @@ function generateAudioBuffers() {
     };
 }
 
-function playSine() {
+function playAudio() {
     const audioData = generateAudioBuffers();
     if (!audioData) {
         return;
