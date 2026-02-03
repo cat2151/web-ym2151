@@ -11,6 +11,16 @@ import { updateDurationDisplay } from '../ui';
 // Export both JSON parser functions with their original names
 export { parseJsonToToneEditor, updateToneEditorFromJson } from './jsonParser';
 
+// Export MIDI converter functions
+export { 
+    midiNoteToYM2151, 
+    ym2151ToMidiNote, 
+    getMidiNoteName, 
+    getYM2151NoteName,
+    MIDI_NOTES,
+    YM2151_NOTES 
+} from './midiConverter';
+
 /**
  * Parse tone editor textarea and generate YM2151 register events
  * @returns JSON editor data or null if parsing fails
