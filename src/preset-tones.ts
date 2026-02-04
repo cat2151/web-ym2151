@@ -3,6 +3,8 @@
  * Loads and manages preset tones from preset-tones.json
  */
 
+import { playAudio } from './audio';
+
 interface PresetTone {
     name?: string;
     tone: string;
@@ -83,5 +85,8 @@ export function loadToneToEditor(): void {
         if (window.onToneEditorChange) {
             window.onToneEditorChange();
         }
+        
+        // Auto-play the loaded preset tone
+        playAudio();
     }
 }

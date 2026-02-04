@@ -3,6 +3,8 @@
  * Loads and manages preset tones from presets.json
  */
 
+import { playAudio } from './audio';
+
 interface Preset {
     name?: string;
     events: Array<{ time: number | string; addr: string; data: string }>;
@@ -89,6 +91,9 @@ export function loadToEditor(): void {
     if (window.parseJsonToToneEditor) {
         window.parseJsonToToneEditor(editObj.events as any);
     }
+    
+    // Auto-play the loaded preset
+    playAudio();
     
     // Note: We don't auto-save when loading a preset to avoid overwriting
     // the user's saved work. Auto-save only occurs on user edits.
