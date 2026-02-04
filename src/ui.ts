@@ -53,7 +53,7 @@ export function toggleStorageSection(): void {
     
     // Toggle state
     btn.setAttribute('aria-expanded', String(!isExpanded));
-    content.setAttribute('aria-hidden', String(isExpanded));
+    content.setAttribute('aria-hidden', String(!isExpanded));
     content.style.display = isExpanded ? 'none' : 'block';
     
     // Update button text
