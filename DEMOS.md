@@ -13,7 +13,7 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 **Technical**:
 - Register values: 0x41, 0x43, 0x45, 0x46, 0x48, 0x4A, 0x4C, 0x4D
 - Note: These values use a simplified linear mapping (incrementing by 1-2 per semitone)
-- The correct YM2151 note table (see below) skips codes 3, 7, and 11
+- The correct YM2151 note table (see below) skips codes 3, 7, 11, and 15
 - Each note plays for 300ms with proper key-on/key-off sequences
 - Simple sine wave tone configuration
 
@@ -52,7 +52,7 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 The note values follow a chromatic scale where:
 - A4 (440Hz) = 0x4A (74 decimal)
 - C#4 = 0x40 (64 decimal) - note 0 starts at C#
-- Note codes skip values 3, 7, and 11 within each octave
+- Note codes skip values 3, 7, 11, and 15 within each octave
 
 ### Note Table
 ```
