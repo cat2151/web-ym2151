@@ -8,12 +8,12 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 
 ### C Major Scale (Do-Re-Mi-Fa-So-La-Ti-Do)
 **Purpose**: Demonstrates sequential note playback  
-**Notes**: Intended as C4 → D4 → E4 → F4 → G4 → A4 → B4 → C5
+**Notes**: C4 → D4 → E4 → F4 → G4 → A4 → B4 → C5
 **Duration**: ~2.4 seconds (300ms per note)  
 **Technical**:
-- Register values: 0x41, 0x43, 0x45, 0x46, 0x48, 0x4A, 0x4C, 0x4D
-- Note: These values use a simplified linear mapping (incrementing by 1-2 per semitone)
-- The correct YM2151 note table (see below) skips codes 3, 7, 11, and 15
+- Register values: 0x2E, 0x31, 0x34, 0x35, 0x38, 0x3A, 0x3D, 0x3E
+- Uses correct YM2151 note codes (C4=0x2E, D4=0x31, E4=0x34, F4=0x35, G4=0x38, A4=0x3A, B4=0x3D, C5=0x3E)
+- Note codes skip values 3, 7, 11, and 15 within each octave
 - Each note plays for 300ms with proper key-on/key-off sequences
 - Simple sine wave tone configuration
 
@@ -50,17 +50,19 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 ## YM2151 Note Values
 
 The note values follow a chromatic scale where:
-- A4 (440Hz) = 0x4A (74 decimal)
-- C#4 = 0x40 (64 decimal) - note 0 starts at C#
+- A4 (440Hz, MIDI 69) = 0x3A (58 decimal)
+- C#4 (MIDI 61) = 0x30 (48 decimal) - note 0 starts at C#
 - Note codes skip values 3, 7, 11, and 15 within each octave
+- YM2151 octave numbering: octave value = (MIDI octave - 2), range 0-7
 
 ### Note Table
 ```
-C#4 = 0x40    D4  = 0x41    D#4 = 0x42    E4  = 0x44
-F4  = 0x45    F#4 = 0x46    G4  = 0x48    G#4 = 0x49
-A4  = 0x4A    A#4 = 0x4C    B4  = 0x4D    C5  = 0x4E
-C#5 = 0x50    D5  = 0x51    D#5 = 0x52    E5  = 0x54
-F5  = 0x55    F#5 = 0x56    ...
+C#4 = 0x30    D4  = 0x31    D#4 = 0x32    E4  = 0x34
+F4  = 0x35    F#4 = 0x36    G4  = 0x38    G#4 = 0x39
+A4  = 0x3A    A#4 = 0x3C    B4  = 0x3D    C5  = 0x3E
+C#5 = 0x40    D5  = 0x41    D#5 = 0x42    E5  = 0x44
+F5  = 0x45    F#5 = 0x46    G5  = 0x48    G#5 = 0x49
+A5  = 0x4A    A#5 = 0x4C    B5  = 0x4D    C6  = 0x4E
 ```
 
 ## Original Presets
