@@ -38,3 +38,26 @@ export function updateDurationDisplay(events: Array<{ time: number | string }>):
         infoSpan.innerText = `(Calculated Duration: ${d.toFixed(2)} sec)`;
     }
 }
+
+/**
+ * Toggle the storage section visibility
+ */
+export function toggleStorageSection(): void {
+    const btn = document.getElementById('storageToggleBtn');
+    const content = document.getElementById('storageContent');
+    const toggleText = btn?.querySelector('.toggle-text');
+    
+    if (!btn || !content) return;
+    
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+    
+    // Toggle state
+    btn.setAttribute('aria-expanded', String(!isExpanded));
+    content.setAttribute('aria-hidden', String(isExpanded));
+    content.style.display = isExpanded ? 'none' : 'block';
+    
+    // Update button text
+    if (toggleText) {
+        toggleText.textContent = isExpanded ? 'Show Save Section' : 'Hide Save Section';
+    }
+}

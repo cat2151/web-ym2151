@@ -27,7 +27,7 @@ import {
 import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor } from './presets';
 import { loadToneToEditor } from './preset-tones';
-import { updateDurationDisplay } from './ui';
+import { updateDurationDisplay, toggleStorageSection } from './ui';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
@@ -45,6 +45,7 @@ declare global {
         loadToEditor: typeof loadToEditor;
         loadToneToEditor: typeof loadToneToEditor;
         updateDurationDisplay: typeof updateDurationDisplay;
+        toggleStorageSection: typeof toggleStorageSection;
     }
 }
 
@@ -66,4 +67,5 @@ if (typeof window !== 'undefined') {
     window.loadToEditor = loadToEditor;
     window.loadToneToEditor = loadToneToEditor;
     window.updateDurationDisplay = updateDurationDisplay;
+    window.toggleStorageSection = toggleStorageSection;
 }
