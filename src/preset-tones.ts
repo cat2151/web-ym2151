@@ -3,6 +3,8 @@
  * Loads and manages preset tones from preset-tones.json
  */
 
+import { playAudio } from './audio';
+
 interface PresetTone {
     name?: string;
     tone: string;
@@ -65,8 +67,9 @@ export async function loadPresetTones(): Promise<void> {
 
 /**
  * Load selected preset tone to tone editor
+ * @param autoPlay - Whether to automatically play the preset tone (default: true)
  */
-export function loadToneToEditor(): void {
+export function loadToneToEditor(autoPlay: boolean = true): void {
     const select = document.getElementById('presetToneSelect') as HTMLSelectElement | null;
     if (!select) return;
     
@@ -82,6 +85,11 @@ export function loadToneToEditor(): void {
         // Trigger the tone editor change event to update JSON
         if (window.onToneEditorChange) {
             window.onToneEditorChange();
+        }
+        
+        // Auto-play the loaded preset tone if requested
+        if (autoPlay) {
+            playAudio();
         }
     }
 }
