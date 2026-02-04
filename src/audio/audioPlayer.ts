@@ -34,7 +34,7 @@ export function playAudio(): void {
     const infoDiv = document.getElementById('info');
     if (infoDiv) {
         infoDiv.innerHTML = 
-            `Playing Stereo<br>` +
+            `Playing<br>` +
             `${audioData.frames} frames (@${OPM_SAMPLE_RATE.toFixed(0)}Hz)<br>`;
     }
 
