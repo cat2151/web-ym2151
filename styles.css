@@ -14,6 +14,40 @@ body {
     border-radius: 5px; 
     border: 2px solid #4a90e2;
 }
+.storage-toggle-btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    border: none;
+    background: #4a90e2;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+.storage-toggle-btn:hover {
+    background: #357abd;
+}
+.storage-toggle-btn:focus {
+    outline: 2px solid #1e5a9e;
+    outline-offset: 2px;
+}
+.toggle-icon::before {
+    content: '▶';
+    display: inline-block;
+    transition: transform 0.2s;
+}
+.storage-toggle-btn[aria-expanded="true"] .toggle-icon::before {
+    transform: rotate(90deg);
+}
+.storage-content {
+    margin-top: 15px;
+}
 .storage-section { 
     margin: 10px 0; 
     padding: 8px 0;
@@ -102,6 +136,19 @@ h1 { margin-bottom: 5px; }
         background: #1e2a3a;
         border-color: #3a6ea5;
         color: #e0e0e0;
+    }
+    
+    .storage-toggle-btn {
+        background: #3a6ea5;
+        color: #e0e0e0;
+    }
+    
+    .storage-toggle-btn:hover {
+        background: #2a5a85;
+    }
+    
+    .storage-toggle-btn:focus {
+        outline-color: #4a90e2;
     }
     
     .storage-section:not(:last-child) {

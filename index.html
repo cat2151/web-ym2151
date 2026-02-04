@@ -33,29 +33,42 @@
     </div>
 
     <div class="storage-controls">
-        <div class="storage-section">
-            <label for="saveSlotSelect"><strong>Save to Slot: </strong></label>
-            <select id="saveSlotSelect">
-                <option value="" disabled selected>Select a slot...</option>
-                <option value="1">Slot 1</option>
-                <option value="2">Slot 2</option>
-                <option value="3">Slot 3</option>
-                <option value="4">Slot 4</option>
-                <option value="5">Slot 5</option>
-                <option value="6">Slot 6</option>
-                <option value="7">Slot 7</option>
-                <option value="8">Slot 8</option>
-            </select>
-            <button onclick="handleSaveSlot()" title="Save current tone to selected slot">💾 Save</button>
-        </div>
+        <button 
+            id="storageToggleBtn" 
+            class="storage-toggle-btn" 
+            aria-controls="storageContent" 
+            aria-expanded="false"
+            onclick="toggleStorageSection()"
+            title="Show/hide save section">
+            <span class="toggle-icon" aria-hidden="true"></span>
+            <span class="toggle-text">Show Save Section</span>
+        </button>
         
-        <div class="storage-section">
-            <label><strong>Manage All Slots: </strong></label>
-            <button onclick="exportAllSlots()" title="Export all 8 slots to a JSON file">📥 Export All Slots</button>
-            <button onclick="importAllSlots()" title="Import slots from a JSON file">📤 Import All Slots</button>
+        <div id="storageContent" class="storage-content" aria-hidden="true" style="display: none;">
+            <div class="storage-section">
+                <label for="saveSlotSelect"><strong>Save to Slot: </strong></label>
+                <select id="saveSlotSelect">
+                    <option value="" disabled selected>Select a slot...</option>
+                    <option value="1">Slot 1</option>
+                    <option value="2">Slot 2</option>
+                    <option value="3">Slot 3</option>
+                    <option value="4">Slot 4</option>
+                    <option value="5">Slot 5</option>
+                    <option value="6">Slot 6</option>
+                    <option value="7">Slot 7</option>
+                    <option value="8">Slot 8</option>
+                </select>
+                <button onclick="handleSaveSlot()" title="Save current tone to selected slot">💾 Save</button>
+            </div>
+            
+            <div class="storage-section">
+                <label><strong>Manage All Slots: </strong></label>
+                <button onclick="exportAllSlots()" title="Export all 8 slots to a JSON file">📥 Export All Slots</button>
+                <button onclick="importAllSlots()" title="Import slots from a JSON file">📤 Import All Slots</button>
+            </div>
+            
+            <div id="slotInfo" class="slot-info"></div>
         </div>
-        
-        <div id="slotInfo" class="slot-info"></div>
     </div>
 
     <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
