@@ -8,10 +8,12 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 
 ### C Major Scale (Do-Re-Mi-Fa-So-La-Ti-Do)
 **Purpose**: Demonstrates sequential note playback  
-**Notes**: C4 → D4 → E4 → F4 → G4 → A4 → B4 → C5  
+**Notes**: Intended as C4 → D4 → E4 → F4 → G4 → A4 → B4 → C5
 **Duration**: ~2.4 seconds (300ms per note)  
 **Technical**:
-- Uses YM2151 chromatic note values (C4=0x41, D4=0x43, E4=0x45, etc.)
+- Register values: 0x41, 0x43, 0x45, 0x46, 0x48, 0x4A, 0x4C, 0x4D
+- Note: These values use a simplified linear mapping (incrementing by 1-2 per semitone)
+- The correct YM2151 note table (see below) skips codes 3, 7, and 11
 - Each note plays for 300ms with proper key-on/key-off sequences
 - Simple sine wave tone configuration
 
@@ -49,16 +51,16 @@ These demos prove that web-ym2151 can produce musical scales and chords ("これ
 
 The note values follow a chromatic scale where:
 - A4 (440Hz) = 0x4A (74 decimal)
-- Each semitone increments by 1
-- C4 = 0x41 (65 decimal)
+- C#4 = 0x40 (64 decimal) - note 0 starts at C#
+- Note codes skip values 3, 7, and 11 within each octave
 
 ### Note Table
 ```
-C4  = 0x41    C#4 = 0x42    D4  = 0x43    D#4 = 0x44
-E4  = 0x45    F4  = 0x46    F#4 = 0x47    G4  = 0x48
-G#4 = 0x49    A4  = 0x4A    A#4 = 0x4B    B4  = 0x4C
-C5  = 0x4D    C#5 = 0x4E    D5  = 0x4F    D#5 = 0x50
-E5  = 0x51    F5  = 0x52    ...
+C#4 = 0x40    D4  = 0x41    D#4 = 0x42    E4  = 0x44
+F4  = 0x45    F#4 = 0x46    G4  = 0x48    G#4 = 0x49
+A4  = 0x4A    A#4 = 0x4C    B4  = 0x4D    C5  = 0x4E
+C#5 = 0x50    D5  = 0x51    D#5 = 0x52    E5  = 0x54
+F5  = 0x55    F#5 = 0x56    ...
 ```
 
 ## Original Presets
