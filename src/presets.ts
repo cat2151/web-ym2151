@@ -44,7 +44,7 @@ export async function loadPresets(): Promise<void> {
         
         if (loadedPresets.length > 0) {
             select.value = '0';
-            loadToEditor();
+            loadToEditor(false); // Don't auto-play on initial load
         }
 
         const infoDiv = document.getElementById('info');
@@ -64,8 +64,9 @@ export async function loadPresets(): Promise<void> {
 
 /**
  * Load selected preset to editor
+ * @param autoPlay - Whether to automatically play the preset (default: true)
  */
-export function loadToEditor(): void {
+export function loadToEditor(autoPlay: boolean = true): void {
     const select = document.getElementById('presetSelect') as HTMLSelectElement | null;
     if (!select) return;
     
@@ -92,8 +93,10 @@ export function loadToEditor(): void {
         window.parseJsonToToneEditor(editObj.events as any);
     }
     
-    // Auto-play the loaded preset
-    playAudio();
+    // Auto-play the loaded preset if requested
+    if (autoPlay) {
+        playAudio();
+    }
     
     // Note: We don't auto-save when loading a preset to avoid overwriting
     // the user's saved work. Auto-save only occurs on user edits.
