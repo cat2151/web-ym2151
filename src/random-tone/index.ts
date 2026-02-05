@@ -117,8 +117,8 @@ function onConfigTextareaChange(): void {
 function formatParam(name: string, value: number | undefined): string | undefined {
     if (value === undefined) return undefined;
     const hexValue = value.toString(16).toUpperCase();
-    // Single-digit hex values (0-F) don't need padding for most params
-    // Two-digit values (10+) need 2 characters
+    // Always format as 2-character uppercase hex, zero-padded if necessary (e.g., 0A, 05)
+    // This ensures consistent width for all parameter values
     const paddedValue = hexValue.padStart(2, '0');
     return `${name}=${paddedValue}`;
 }
@@ -184,15 +184,40 @@ export function generateRandomTone(): void {
     const fl = randomValue(currentConfig.global.FL);
     if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
     
-    // Keep current NOTE value if NOTE randomization is disabled
-    if (!currentConfig.global.NOTE?.enabled) {
-        // Extract current NOTE value from tone editor
+    // Handle NOTE parameter
+    const noteConfig = currentConfig.global.NOTE;
+    if (noteConfig) {
+        // Check if NOTE is a ParamRange (has min/max) or enabled flag
+        const hasMinMax = 'min' in noteConfig && 'max' in noteConfig;
+        const isEnabled = 'enabled' in noteConfig && noteConfig.enabled;
+        
+        if (hasMinMax) {
+            // Generate random NOTE value when ParamRange is provided
+            const note = randomValue(noteConfig as ParamRange);
+            if (note !== undefined) {
+                globalParts.push(`NOTE=${note.toString(16).toUpperCase().padStart(2, '0')}`);
+            }
+        } else if (!isEnabled) {
+            // Keep current NOTE value if NOTE randomization is disabled
+            const currentContent = toneEditor.value;
+            const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
+            if (noteMatch) {
+                globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
+            } else {
+                // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
+                globalParts.push('NOTE=4A');
+            }
+        }
+        // If enabled=true but no range, skip NOTE (invalid config)
+    } else {
+        // No NOTE config, keep current value
         const currentContent = toneEditor.value;
         const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
         if (noteMatch) {
             globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
         } else {
-            globalParts.push('NOTE=49'); // Default to A4 (MIDI note 69 = 0x45, YM2151 uses different scheme)
+            // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
+            globalParts.push('NOTE=4A');
         }
     }
     
@@ -224,7 +249,7 @@ export function toggleRandomConfigSection(): void {
     
     // Toggle state
     btn.setAttribute('aria-expanded', String(!isExpanded));
-    content.setAttribute('aria-hidden', String(isExpanded));
+    content.setAttribute('aria-hidden', String(!isExpanded));
     content.style.display = isExpanded ? 'none' : 'block';
     
     // Update button text
@@ -256,6 +281,61 @@ export function exportRandomConfig(): void {
 }
 
 /**
+ * Validate random configuration structure
+ */
+function validateConfig(config: any): config is RandomConfig {
+    // Check basic structure
+    if (!config || typeof config !== 'object') {
+        return false;
+    }
+    
+    // Check operators array
+    if (!Array.isArray(config.operators) || config.operators.length !== 4) {
+        return false;
+    }
+    
+    // Check each operator has valid structure
+    for (const op of config.operators) {
+        if (!op || typeof op !== 'object') {
+            return false;
+        }
+        // Check that range properties, if present, have min and max
+        const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
+        for (const prop of rangeProps) {
+            if (op[prop]) {
+                if (typeof op[prop].min !== 'number' || typeof op[prop].max !== 'number') {
+                    return false;
+                }
+            }
+        }
+    }
+    
+    // Check global parameters
+    if (!config.global || typeof config.global !== 'object') {
+        return false;
+    }
+    
+    // Check global ranges
+    const globalRangeProps = ['CON', 'FL'];
+    for (const prop of globalRangeProps) {
+        if (config.global[prop]) {
+            if (typeof config.global[prop].min !== 'number' || typeof config.global[prop].max !== 'number') {
+                return false;
+            }
+        }
+    }
+    
+    // Check NOTE if present
+    if (config.global.NOTE) {
+        if (typeof config.global.NOTE.enabled !== 'boolean') {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
  * Import random configuration from JSON file
  */
 export function importRandomConfig(): void {
@@ -273,12 +353,18 @@ export function importRandomConfig(): void {
             try {
                 const content = evt.target?.result as string;
                 const parsed = JSON.parse(content);
+                
+                // Validate configuration structure
+                if (!validateConfig(parsed)) {
+                    throw new Error('Invalid configuration structure');
+                }
+                
                 currentConfig = parsed;
                 updateConfigTextarea();
                 alert('Configuration imported successfully');
             } catch (error) {
                 console.error('Error importing config:', error);
-                alert('Failed to import configuration. Invalid JSON file.');
+                alert('Failed to import configuration. Invalid JSON file or structure.');
             }
         };
         reader.readAsText(file);

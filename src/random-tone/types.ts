@@ -31,7 +31,7 @@ export interface OperatorRandomConfig {
 export interface GlobalRandomConfig {
     CON?: ParamRange;
     FL?: ParamRange;
-    NOTE?: { enabled: boolean };
+    NOTE?: { enabled: boolean } | ParamRange;
 }
 
 /**
