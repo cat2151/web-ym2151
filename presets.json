@@ -2,206 +2,1286 @@
   {
     "name": "Sine Wave (A4 - 440Hz)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x3A" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x3A"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      }
     ]
   },
   {
     "name": "Sine Wave (A5 - High Pitch)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x4A" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x4A"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      }
     ]
   },
   {
     "name": "C Major Scale (Do-Re-Mi-Fa-So-La-Ti-Do)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x2E" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" },
-      { "time": 0.3, "addr": "0x08", "data": "0x00" },
-      { "time": 0.3, "addr": "0x28", "data": "0x31" },
-      { "time": 0.3, "addr": "0x08", "data": "0x78" },
-      { "time": 0.6, "addr": "0x08", "data": "0x00" },
-      { "time": 0.6, "addr": "0x28", "data": "0x34" },
-      { "time": 0.6, "addr": "0x08", "data": "0x78" },
-      { "time": 0.9, "addr": "0x08", "data": "0x00" },
-      { "time": 0.9, "addr": "0x28", "data": "0x35" },
-      { "time": 0.9, "addr": "0x08", "data": "0x78" },
-      { "time": 1.2, "addr": "0x08", "data": "0x00" },
-      { "time": 1.2, "addr": "0x28", "data": "0x38" },
-      { "time": 1.2, "addr": "0x08", "data": "0x78" },
-      { "time": 1.5, "addr": "0x08", "data": "0x00" },
-      { "time": 1.5, "addr": "0x28", "data": "0x3A" },
-      { "time": 1.5, "addr": "0x08", "data": "0x78" },
-      { "time": 1.8, "addr": "0x08", "data": "0x00" },
-      { "time": 1.8, "addr": "0x28", "data": "0x3D" },
-      { "time": 1.8, "addr": "0x08", "data": "0x78" },
-      { "time": 2.1, "addr": "0x08", "data": "0x00" },
-      { "time": 2.1, "addr": "0x28", "data": "0x3E" },
-      { "time": 2.1, "addr": "0x08", "data": "0x78" },
-      { "time": 2.4, "addr": "0x08", "data": "0x00" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x2E"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.3,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 0.3,
+        "addr": "0x28",
+        "data": "0x31"
+      },
+      {
+        "time": 0.3,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.6,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 0.6,
+        "addr": "0x28",
+        "data": "0x34"
+      },
+      {
+        "time": 0.6,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.9,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 0.9,
+        "addr": "0x28",
+        "data": "0x35"
+      },
+      {
+        "time": 0.9,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 1.2,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 1.2,
+        "addr": "0x28",
+        "data": "0x38"
+      },
+      {
+        "time": 1.2,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 1.5,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 1.5,
+        "addr": "0x28",
+        "data": "0x3A"
+      },
+      {
+        "time": 1.5,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 1.8,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 1.8,
+        "addr": "0x28",
+        "data": "0x3D"
+      },
+      {
+        "time": 1.8,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 2.1,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 2.1,
+        "addr": "0x28",
+        "data": "0x3E"
+      },
+      {
+        "time": 2.1,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x00"
+      }
     ]
   },
   {
     "name": "C Major Chord (C4-E4-G4)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x2E" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" },
-      { "time": 0.05, "addr": "0x29", "data": "0x34" },
-      { "time": 0.05, "addr": "0x31", "data": "0x00" },
-      { "time": 0.05, "addr": "0x08", "data": "0x79" },
-      { "time": 0.1, "addr": "0x2A", "data": "0x38" },
-      { "time": 0.1, "addr": "0x32", "data": "0x00" },
-      { "time": 0.1, "addr": "0x08", "data": "0x7A" },
-      { "time": 1.0, "addr": "0x08", "data": "0x00" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x2E"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x21",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x61",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x69",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x71",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x79",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x41",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x81",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x29",
+        "data": "0x34"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x31",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x22",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x62",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x6A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x72",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x7A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x42",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x82",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x2A",
+        "data": "0x38"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x32",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 1.0,
+        "addr": "0x08",
+        "data": "0x00"
+      }
     ]
   },
   {
     "name": "F Major Chord (F4-A4-C5)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x35" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" },
-      { "time": 0.05, "addr": "0x29", "data": "0x3A" },
-      { "time": 0.05, "addr": "0x31", "data": "0x00" },
-      { "time": 0.05, "addr": "0x08", "data": "0x79" },
-      { "time": 0.1, "addr": "0x2A", "data": "0x3E" },
-      { "time": 0.1, "addr": "0x32", "data": "0x00" },
-      { "time": 0.1, "addr": "0x08", "data": "0x7A" },
-      { "time": 1.0, "addr": "0x08", "data": "0x00" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x35"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x21",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x61",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x69",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x71",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x79",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x41",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x81",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x29",
+        "data": "0x3A"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x31",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x22",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x62",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x6A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x72",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x7A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x42",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x82",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x2A",
+        "data": "0x3E"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x32",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 1.0,
+        "addr": "0x08",
+        "data": "0x00"
+      }
     ]
   },
   {
     "name": "G Major Chord (G4-B4-D5)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x38" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" },
-      { "time": 0.05, "addr": "0x29", "data": "0x3D" },
-      { "time": 0.05, "addr": "0x31", "data": "0x00" },
-      { "time": 0.05, "addr": "0x08", "data": "0x79" },
-      { "time": 0.1, "addr": "0x2A", "data": "0x41" },
-      { "time": 0.1, "addr": "0x32", "data": "0x00" },
-      { "time": 0.1, "addr": "0x08", "data": "0x7A" },
-      { "time": 1.0, "addr": "0x08", "data": "0x00" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x38"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x21",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x61",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x69",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x71",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x79",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x41",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x81",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x29",
+        "data": "0x3D"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x31",
+        "data": "0x00"
+      },
+      {
+        "time": 0.05,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x22",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x62",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x6A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x72",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x7A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x42",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x82",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x2A",
+        "data": "0x41"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x32",
+        "data": "0x00"
+      },
+      {
+        "time": 0.1,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 1.0,
+        "addr": "0x08",
+        "data": "0x00"
+      }
     ]
   },
   {
     "name": "Chord Progression (C-F-G-C)",
     "events": [
-      { "time": 0.0, "addr": "0x20", "data": "0xC7" },
-      { "time": 0.0, "addr": "0x60", "data": "0x00" },
-      { "time": 0.0, "addr": "0x68", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x70", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x78", "data": "0x7F" },
-      { "time": 0.0, "addr": "0x40", "data": "0x01" },
-      { "time": 0.0, "addr": "0x80", "data": "0x1F" },
-      { "time": 0.0, "addr": "0xA0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xC0", "data": "0x00" },
-      { "time": 0.0, "addr": "0xE0", "data": "0x00" },
-      { "time": 0.0, "addr": "0x28", "data": "0x2E" },
-      { "time": 0.0, "addr": "0x29", "data": "0x34" },
-      { "time": 0.0, "addr": "0x2A", "data": "0x38" },
-      { "time": 0.0, "addr": "0x30", "data": "0x00" },
-      { "time": 0.0, "addr": "0x31", "data": "0x00" },
-      { "time": 0.0, "addr": "0x32", "data": "0x00" },
-      { "time": 0.0, "addr": "0x08", "data": "0x78" },
-      { "time": 0.0, "addr": "0x08", "data": "0x79" },
-      { "time": 0.0, "addr": "0x08", "data": "0x7A" },
-      { "time": 0.8, "addr": "0x08", "data": "0x00" },
-      { "time": 0.8, "addr": "0x08", "data": "0x01" },
-      { "time": 0.8, "addr": "0x08", "data": "0x02" },
-      { "time": 0.8, "addr": "0x28", "data": "0x35" },
-      { "time": 0.8, "addr": "0x29", "data": "0x3A" },
-      { "time": 0.8, "addr": "0x2A", "data": "0x3E" },
-      { "time": 0.8, "addr": "0x08", "data": "0x78" },
-      { "time": 0.8, "addr": "0x08", "data": "0x79" },
-      { "time": 0.8, "addr": "0x08", "data": "0x7A" },
-      { "time": 1.6, "addr": "0x08", "data": "0x00" },
-      { "time": 1.6, "addr": "0x08", "data": "0x01" },
-      { "time": 1.6, "addr": "0x08", "data": "0x02" },
-      { "time": 1.6, "addr": "0x28", "data": "0x38" },
-      { "time": 1.6, "addr": "0x29", "data": "0x3D" },
-      { "time": 1.6, "addr": "0x2A", "data": "0x41" },
-      { "time": 1.6, "addr": "0x08", "data": "0x78" },
-      { "time": 1.6, "addr": "0x08", "data": "0x79" },
-      { "time": 1.6, "addr": "0x08", "data": "0x7A" },
-      { "time": 2.4, "addr": "0x08", "data": "0x00" },
-      { "time": 2.4, "addr": "0x08", "data": "0x01" },
-      { "time": 2.4, "addr": "0x08", "data": "0x02" },
-      { "time": 2.4, "addr": "0x28", "data": "0x2E" },
-      { "time": 2.4, "addr": "0x29", "data": "0x34" },
-      { "time": 2.4, "addr": "0x2A", "data": "0x38" },
-      { "time": 2.4, "addr": "0x08", "data": "0x78" },
-      { "time": 2.4, "addr": "0x08", "data": "0x79" },
-      { "time": 2.4, "addr": "0x08", "data": "0x7A" },
-      { "time": 3.2, "addr": "0x08", "data": "0x00" },
-      { "time": 3.2, "addr": "0x08", "data": "0x01" },
-      { "time": 3.2, "addr": "0x08", "data": "0x02" }
+      {
+        "time": 0.0,
+        "addr": "0x20",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x60",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x68",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x70",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x78",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x40",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x80",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE0",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x28",
+        "data": "0x2E"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x21",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x61",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x69",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x71",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x79",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x41",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x81",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE1",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x29",
+        "data": "0x34"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x22",
+        "data": "0xC7"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x62",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x6A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x72",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x7A",
+        "data": "0x7F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x42",
+        "data": "0x01"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x82",
+        "data": "0x1F"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xA2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xC2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0xE2",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x2A",
+        "data": "0x38"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x30",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x31",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x32",
+        "data": "0x00"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 0.0,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x01"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x02"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x28",
+        "data": "0x35"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x29",
+        "data": "0x3A"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x2A",
+        "data": "0x3E"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 0.8,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x01"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x02"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x28",
+        "data": "0x38"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x29",
+        "data": "0x3D"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x2A",
+        "data": "0x41"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 1.6,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x01"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x02"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x28",
+        "data": "0x2E"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x29",
+        "data": "0x34"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x2A",
+        "data": "0x38"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x78"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x79"
+      },
+      {
+        "time": 2.4,
+        "addr": "0x08",
+        "data": "0x7A"
+      },
+      {
+        "time": 3.2,
+        "addr": "0x08",
+        "data": "0x00"
+      },
+      {
+        "time": 3.2,
+        "addr": "0x08",
+        "data": "0x01"
+      },
+      {
+        "time": 3.2,
+        "addr": "0x08",
+        "data": "0x02"
+      }
     ]
   }
 ]
