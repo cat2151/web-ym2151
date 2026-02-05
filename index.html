@@ -23,6 +23,7 @@
         
         <button onclick="playAudio()">Play</button>
         <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
+        <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button>
         <span id="durationInfo" class="duration-display"></span>
         <br><br>
         
@@ -68,6 +69,32 @@
             </div>
             
             <div id="slotInfo" class="slot-info"></div>
+        </div>
+    </div>
+
+    <div class="random-controls">
+        <button 
+            id="randomConfigToggleBtn" 
+            class="random-toggle-btn" 
+            aria-controls="randomConfigContent" 
+            aria-expanded="false"
+            onclick="toggleRandomConfigSection()"
+            title="Show/hide random tone configuration">
+            <span class="toggle-icon" aria-hidden="true"></span>
+            <span class="toggle-text">Show Config</span>
+        </button>
+        
+        <div id="randomConfigContent" class="random-content" aria-hidden="true" style="display: none;">
+            <div class="random-section">
+                <label for="randomConfigTextarea"><strong>Random Tone Configuration (JSON): </strong></label>
+                <textarea id="randomConfigTextarea" class="config-textarea" spellcheck="false"></textarea>
+            </div>
+            
+            <div class="random-section">
+                <label><strong>Manage Configuration: </strong></label>
+                <button onclick="exportRandomConfig()" title="Export configuration to a JSON file">📥 Export Config</button>
+                <button onclick="importRandomConfig()" title="Import configuration from a JSON file">📤 Import Config</button>
+            </div>
         </div>
     </div>
 

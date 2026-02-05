@@ -11,6 +11,7 @@ import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
 import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
+import { initializeRandomToneGenerator } from './random-tone';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -27,6 +28,9 @@ export function initializeApplication(): void {
     
     // Initialize auto-play checkbox
     initializeAutoPlayCheckbox();
+    
+    // Initialize random tone generator
+    initializeRandomToneGenerator();
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)

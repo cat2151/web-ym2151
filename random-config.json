@@ -1,0 +1,53 @@
+{
+  "operators": [
+    {
+      "TL": { "min": 0, "max": 0 },
+      "AR": { "min": 5, "max": 31 },
+      "DR": { "min": 0, "max": 9 },
+      "SR": { "min": 0, "max": 0 },
+      "RR": { "min": 0, "max": 0 },
+      "SL": { "min": 15, "max": 15 },
+      "KS": { "min": 0, "max": 3 },
+      "MUL": { "min": 0, "max": 15 },
+      "DT1": { "min": 0, "max": 7 }
+    },
+    {
+      "TL": { "min": 0, "max": 0 },
+      "AR": { "min": 5, "max": 31 },
+      "DR": { "min": 0, "max": 9 },
+      "SR": { "min": 0, "max": 0 },
+      "RR": { "min": 0, "max": 0 },
+      "SL": { "min": 15, "max": 15 },
+      "KS": { "min": 0, "max": 3 },
+      "MUL": { "min": 0, "max": 15 },
+      "DT1": { "min": 0, "max": 7 }
+    },
+    {
+      "TL": { "min": 0, "max": 0 },
+      "AR": { "min": 5, "max": 31 },
+      "DR": { "min": 0, "max": 9 },
+      "SR": { "min": 0, "max": 0 },
+      "RR": { "min": 0, "max": 0 },
+      "SL": { "min": 15, "max": 15 },
+      "KS": { "min": 0, "max": 3 },
+      "MUL": { "min": 0, "max": 15 },
+      "DT1": { "min": 0, "max": 7 }
+    },
+    {
+      "TL": { "min": 0, "max": 0 },
+      "AR": { "min": 5, "max": 31 },
+      "DR": { "min": 0, "max": 9 },
+      "SR": { "min": 0, "max": 0 },
+      "RR": { "min": 0, "max": 0 },
+      "SL": { "min": 15, "max": 15 },
+      "KS": { "min": 0, "max": 3 },
+      "MUL": { "min": 0, "max": 15 },
+      "DT1": { "min": 0, "max": 7 }
+    }
+  ],
+  "global": {
+    "CON": { "min": 0, "max": 7 },
+    "FL": { "min": 0, "max": 7 },
+    "NOTE": { "enabled": false }
+  }
+}
