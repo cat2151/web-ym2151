@@ -15,6 +15,7 @@ export * from './audio';
 export * from './keyboard';
 export * from './autoplay';
 export * from './midi';
+export * from './random-tone';
 export * from './app';
 
 // Import necessary functions for global scope
@@ -29,6 +30,12 @@ import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor } from './presets';
 import { loadToneToEditor } from './preset-tones';
 import { updateDurationDisplay, toggleStorageSection } from './ui';
+import { 
+    generateRandomTone, 
+    toggleRandomConfigSection, 
+    exportRandomConfig, 
+    importRandomConfig 
+} from './random-tone';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
@@ -47,6 +54,10 @@ declare global {
         loadToneToEditor: typeof loadToneToEditor;
         updateDurationDisplay: typeof updateDurationDisplay;
         toggleStorageSection: typeof toggleStorageSection;
+        generateRandomTone: typeof generateRandomTone;
+        toggleRandomConfigSection: typeof toggleRandomConfigSection;
+        exportRandomConfig: typeof exportRandomConfig;
+        importRandomConfig: typeof importRandomConfig;
     }
 }
 
@@ -69,4 +80,8 @@ if (typeof window !== 'undefined') {
     window.loadToneToEditor = loadToneToEditor;
     window.updateDurationDisplay = updateDurationDisplay;
     window.toggleStorageSection = toggleStorageSection;
+    window.generateRandomTone = generateRandomTone;
+    window.toggleRandomConfigSection = toggleRandomConfigSection;
+    window.exportRandomConfig = exportRandomConfig;
+    window.importRandomConfig = importRandomConfig;
 }

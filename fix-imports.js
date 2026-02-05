@@ -12,7 +12,7 @@ function fixImportsInFile(filePath) {
     
     // First, fix directory imports (e.g., './storage' -> './storage/index.js')
     // This must be done BEFORE adding .js extensions to avoid './storage.js'
-    const dirImportPattern = /(from\s+['"])(\.\/(storage|audio|tone-editor|midi))(['"];)/g;
+    const dirImportPattern = /(from\s+['"])(\.\.?\/(storage|audio|tone-editor|midi|random-tone))(['"];)/g;
     content = content.replace(dirImportPattern, (match, prefix, dirPath, dir, suffix) => {
         modified = true;
         return `${prefix}${dirPath}/index.js${suffix}`;

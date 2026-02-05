@@ -119,6 +119,57 @@ textarea {
 h1 { margin-bottom: 5px; }
 .editor-label { margin-top: 20px; font-weight: bold; display: block; }
 
+/* Random Tone Controls */
+.random-controls { 
+    margin: 20px 0; 
+    padding: 15px; 
+    background: #f0fff8; 
+    border-radius: 5px; 
+    border: 2px solid #4a9070;
+}
+.random-toggle-btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    border: none;
+    background: #4a9070;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+.random-toggle-btn:hover {
+    background: #3a7050;
+}
+.random-toggle-btn:focus {
+    outline: 2px solid #2a6040;
+    outline-offset: 2px;
+}
+.random-toggle-btn[aria-expanded="true"] .toggle-icon::before {
+    transform: rotate(90deg);
+}
+.random-content {
+    margin-top: 15px;
+}
+.random-section { 
+    margin: 10px 0; 
+    padding: 8px 0;
+}
+.random-section:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
+.config-textarea {
+    height: 200px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    background: #f8f8f8;
+}
+
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     body {
@@ -214,5 +265,34 @@ h1 { margin-bottom: 5px; }
     .info {
         background: #2a2a2a;
         color: #e0e0e0;
+    }
+    
+    .random-controls {
+        background: #1e3a2a;
+        border-color: #4a9070;
+        color: #e0e0e0;
+    }
+    
+    .random-toggle-btn {
+        background: #4a9070;
+        color: #e0e0e0;
+    }
+    
+    .random-toggle-btn:hover {
+        background: #3a7050;
+    }
+    
+    .random-toggle-btn:focus {
+        outline-color: #5aa080;
+    }
+    
+    .random-section:not(:last-child) {
+        border-bottom-color: #444;
+    }
+    
+    .config-textarea {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #444;
     }
 }
