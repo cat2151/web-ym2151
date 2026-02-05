@@ -132,15 +132,15 @@ function getOperatorConfig(config: RandomConfig, operatorIndex: number): Operato
     // Merge common params with operator-specific overrides
     // Operator-specific values take precedence
     return {
-        TL: specific.TL || common.TL,
-        AR: specific.AR || common.AR,
-        DR: specific.DR || common.DR,
-        SR: specific.SR || common.SR,
-        RR: specific.RR || common.RR,
-        SL: specific.SL || common.SL,
-        KS: specific.KS || common.KS,
-        MUL: specific.MUL || common.MUL,
-        DT1: specific.DT1 || common.DT1
+        TL: specific.TL ?? common.TL,
+        AR: specific.AR ?? common.AR,
+        DR: specific.DR ?? common.DR,
+        SR: specific.SR ?? common.SR,
+        RR: specific.RR ?? common.RR,
+        SL: specific.SL ?? common.SL,
+        KS: specific.KS ?? common.KS,
+        MUL: specific.MUL ?? common.MUL,
+        DT1: specific.DT1 ?? common.DT1
     };
 }
 
