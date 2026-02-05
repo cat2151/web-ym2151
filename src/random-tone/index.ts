@@ -304,15 +304,16 @@ export function exportRandomConfig(): void {
 /**
  * Validate operator parameter ranges
  */
-function validateOperatorRanges(params: any): boolean {
+function validateOperatorRanges(params: unknown): params is OperatorRandomConfig {
     if (!params || typeof params !== 'object') {
         return false;
     }
     
     const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
     for (const prop of rangeProps) {
-        if (params[prop]) {
-            if (typeof params[prop].min !== 'number' || typeof params[prop].max !== 'number') {
+        const paramObj = params as Record<string, any>;
+        if (paramObj[prop]) {
+            if (typeof paramObj[prop].min !== 'number' || typeof paramObj[prop].max !== 'number') {
                 return false;
             }
         }
@@ -323,44 +324,47 @@ function validateOperatorRanges(params: any): boolean {
 /**
  * Validate random configuration structure
  */
-function validateConfig(config: any): config is RandomConfig {
+function validateConfig(config: unknown): config is RandomConfig {
     // Check basic structure
     if (!config || typeof config !== 'object') {
         return false;
     }
     
+    // Cast to any for property access during validation
+    const cfg = config as any;
+    
     // Check global parameters first (required)
-    if (!config.global || typeof config.global !== 'object') {
+    if (!cfg.global || typeof cfg.global !== 'object') {
         return false;
     }
     
     // Check that at least one source of operator parameters exists and has content
-    const hasCommonParams = config.commonOperatorParams && 
-                           typeof config.commonOperatorParams === 'object' &&
-                           Object.keys(config.commonOperatorParams).length > 0;
-    const hasOperators = config.operators && 
-                        Array.isArray(config.operators) && 
-                        config.operators.length === 4;
+    const hasCommonParams = cfg.commonOperatorParams && 
+                           typeof cfg.commonOperatorParams === 'object' &&
+                           Object.keys(cfg.commonOperatorParams).length > 0;
+    const hasOperators = cfg.operators && 
+                        Array.isArray(cfg.operators) && 
+                        cfg.operators.length === 4;
     
     if (!hasCommonParams && !hasOperators) {
         return false;
     }
     
     // If commonOperatorParams exists, validate it
-    if (config.commonOperatorParams) {
-        if (!validateOperatorRanges(config.commonOperatorParams)) {
+    if (cfg.commonOperatorParams) {
+        if (!validateOperatorRanges(cfg.commonOperatorParams)) {
             return false;
         }
     }
     
     // If operators array exists, validate it
-    if (config.operators) {
-        if (!Array.isArray(config.operators) || config.operators.length !== 4) {
+    if (cfg.operators) {
+        if (!Array.isArray(cfg.operators) || cfg.operators.length !== 4) {
             return false;
         }
         
         // Check each operator has valid structure
-        for (const op of config.operators) {
+        for (const op of cfg.operators) {
             if (!validateOperatorRanges(op)) {
                 return false;
             }
@@ -370,18 +374,18 @@ function validateConfig(config: any): config is RandomConfig {
     // Check global ranges
     const globalRangeProps = ['CON', 'FL'];
     for (const prop of globalRangeProps) {
-        if (config.global[prop]) {
-            if (typeof config.global[prop].min !== 'number' || typeof config.global[prop].max !== 'number') {
+        if (cfg.global[prop]) {
+            if (typeof cfg.global[prop].min !== 'number' || typeof cfg.global[prop].max !== 'number') {
                 return false;
             }
         }
     }
     
     // Check NOTE if present (can be either {enabled: boolean} or ParamRange)
-    if (config.global.NOTE) {
-        const hasEnabled = 'enabled' in config.global.NOTE && typeof config.global.NOTE.enabled === 'boolean';
-        const hasMinMax = 'min' in config.global.NOTE && 'max' in config.global.NOTE &&
-                          typeof config.global.NOTE.min === 'number' && typeof config.global.NOTE.max === 'number';
+    if (cfg.global.NOTE) {
+        const hasEnabled = 'enabled' in cfg.global.NOTE && typeof cfg.global.NOTE.enabled === 'boolean';
+        const hasMinMax = 'min' in cfg.global.NOTE && 'max' in cfg.global.NOTE &&
+                          typeof cfg.global.NOTE.min === 'number' && typeof cfg.global.NOTE.max === 'number';
         if (!hasEnabled && !hasMinMax) {
             return false;
         }
