@@ -325,9 +325,12 @@ function validateConfig(config: any): config is RandomConfig {
         }
     }
     
-    // Check NOTE if present
+    // Check NOTE if present (can be either {enabled: boolean} or ParamRange)
     if (config.global.NOTE) {
-        if (typeof config.global.NOTE.enabled !== 'boolean') {
+        const hasEnabled = 'enabled' in config.global.NOTE && typeof config.global.NOTE.enabled === 'boolean';
+        const hasMinMax = 'min' in config.global.NOTE && 'max' in config.global.NOTE &&
+                          typeof config.global.NOTE.min === 'number' && typeof config.global.NOTE.max === 'number';
+        if (!hasEnabled && !hasMinMax) {
             return false;
         }
     }
