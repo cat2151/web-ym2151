@@ -8,7 +8,7 @@ import { playAudio } from '../audio';
 
 let currentConfig: RandomConfig | null = null;
 let configTextarea: HTMLTextAreaElement | null = null;
-let configDebounceTimer: number | null = null;
+let configDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Generate a random integer between min and max (inclusive)
@@ -112,6 +112,18 @@ function onConfigTextareaChange(): void {
 }
 
 /**
+ * Format a parameter value to hex string
+ */
+function formatParam(name: string, value: number | undefined): string | undefined {
+    if (value === undefined) return undefined;
+    const hexValue = value.toString(16).toUpperCase();
+    // Single-digit hex values (0-F) don't need padding for most params
+    // Two-digit values (10+) need 2 characters
+    const paddedValue = hexValue.padStart(2, '0');
+    return `${name}=${paddedValue}`;
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -133,29 +145,29 @@ export function generateRandomTone(): void {
         const opConfig = currentConfig.operators[i];
         const parts: string[] = [];
         
-        const tl = randomValue(opConfig.TL);
-        if (tl !== undefined) parts.push(`TL=${tl.toString(16).toUpperCase().padStart(2, '0')}`);
+        const tl = formatParam('TL', randomValue(opConfig.TL));
+        if (tl) parts.push(tl);
         
-        const ar = randomValue(opConfig.AR);
-        if (ar !== undefined) parts.push(`AR=${ar.toString(16).toUpperCase().padStart(2, '0')}`);
+        const ar = formatParam('AR', randomValue(opConfig.AR));
+        if (ar) parts.push(ar);
         
-        const dr = randomValue(opConfig.DR);
-        if (dr !== undefined) parts.push(`DR=${dr.toString(16).toUpperCase().padStart(2, '0')}`);
+        const dr = formatParam('DR', randomValue(opConfig.DR));
+        if (dr) parts.push(dr);
         
-        const sr = randomValue(opConfig.SR);
-        if (sr !== undefined) parts.push(`SR=${sr.toString(16).toUpperCase().padStart(2, '0')}`);
+        const sr = formatParam('SR', randomValue(opConfig.SR));
+        if (sr) parts.push(sr);
         
-        const rr = randomValue(opConfig.RR);
-        if (rr !== undefined) parts.push(`RR=${rr.toString(16).toUpperCase().padStart(2, '0')}`);
+        const rr = formatParam('RR', randomValue(opConfig.RR));
+        if (rr) parts.push(rr);
         
-        const sl = randomValue(opConfig.SL);
-        if (sl !== undefined) parts.push(`SL=${sl.toString(16).toUpperCase().padStart(2, '0')}`);
+        const sl = formatParam('SL', randomValue(opConfig.SL));
+        if (sl) parts.push(sl);
         
         const ks = randomValue(opConfig.KS);
         if (ks !== undefined) parts.push(`KS=${ks.toString(16).toUpperCase()}`);
         
-        const mul = randomValue(opConfig.MUL);
-        if (mul !== undefined) parts.push(`MUL=${mul.toString(16).toUpperCase().padStart(2, '0')}`);
+        const mul = formatParam('MUL', randomValue(opConfig.MUL));
+        if (mul) parts.push(mul);
         
         const dt1 = randomValue(opConfig.DT1);
         if (dt1 !== undefined) parts.push(`DT1=${dt1.toString(16).toUpperCase()}`);
@@ -180,7 +192,7 @@ export function generateRandomTone(): void {
         if (noteMatch) {
             globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
         } else {
-            globalParts.push('NOTE=4A'); // Default to A4
+            globalParts.push('NOTE=49'); // Default to A4 (MIDI note 69 = 0x45, YM2151 uses different scheme)
         }
     }
     
