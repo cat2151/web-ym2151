@@ -302,6 +302,25 @@ export function exportRandomConfig(): void {
 }
 
 /**
+ * Validate operator parameter ranges
+ */
+function validateOperatorRanges(params: any): boolean {
+    if (!params || typeof params !== 'object') {
+        return false;
+    }
+    
+    const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
+    for (const prop of rangeProps) {
+        if (params[prop]) {
+            if (typeof params[prop].min !== 'number' || typeof params[prop].max !== 'number') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/**
  * Validate random configuration structure
  */
 function validateConfig(config: any): config is RandomConfig {
@@ -310,25 +329,27 @@ function validateConfig(config: any): config is RandomConfig {
         return false;
     }
     
-    // Check that either commonOperatorParams or operators exists
-    if (!config.commonOperatorParams && !config.operators) {
+    // Check global parameters first (required)
+    if (!config.global || typeof config.global !== 'object') {
+        return false;
+    }
+    
+    // Check that at least one source of operator parameters exists and has content
+    const hasCommonParams = config.commonOperatorParams && 
+                           typeof config.commonOperatorParams === 'object' &&
+                           Object.keys(config.commonOperatorParams).length > 0;
+    const hasOperators = config.operators && 
+                        Array.isArray(config.operators) && 
+                        config.operators.length === 4;
+    
+    if (!hasCommonParams && !hasOperators) {
         return false;
     }
     
     // If commonOperatorParams exists, validate it
     if (config.commonOperatorParams) {
-        if (typeof config.commonOperatorParams !== 'object') {
+        if (!validateOperatorRanges(config.commonOperatorParams)) {
             return false;
-        }
-        // Check that range properties, if present, have min and max
-        const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
-        for (const prop of rangeProps) {
-            if (config.commonOperatorParams[prop]) {
-                if (typeof config.commonOperatorParams[prop].min !== 'number' || 
-                    typeof config.commonOperatorParams[prop].max !== 'number') {
-                    return false;
-                }
-            }
         }
     }
     
@@ -340,24 +361,10 @@ function validateConfig(config: any): config is RandomConfig {
         
         // Check each operator has valid structure
         for (const op of config.operators) {
-            if (!op || typeof op !== 'object') {
+            if (!validateOperatorRanges(op)) {
                 return false;
             }
-            // Check that range properties, if present, have min and max
-            const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
-            for (const prop of rangeProps) {
-                if (op[prop]) {
-                    if (typeof op[prop].min !== 'number' || typeof op[prop].max !== 'number') {
-                        return false;
-                    }
-                }
-            }
         }
-    }
-    
-    // Check global parameters
-    if (!config.global || typeof config.global !== 'object') {
-        return false;
     }
     
     // Check global ranges
