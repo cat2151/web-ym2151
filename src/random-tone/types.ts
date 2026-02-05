@@ -38,6 +38,7 @@ export interface GlobalRandomConfig {
  * Complete randomization configuration
  */
 export interface RandomConfig {
-    operators: OperatorRandomConfig[];
+    commonOperatorParams?: OperatorRandomConfig;
+    operators?: OperatorRandomConfig[];
     global: GlobalRandomConfig;
 }

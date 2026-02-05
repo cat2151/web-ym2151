@@ -3,7 +3,7 @@
  * Generates random tone parameters based on configurable ranges
  */
 
-import { RandomConfig, ParamRange } from './types';
+import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playAudio } from '../audio';
 
 let currentConfig: RandomConfig | null = null;
@@ -52,20 +52,18 @@ export async function loadRandomConfig(): Promise<void> {
  * Get default random configuration
  */
 function getDefaultConfig(): RandomConfig {
-    const operatorConfig = {
-        TL: { min: 0, max: 0 },
-        AR: { min: 5, max: 31 },
-        DR: { min: 0, max: 9 },
-        SR: { min: 0, max: 0 },
-        RR: { min: 0, max: 0 },
-        SL: { min: 15, max: 15 },
-        KS: { min: 0, max: 3 },
-        MUL: { min: 0, max: 15 },
-        DT1: { min: 0, max: 7 }
-    };
-    
     return {
-        operators: [operatorConfig, operatorConfig, operatorConfig, operatorConfig],
+        commonOperatorParams: {
+            TL: { min: 0, max: 0 },
+            AR: { min: 5, max: 31 },
+            DR: { min: 0, max: 9 },
+            SR: { min: 0, max: 0 },
+            RR: { min: 0, max: 0 },
+            SL: { min: 15, max: 15 },
+            KS: { min: 0, max: 3 },
+            MUL: { min: 0, max: 15 },
+            DT1: { min: 0, max: 7 }
+        },
         global: {
             CON: { min: 0, max: 7 },
             FL: { min: 0, max: 7 },
@@ -124,6 +122,29 @@ function formatParam(name: string, value: number | undefined): string | undefine
 }
 
 /**
+ * Get operator configuration for a specific operator index
+ * Combines commonOperatorParams with operator-specific overrides
+ */
+function getOperatorConfig(config: RandomConfig, operatorIndex: number): OperatorRandomConfig {
+    const common = config.commonOperatorParams || {};
+    const specific = config.operators?.[operatorIndex] || {};
+    
+    // Merge common params with operator-specific overrides
+    // Operator-specific values take precedence
+    return {
+        TL: specific.TL || common.TL,
+        AR: specific.AR || common.AR,
+        DR: specific.DR || common.DR,
+        SR: specific.SR || common.SR,
+        RR: specific.RR || common.RR,
+        SL: specific.SL || common.SL,
+        KS: specific.KS || common.KS,
+        MUL: specific.MUL || common.MUL,
+        DT1: specific.DT1 || common.DT1
+    };
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -142,7 +163,7 @@ export function generateRandomTone(): void {
     
     // Generate random parameters for each operator
     for (let i = 0; i < 4; i++) {
-        const opConfig = currentConfig.operators[i];
+        const opConfig = getOperatorConfig(currentConfig, i);
         const parts: string[] = [];
         
         const tl = formatParam('TL', randomValue(opConfig.TL));
@@ -289,22 +310,46 @@ function validateConfig(config: any): config is RandomConfig {
         return false;
     }
     
-    // Check operators array
-    if (!Array.isArray(config.operators) || config.operators.length !== 4) {
+    // Check that either commonOperatorParams or operators exists
+    if (!config.commonOperatorParams && !config.operators) {
         return false;
     }
     
-    // Check each operator has valid structure
-    for (const op of config.operators) {
-        if (!op || typeof op !== 'object') {
+    // If commonOperatorParams exists, validate it
+    if (config.commonOperatorParams) {
+        if (typeof config.commonOperatorParams !== 'object') {
             return false;
         }
         // Check that range properties, if present, have min and max
         const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
         for (const prop of rangeProps) {
-            if (op[prop]) {
-                if (typeof op[prop].min !== 'number' || typeof op[prop].max !== 'number') {
+            if (config.commonOperatorParams[prop]) {
+                if (typeof config.commonOperatorParams[prop].min !== 'number' || 
+                    typeof config.commonOperatorParams[prop].max !== 'number') {
                     return false;
+                }
+            }
+        }
+    }
+    
+    // If operators array exists, validate it
+    if (config.operators) {
+        if (!Array.isArray(config.operators) || config.operators.length !== 4) {
+            return false;
+        }
+        
+        // Check each operator has valid structure
+        for (const op of config.operators) {
+            if (!op || typeof op !== 'object') {
+                return false;
+            }
+            // Check that range properties, if present, have min and max
+            const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
+            for (const prop of rangeProps) {
+                if (op[prop]) {
+                    if (typeof op[prop].min !== 'number' || typeof op[prop].max !== 'number') {
+                        return false;
+                    }
                 }
             }
         }
