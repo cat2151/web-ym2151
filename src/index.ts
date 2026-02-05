@@ -14,7 +14,7 @@ export * from './tone-editor';
 export * from './audio';
 export * from './keyboard';
 export * from './autoplay';
-export * from './midi/index';
+export * from './midi';
 export * from './app';
 
 // Import necessary functions for global scope
