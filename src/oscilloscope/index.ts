@@ -219,12 +219,16 @@ export function toggleOscilloscopeSection(): void {
         content.setAttribute('aria-hidden', 'false');
         button.setAttribute('aria-expanded', 'true');
         if (toggleText) toggleText.textContent = 'Hide Waveform Visualizer';
+        // Note: Oscilloscope will be started when Play button is clicked
+        // Set flag to indicate oscilloscope is ready to receive data
+        isOscilloscopeRunning = false; // Reset state
     }
 }
 
 /**
- * Check if oscilloscope is currently running
+ * Check if oscilloscope is currently visible and ready
  */
-export function isOscilloscopeActive(): boolean {
-    return isOscilloscopeRunning;
+export function isOscilloscopeVisible(): boolean {
+    const button = document.getElementById('oscilloscopeToggleBtn');
+    return button?.getAttribute('aria-expanded') === 'true';
 }

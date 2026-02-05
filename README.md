@@ -10,6 +10,10 @@
 - ブラウザで440Hzの音を鳴らします
 - **New**: ドレミファソラシド（C Major Scale）や和音のデモを追加しました
   - 詳細は [DEMOS.md](./DEMOS.md) を参照してください
+- **New**: 波形ビジュアライザ（オシロスコープ）機能を追加しました
+  - [cat-oscilloscope](https://github.com/cat2151/cat-oscilloscope) ライブラリを使用
+  - リアルタイムで音声波形を可視化
+  - 詳細は [OSCILLOSCOPE.md](./OSCILLOSCOPE.md) を参照してください
 
 ## 用途
 - これを、他projectのcoding agentが参照して実装に役立てることができるか？の検証用です
@@ -44,6 +48,9 @@ npm run clean
 
 ### 実行
 ```bash
+# オシロスコープライブラリのセットアップ（初回のみ）
+./setup-oscilloscope.sh
+
 # ローカルサーバー起動
 ./build.sh --server-only
 # または
@@ -59,6 +66,7 @@ TypeScript化により、コードベースは以下のように整理されま�
 - **src/storage/** - ストレージ機能（旧storage.js 783行を責任ごとに分割）
 - **src/tone-editor/** - トーンエディタ機能
 - **src/audio/** - オーディオ生成・再生・エクスポート機能
+- **src/oscilloscope/** - 波形ビジュアライザ機能（cat-oscilloscope統合）
 - **src/** - その他のコアモジュール
 
 詳細は [TYPESCRIPT.md](./TYPESCRIPT.md) を参照してください。

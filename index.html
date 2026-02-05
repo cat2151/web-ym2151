@@ -125,10 +125,10 @@
         </div>
     </div>
     
-    <!-- Load cat-oscilloscope library via CDN -->
+    <!-- Load cat-oscilloscope library locally -->
     <script type="module">
-        // Import cat-oscilloscope library from CDN
-        import('https://cdn.jsdelivr.net/gh/cat2151/cat-oscilloscope@main/dist/cat-oscilloscope.mjs')
+        // Import cat-oscilloscope library from local file
+        import('./lib/cat-oscilloscope.mjs')
             .then(module => {
                 window.Oscilloscope = module.Oscilloscope;
                 window.BufferSource = module.BufferSource;
