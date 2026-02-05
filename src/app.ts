@@ -12,6 +12,7 @@ import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
 import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
 import { initializeRandomToneGenerator } from './random-tone';
+import { initializeOscilloscope } from './oscilloscope';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -31,6 +32,16 @@ export function initializeApplication(): void {
     
     // Initialize random tone generator
     initializeRandomToneGenerator();
+    
+    // Initialize oscilloscope when library is loaded
+    // Note: The cat-oscilloscope library needs to be loaded first via CDN
+    setTimeout(() => {
+        try {
+            initializeOscilloscope();
+        } catch (error) {
+            console.warn('Oscilloscope initialization deferred:', error);
+        }
+    }, 1000); // Delay to ensure CDN library is loaded
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)

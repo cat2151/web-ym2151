@@ -108,6 +108,37 @@
         Initializing...
     </div>
     
+    <div class="oscilloscope-container">
+        <button 
+            id="oscilloscopeToggleBtn" 
+            class="oscilloscope-toggle-btn" 
+            aria-controls="oscilloscopeContent" 
+            aria-expanded="false"
+            onclick="toggleOscilloscopeSection()"
+            title="Show/hide waveform visualizer">
+            <span class="toggle-icon" aria-hidden="true"></span>
+            <span class="toggle-text">Show Waveform Visualizer</span>
+        </button>
+        
+        <div id="oscilloscopeContent" class="oscilloscope-content" aria-hidden="true" style="display: none;">
+            <canvas id="oscilloscope" width="800" height="400"></canvas>
+        </div>
+    </div>
+    
+    <!-- Load cat-oscilloscope library via CDN -->
+    <script type="module">
+        // Import cat-oscilloscope library from CDN
+        import('https://cdn.jsdelivr.net/gh/cat2151/cat-oscilloscope@main/dist/cat-oscilloscope.mjs')
+            .then(module => {
+                window.Oscilloscope = module.Oscilloscope;
+                window.BufferSource = module.BufferSource;
+                console.log('cat-oscilloscope library loaded');
+            })
+            .catch(error => {
+                console.error('Failed to load cat-oscilloscope library:', error);
+            });
+    </script>
+    
     <!-- Load compiled TypeScript modules -->
     <script type="module" src="dist/index.js"></script>
     
