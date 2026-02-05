@@ -5,12 +5,15 @@
 
 set -e
 
+# Store the original directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "=========================================="
 echo " cat-oscilloscope Library Setup"
 echo "=========================================="
 
 # Check if lib and wasm directories already exist
-if [ -d "lib" ] && [ -d "wasm" ]; then
+if [ -d "$SCRIPT_DIR/lib" ] && [ -d "$SCRIPT_DIR/wasm" ]; then
     echo "Library files already exist. Checking if update is needed..."
 fi
 
@@ -22,7 +25,7 @@ git clone --depth 1 https://github.com/cat2151/cat-oscilloscope.git
 cd cat-oscilloscope
 
 # Go back to project directory
-cd "$OLDPWD"
+cd "$SCRIPT_DIR"
 
 # Create lib directory and copy library file
 echo "Setting up library files..."

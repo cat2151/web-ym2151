@@ -42,10 +42,6 @@ declare global {
 }
 
 let oscilloscopeInstance: Oscilloscope | null = null;
-let audioContextForOscilloscope: AudioContext | null = null;
-let analyserNodeForOscilloscope: AnalyserNode | null = null;
-let animationFrameId: number | null = null;
-let isOscilloscopeRunning = false;
 
 /**
  * Initialize oscilloscope with canvas element
@@ -110,7 +106,6 @@ export function startOscilloscopeFromBuffer(audioData: Float32Array, sampleRate:
         });
 
         oscilloscopeInstance.startFromBuffer(bufferSource);
-        isOscilloscopeRunning = true;
         console.log('Oscilloscope started from buffer');
     } catch (error) {
         console.error('Failed to start oscilloscope from buffer:', error);
@@ -118,70 +113,9 @@ export function startOscilloscopeFromBuffer(audioData: Float32Array, sampleRate:
 }
 
 /**
- * Start oscilloscope visualization from Web Audio API nodes
- */
-export function startOscilloscopeFromAudioContext(
-    audioContext: AudioContext,
-    sourceNode: AudioNode
-): void {
-    if (!oscilloscopeInstance) {
-        console.warn('Oscilloscope not initialized');
-        return;
-    }
-
-    try {
-        // Create analyser node for real-time data extraction
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 4096;
-        analyser.smoothingTimeConstant = 0;
-
-        sourceNode.connect(analyser);
-        
-        audioContextForOscilloscope = audioContext;
-        analyserNodeForOscilloscope = analyser;
-        
-        // Start animation loop to feed data to oscilloscope
-        updateOscilloscopeFromAnalyser();
-        isOscilloscopeRunning = true;
-        
-        console.log('Oscilloscope started from audio context');
-    } catch (error) {
-        console.error('Failed to start oscilloscope from audio context:', error);
-    }
-}
-
-/**
- * Update oscilloscope with data from analyser node
- */
-function updateOscilloscopeFromAnalyser(): void {
-    if (!analyserNodeForOscilloscope || !oscilloscopeInstance || !isOscilloscopeRunning) {
-        return;
-    }
-
-    const bufferLength = analyserNodeForOscilloscope.frequencyBinCount;
-    const dataArray = new Float32Array(bufferLength);
-    analyserNodeForOscilloscope.getFloatTimeDomainData(dataArray);
-
-    // Feed data to oscilloscope
-    if (audioContextForOscilloscope) {
-        startOscilloscopeFromBuffer(dataArray, audioContextForOscilloscope.sampleRate);
-    }
-
-    // Schedule next update (approximately 60fps)
-    animationFrameId = requestAnimationFrame(updateOscilloscopeFromAnalyser);
-}
-
-/**
  * Stop oscilloscope visualization
  */
 export async function stopOscilloscope(): Promise<void> {
-    isOscilloscopeRunning = false;
-    
-    if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-    }
-
     if (oscilloscopeInstance) {
         try {
             await oscilloscopeInstance.stop();
@@ -190,9 +124,6 @@ export async function stopOscilloscope(): Promise<void> {
             console.error('Failed to stop oscilloscope:', error);
         }
     }
-
-    audioContextForOscilloscope = null;
-    analyserNodeForOscilloscope = null;
 }
 
 /**
@@ -219,9 +150,6 @@ export function toggleOscilloscopeSection(): void {
         content.setAttribute('aria-hidden', 'false');
         button.setAttribute('aria-expanded', 'true');
         if (toggleText) toggleText.textContent = 'Hide Waveform Visualizer';
-        // Note: Oscilloscope will be started when Play button is clicked
-        // Set flag to indicate oscilloscope is ready to receive data
-        isOscilloscopeRunning = false; // Reset state
     }
 }
 

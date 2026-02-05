@@ -34,14 +34,22 @@ export function initializeApplication(): void {
     initializeRandomToneGenerator();
     
     // Initialize oscilloscope when library is loaded
-    // Note: The cat-oscilloscope library needs to be loaded first via CDN
-    setTimeout(() => {
-        try {
-            initializeOscilloscope();
-        } catch (error) {
-            console.warn('Oscilloscope initialization deferred:', error);
+    // Check periodically if the library is available
+    const checkOscilloscopeLibrary = () => {
+        if (typeof window.Oscilloscope !== 'undefined') {
+            try {
+                initializeOscilloscope();
+            } catch (error) {
+                console.warn('Oscilloscope initialization failed:', error);
+            }
+        } else {
+            // Retry after a short delay
+            setTimeout(checkOscilloscopeLibrary, 100);
         }
-    }, 1000); // Delay to ensure CDN library is loaded
+    };
+    
+    // Start checking after a brief delay to allow script loading
+    setTimeout(checkOscilloscopeLibrary, 500);
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)
