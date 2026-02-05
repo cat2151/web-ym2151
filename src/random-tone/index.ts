@@ -3,7 +3,7 @@
  * Generates random tone parameters based on configurable ranges
  */
 
-import { RandomConfig, ParamRange } from './types';
+import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playAudio } from '../audio';
 
 let currentConfig: RandomConfig | null = null;
@@ -52,20 +52,18 @@ export async function loadRandomConfig(): Promise<void> {
  * Get default random configuration
  */
 function getDefaultConfig(): RandomConfig {
-    const operatorConfig = {
-        TL: { min: 0, max: 0 },
-        AR: { min: 5, max: 31 },
-        DR: { min: 0, max: 9 },
-        SR: { min: 0, max: 0 },
-        RR: { min: 0, max: 0 },
-        SL: { min: 15, max: 15 },
-        KS: { min: 0, max: 3 },
-        MUL: { min: 0, max: 15 },
-        DT1: { min: 0, max: 7 }
-    };
-    
     return {
-        operators: [operatorConfig, operatorConfig, operatorConfig, operatorConfig],
+        commonOperatorParams: {
+            TL: { min: 0, max: 0 },
+            AR: { min: 5, max: 31 },
+            DR: { min: 0, max: 9 },
+            SR: { min: 0, max: 0 },
+            RR: { min: 0, max: 0 },
+            SL: { min: 15, max: 15 },
+            KS: { min: 0, max: 3 },
+            MUL: { min: 0, max: 15 },
+            DT1: { min: 0, max: 7 }
+        },
         global: {
             CON: { min: 0, max: 7 },
             FL: { min: 0, max: 7 },
@@ -124,6 +122,29 @@ function formatParam(name: string, value: number | undefined): string | undefine
 }
 
 /**
+ * Get operator configuration for a specific operator index
+ * Combines commonOperatorParams with operator-specific overrides
+ */
+function getOperatorConfig(config: RandomConfig, operatorIndex: number): OperatorRandomConfig {
+    const common = config.commonOperatorParams || {};
+    const specific = config.operators?.[operatorIndex] || {};
+    
+    // Merge common params with operator-specific overrides
+    // Operator-specific values take precedence
+    return {
+        TL: specific.TL ?? common.TL,
+        AR: specific.AR ?? common.AR,
+        DR: specific.DR ?? common.DR,
+        SR: specific.SR ?? common.SR,
+        RR: specific.RR ?? common.RR,
+        SL: specific.SL ?? common.SL,
+        KS: specific.KS ?? common.KS,
+        MUL: specific.MUL ?? common.MUL,
+        DT1: specific.DT1 ?? common.DT1
+    };
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -142,7 +163,7 @@ export function generateRandomTone(): void {
     
     // Generate random parameters for each operator
     for (let i = 0; i < 4; i++) {
-        const opConfig = currentConfig.operators[i];
+        const opConfig = getOperatorConfig(currentConfig, i);
         const parts: string[] = [];
         
         const tl = formatParam('TL', randomValue(opConfig.TL));
@@ -281,55 +302,90 @@ export function exportRandomConfig(): void {
 }
 
 /**
+ * Validate operator parameter ranges
+ */
+function validateOperatorRanges(params: unknown): params is OperatorRandomConfig {
+    if (!params || typeof params !== 'object') {
+        return false;
+    }
+    
+    const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
+    for (const prop of rangeProps) {
+        const paramObj = params as Record<string, any>;
+        if (paramObj[prop]) {
+            if (typeof paramObj[prop].min !== 'number' || typeof paramObj[prop].max !== 'number') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/**
  * Validate random configuration structure
  */
-function validateConfig(config: any): config is RandomConfig {
+function validateConfig(config: unknown): config is RandomConfig {
     // Check basic structure
     if (!config || typeof config !== 'object') {
         return false;
     }
     
-    // Check operators array
-    if (!Array.isArray(config.operators) || config.operators.length !== 4) {
+    // Cast to any for property access during validation
+    const cfg = config as any;
+    
+    // Check global parameters first (required)
+    if (!cfg.global || typeof cfg.global !== 'object') {
         return false;
     }
     
-    // Check each operator has valid structure
-    for (const op of config.operators) {
-        if (!op || typeof op !== 'object') {
+    // Check that at least one source of operator parameters exists and has content
+    const hasCommonParams = cfg.commonOperatorParams && 
+                           typeof cfg.commonOperatorParams === 'object' &&
+                           Object.keys(cfg.commonOperatorParams).length > 0;
+    const hasOperators = cfg.operators && 
+                        Array.isArray(cfg.operators) && 
+                        cfg.operators.length === 4;
+    
+    if (!hasCommonParams && !hasOperators) {
+        return false;
+    }
+    
+    // If commonOperatorParams exists, validate it
+    if (cfg.commonOperatorParams) {
+        if (!validateOperatorRanges(cfg.commonOperatorParams)) {
             return false;
         }
-        // Check that range properties, if present, have min and max
-        const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
-        for (const prop of rangeProps) {
-            if (op[prop]) {
-                if (typeof op[prop].min !== 'number' || typeof op[prop].max !== 'number') {
-                    return false;
-                }
-            }
-        }
     }
     
-    // Check global parameters
-    if (!config.global || typeof config.global !== 'object') {
-        return false;
+    // If operators array exists, validate it
+    if (cfg.operators) {
+        if (!Array.isArray(cfg.operators) || cfg.operators.length !== 4) {
+            return false;
+        }
+        
+        // Check each operator has valid structure
+        for (const op of cfg.operators) {
+            if (!validateOperatorRanges(op)) {
+                return false;
+            }
+        }
     }
     
     // Check global ranges
     const globalRangeProps = ['CON', 'FL'];
     for (const prop of globalRangeProps) {
-        if (config.global[prop]) {
-            if (typeof config.global[prop].min !== 'number' || typeof config.global[prop].max !== 'number') {
+        if (cfg.global[prop]) {
+            if (typeof cfg.global[prop].min !== 'number' || typeof cfg.global[prop].max !== 'number') {
                 return false;
             }
         }
     }
     
     // Check NOTE if present (can be either {enabled: boolean} or ParamRange)
-    if (config.global.NOTE) {
-        const hasEnabled = 'enabled' in config.global.NOTE && typeof config.global.NOTE.enabled === 'boolean';
-        const hasMinMax = 'min' in config.global.NOTE && 'max' in config.global.NOTE &&
-                          typeof config.global.NOTE.min === 'number' && typeof config.global.NOTE.max === 'number';
+    if (cfg.global.NOTE) {
+        const hasEnabled = 'enabled' in cfg.global.NOTE && typeof cfg.global.NOTE.enabled === 'boolean';
+        const hasMinMax = 'min' in cfg.global.NOTE && 'max' in cfg.global.NOTE &&
+                          typeof cfg.global.NOTE.min === 'number' && typeof cfg.global.NOTE.max === 'number';
         if (!hasEnabled && !hasMinMax) {
             return false;
         }
