@@ -12,7 +12,7 @@
   - 詳細は [DEMOS.md](./DEMOS.md) を参照してください
 - **New**: 波形ビジュアライザ（オシロスコープ）機能を追加しました
   - [cat-oscilloscope](https://github.com/cat2151/cat-oscilloscope) ライブラリを使用
-  - リアルタイムで音声波形を可視化
+  - 生成されたオーディオバッファの波形を可視化
   - 詳細は [OSCILLOSCOPE.md](./OSCILLOSCOPE.md) を参照してください
 
 ## 用途

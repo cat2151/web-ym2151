@@ -34,7 +34,9 @@ export function initializeApplication(): void {
     initializeRandomToneGenerator();
     
     // Initialize oscilloscope when library is loaded
-    // Check periodically if the library is available
+    // Check periodically if the library is available (max 50 retries = 5 seconds)
+    let oscilloscopeRetries = 0;
+    const maxRetries = 50;
     const checkOscilloscopeLibrary = () => {
         if (typeof window.Oscilloscope !== 'undefined') {
             try {
@@ -42,9 +44,11 @@ export function initializeApplication(): void {
             } catch (error) {
                 console.warn('Oscilloscope initialization failed:', error);
             }
-        } else {
-            // Retry after a short delay
+        } else if (oscilloscopeRetries < maxRetries) {
+            oscilloscopeRetries++;
             setTimeout(checkOscilloscopeLibrary, 100);
+        } else {
+            console.warn('cat-oscilloscope library not loaded after timeout. Run ./setup-oscilloscope.sh to install library files.');
         }
     };
     

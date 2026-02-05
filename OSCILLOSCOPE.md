@@ -4,7 +4,7 @@ This demo includes a waveform visualizer feature using the [cat-oscilloscope](ht
 
 ## Features
 
-- Real-time waveform visualization of YM2151 audio output
+- Waveform visualization of generated audio from YM2151 output
 - Sine wave display with automatic gain adjustment
 - Collapsible UI section to save screen space
 - Uses BufferSource mode for accurate waveform rendering

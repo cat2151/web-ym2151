@@ -14,7 +14,7 @@ echo "=========================================="
 
 # Check if lib and wasm directories already exist
 if [ -d "$SCRIPT_DIR/lib" ] && [ -d "$SCRIPT_DIR/wasm" ]; then
-    echo "Library files already exist. Checking if update is needed..."
+    echo "Library files already exist. Overwriting with latest version..."
 fi
 
 # Clone cat-oscilloscope repository to temp directory

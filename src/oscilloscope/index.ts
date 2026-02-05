@@ -55,7 +55,7 @@ export function initializeOscilloscope(): void {
 
     // Check if cat-oscilloscope library is loaded
     if (typeof window.Oscilloscope === 'undefined') {
-        console.error('cat-oscilloscope library not loaded. Please include the library via CDN.');
+        console.error('cat-oscilloscope library not loaded. Please run ./setup-oscilloscope.sh to install the library files.');
         return;
     }
 
@@ -88,7 +88,7 @@ export function initializeOscilloscope(): void {
 /**
  * Start oscilloscope visualization from audio buffer data
  */
-export function startOscilloscopeFromBuffer(audioData: Float32Array, sampleRate: number): void {
+export async function startOscilloscopeFromBuffer(audioData: Float32Array, sampleRate: number): Promise<void> {
     if (!oscilloscopeInstance) {
         console.warn('Oscilloscope not initialized');
         return;
@@ -100,6 +100,9 @@ export function startOscilloscopeFromBuffer(audioData: Float32Array, sampleRate:
     }
 
     try {
+        // Stop the previous oscilloscope instance before starting a new one
+        await stopOscilloscope();
+        
         const bufferSource = new window.BufferSource(audioData, sampleRate, {
             loop: true,
             chunkSize: 4096
