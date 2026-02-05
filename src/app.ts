@@ -34,7 +34,7 @@ export function initializeApplication(): void {
     initializeRandomToneGenerator();
     
     // Initialize oscilloscope when library is loaded
-    // Check periodically if the library is available (max 50 retries = 5 seconds)
+    // Check periodically if the library is available (max 50 retries = ~5 seconds)
     let oscilloscopeRetries = 0;
     const maxRetries = 50;
     const checkOscilloscopeLibrary = () => {
