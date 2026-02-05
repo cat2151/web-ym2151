@@ -3,3 +3,5 @@ sine_test.js
 node_modules/
 dist/
 *.log
+lib/
+wasm/

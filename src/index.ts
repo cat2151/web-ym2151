@@ -16,6 +16,7 @@ export * from './keyboard';
 export * from './autoplay';
 export * from './midi';
 export * from './random-tone';
+export * from './oscilloscope';
 export * from './app';
 
 // Import necessary functions for global scope
@@ -36,6 +37,7 @@ import {
     exportRandomConfig, 
     importRandomConfig 
 } from './random-tone';
+import { toggleOscilloscopeSection } from './oscilloscope';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
@@ -58,6 +60,7 @@ declare global {
         toggleRandomConfigSection: typeof toggleRandomConfigSection;
         exportRandomConfig: typeof exportRandomConfig;
         importRandomConfig: typeof importRandomConfig;
+        toggleOscilloscopeSection: typeof toggleOscilloscopeSection;
     }
 }
 
@@ -84,4 +87,5 @@ if (typeof window !== 'undefined') {
     window.toggleRandomConfigSection = toggleRandomConfigSection;
     window.exportRandomConfig = exportRandomConfig;
     window.importRandomConfig = importRandomConfig;
+    window.toggleOscilloscopeSection = toggleOscilloscopeSection;
 }

@@ -296,3 +296,76 @@ h1 { margin-bottom: 5px; }
         border-color: #444;
     }
 }
+
+/* Oscilloscope Controls */
+.oscilloscope-container { 
+    margin: 20px 0; 
+    padding: 15px; 
+    background: #f0f0ff; 
+    border-radius: 5px; 
+    border: 2px solid #5a6ea5;
+}
+.oscilloscope-toggle-btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+    border: none;
+    background: #5a6ea5;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+.oscilloscope-toggle-btn:hover {
+    background: #4a5a85;
+}
+.oscilloscope-toggle-btn:focus {
+    outline: 2px solid #3a4a75;
+    outline-offset: 2px;
+}
+.oscilloscope-toggle-btn[aria-expanded="true"] .toggle-icon::before {
+    transform: rotate(90deg);
+}
+.oscilloscope-content {
+    margin-top: 15px;
+}
+#oscilloscope {
+    width: 100%;
+    max-width: 800px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #000;
+    display: block;
+}
+
+/* Dark Mode Oscilloscope Styles */
+@media (prefers-color-scheme: dark) {
+    .oscilloscope-container {
+        background: #1e2a3a;
+        border-color: #5a6ea5;
+        color: #e0e0e0;
+    }
+    
+    .oscilloscope-toggle-btn {
+        background: #5a6ea5;
+        color: #e0e0e0;
+    }
+    
+    .oscilloscope-toggle-btn:hover {
+        background: #4a5a85;
+    }
+    
+    .oscilloscope-toggle-btn:focus {
+        outline-color: #6a90e2;
+    }
+    
+    #oscilloscope {
+        border-color: #555;
+        background: #1a1a1a;
+    }
+}

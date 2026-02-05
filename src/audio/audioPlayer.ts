@@ -1,10 +1,9 @@
-/**
- * Audio Player
- * Plays audio buffers using Web Audio API
- */
-
 import { generateAudioBuffers } from './audioGenerator';
 import { OPM_SAMPLE_RATE } from '../constants';
+import { 
+    startOscilloscopeFromBuffer, 
+    isOscilloscopeVisible 
+} from '../oscilloscope';
 
 let audioContext: AudioContext | null = null;
 
@@ -30,6 +29,12 @@ export function playAudio(): void {
     source.buffer = audioBuffer;
     source.connect(audioContext.destination);
     source.start();
+    
+    // Update oscilloscope if it's visible
+    if (isOscilloscopeVisible()) {
+        // Use mono audio for oscilloscope (left channel)
+        startOscilloscopeFromBuffer(audioData.left, OPM_SAMPLE_RATE);
+    }
     
     const infoDiv = document.getElementById('info');
     if (infoDiv) {

@@ -12,6 +12,7 @@ import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
 import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
 import { initializeRandomToneGenerator } from './random-tone';
+import { initializeOscilloscope } from './oscilloscope';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -31,6 +32,28 @@ export function initializeApplication(): void {
     
     // Initialize random tone generator
     initializeRandomToneGenerator();
+    
+    // Initialize oscilloscope when library is loaded
+    // Check periodically if the library is available (max 50 retries = ~5 seconds)
+    let oscilloscopeRetries = 0;
+    const maxRetries = 50;
+    const checkOscilloscopeLibrary = () => {
+        if (typeof window.Oscilloscope !== 'undefined') {
+            try {
+                initializeOscilloscope();
+            } catch (error) {
+                console.warn('Oscilloscope initialization failed:', error);
+            }
+        } else if (oscilloscopeRetries < maxRetries) {
+            oscilloscopeRetries++;
+            setTimeout(checkOscilloscopeLibrary, 100);
+        } else {
+            console.warn('cat-oscilloscope library not loaded after timeout. Run ./setup-oscilloscope.sh to install library files.');
+        }
+    };
+    
+    // Start checking after a brief delay to allow script loading
+    setTimeout(checkOscilloscopeLibrary, 500);
     
     const tryLoadFromStorage = function() {
         // Load from storage after presets are loaded (or if presets fail to load)
