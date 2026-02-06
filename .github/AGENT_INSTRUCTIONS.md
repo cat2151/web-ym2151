@@ -29,10 +29,10 @@ const { chromium } = require('playwright');
   page.on('pageerror', error => console.error('PAGE ERROR:', error));
   
   // Navigate to the page
-  await page.goto('https://cat2151.github.io/web-ym2151/');
+  await page.goto('https://cat2151.github.io/web-ym2151/', { waitUntil: 'networkidle' });
   
-  // Wait and check for errors
-  await page.waitForTimeout(5000);
+  // Wait for scripts to execute
+  await page.waitForLoadState('domcontentloaded');
   
   await browser.close();
 })();
