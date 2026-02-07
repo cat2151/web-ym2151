@@ -60,12 +60,12 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 
-    const framesToDisplay = Math.min(samples.length, Math.floor(sampleRate));
-    if (framesToDisplay <= 0) {
+    const samplesToDisplay = Math.min(samples.length, Math.floor(sampleRate));
+    if (samplesToDisplay <= 0) {
         return;
     }
 
-    const samplesPerPixel = framesToDisplay / width;
+    const samplesPerPixel = samplesToDisplay / width;
     const mid = height / 2;
     const amplitude = height / 2;
 
@@ -79,15 +79,15 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
         if (end <= start) {
             end = start + 1;
         }
-        if (start >= framesToDisplay) {
+        if (start >= samplesToDisplay) {
             break;
         }
-        if (end > framesToDisplay) {
-            end = framesToDisplay;
+        if (end > samplesToDisplay) {
+            end = samplesToDisplay;
         }
-        let min = Infinity;
-        let max = -Infinity;
-        for (let i = start; i < end; i++) {
+        let min = samples[start];
+        let max = samples[start];
+        for (let i = start + 1; i < end; i++) {
             const value = samples[i];
             if (value < min) {
                 min = value;
