@@ -40,7 +40,7 @@ export function updateDurationDisplay(events: Array<{ time: number | string }>):
 }
 
 /**
- * Render a 1-second waveform preview to the UI canvas.
+ * Render a waveform preview to the UI canvas.
  */
 const WAVEFORM_COLOR = '#f60';
 
