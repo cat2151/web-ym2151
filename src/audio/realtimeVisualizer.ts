@@ -94,17 +94,33 @@ function drawFFT(): void {
 
     clearCanvas(fftCtx, width, height);
 
-    const barWidth = Math.max(1, width / frequencyData.length);
-    let x = 0;
+    const numBars = Math.min(width, frequencyData.length);
+    if (numBars <= 0) return;
 
-    for (let i = 0; i < frequencyData.length; i++) {
-        const value = frequencyData[i] / 255;
-        const barHeight = value * height;
+    const barWidth = width / numBars;
+    const binStep = frequencyData.length / numBars;
+
+    let x = 0;
+    fftCtx.fillStyle = FFT_COLOR;
+
+    for (let barIndex = 0; barIndex < numBars; barIndex++) {
+        const startBin = Math.floor(barIndex * binStep);
+        const endBin = Math.floor((barIndex + 1) * binStep);
+
+        let sum = 0;
+        let count = 0;
+
+        for (let bin = startBin; bin < endBin && bin < frequencyData.length; bin++) {
+            sum += frequencyData[bin];
+            count++;
+        }
+
+        const avgValue = count > 0 ? sum / count : 0;
+        const normalized = avgValue / 255;
+        const barHeight = normalized * height;
         const y = height - barHeight;
 
-        fftCtx.fillStyle = FFT_COLOR;
         fftCtx.fillRect(x, y, barWidth, barHeight);
-
         x += barWidth;
     }
 }
@@ -122,7 +138,8 @@ function renderFrame(): void {
 }
 
 /**
- * Prepare canvas contexts on DOMContentLoaded.
+ * Prepare and clear canvas contexts for realtime visualization.
+ * Call this after the visualizer canvases are available in the DOM.
  */
 export function initializeRealtimeVisualizer(): void {
     if (typeof document === 'undefined') {
@@ -156,6 +173,15 @@ export function startRealtimeVisualization(
         return;
     }
 
+    // Disconnect any previous source to avoid lingering connections
+    if (currentSource && analyserNode && currentSource !== source) {
+        try {
+            currentSource.disconnect(analyserNode);
+        } catch (error) {
+            console.warn('Failed to disconnect previous source from analyser:', error);
+        }
+    }
+
     if (!analyserConnected) {
         analyser.connect(context.destination);
         analyserConnected = true;
@@ -180,6 +206,13 @@ export function startRealtimeVisualization(
     source.addEventListener(
         'ended',
         () => {
+            if (analyserNode) {
+                try {
+                    source.disconnect(analyserNode);
+                } catch (error) {
+                    console.warn('Failed to disconnect ended source from analyser:', error);
+                }
+            }
             if (currentSource === source) {
                 stopRealtimeVisualization();
             }
