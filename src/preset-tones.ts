@@ -4,6 +4,7 @@
  */
 
 import { playAudio } from './audio';
+import { showRenderingOverlay, hideRenderingOverlay } from './ui';
 
 interface PresetTone {
     name?: string;
@@ -92,4 +93,15 @@ export function loadToneToEditor(autoPlay: boolean = true): void {
             playAudio();
         }
     }
+}
+
+export function handlePresetToneChange(): void {
+    showRenderingOverlay('Now rendering tone...');
+    window.setTimeout(() => {
+        try {
+            loadToneToEditor();
+        } finally {
+            hideRenderingOverlay();
+        }
+    }, 0);
 }

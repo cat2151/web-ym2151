@@ -412,6 +412,58 @@ h1 { margin-bottom: 5px; }
     text-decoration: underline;
 }
 
+.render-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    backdrop-filter: blur(2px);
+}
+
+.render-overlay.is-active {
+    display: flex;
+}
+
+.render-overlay__content {
+    background: #ffffff;
+    color: #000000;
+    padding: 20px 24px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    min-width: 240px;
+    justify-content: center;
+}
+
+.render-overlay__spinner {
+    width: 28px;
+    height: 28px;
+    border: 4px solid #4a90e2;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: render-spin 1s linear infinite;
+}
+
+@keyframes render-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+body.rendering {
+    touch-action: none;
+}
+
+body.rendering select:disabled {
+    opacity: 0.7;
+}
+
 /* Legacy single repo-link support (for backwards compatibility) */
 .repo-link {
     position: fixed;
@@ -437,5 +489,15 @@ h1 { margin-bottom: 5px; }
     }
     .repo-link {
         color: #aaa;
+    }
+
+    .render-overlay__content {
+        background: #1e1e2a;
+        color: #e0e0e0;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .render-overlay__spinner {
+        border-color: #a0c4ff;
+        border-top-color: transparent;
     }
 }

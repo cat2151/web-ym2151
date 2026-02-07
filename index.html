@@ -10,13 +10,13 @@
     
     <div class="controls">
         <label for="presetSelect"><strong>Load Preset JSON: </strong></label>
-        <select id="presetSelect" onchange="loadToEditor()">
+        <select id="presetSelect" onchange="handlePresetChange()">
             <option value="" disabled selected>Loading presets...</option>
         </select>
         <br><br>
         
         <label for="presetToneSelect"><strong>Load Preset Tone: </strong></label>
-        <select id="presetToneSelect" onchange="loadToneToEditor()">
+        <select id="presetToneSelect" onchange="handlePresetToneChange()">
             <option value="" disabled selected>Loading preset tones...</option>
         </select>
         <br><br>
@@ -147,6 +147,13 @@
     
     <!-- External WASM script (loaded last to use Module from TypeScript) -->
     <script defer src="sine_test.js"></script>
+    
+    <div id="renderOverlay" class="render-overlay" aria-live="assertive" aria-hidden="true">
+        <div class="render-overlay__content">
+            <div class="render-overlay__spinner" aria-hidden="true"></div>
+            <div class="render-overlay__text">Now rendering...</div>
+        </div>
+    </div>
     
     <!-- Repository links -->
     <div class="repo-links">
