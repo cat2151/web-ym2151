@@ -4,6 +4,7 @@
  */
 
 import { playAudio } from './audio';
+import { showRenderingOverlay, hideRenderingOverlay } from './ui';
 
 interface Preset {
     name?: string;
@@ -100,4 +101,15 @@ export function loadToEditor(autoPlay: boolean = true): void {
     
     // Note: We don't auto-save when loading a preset to avoid overwriting
     // the user's saved work. Auto-save only occurs on user edits.
+}
+
+export function handlePresetChange(): void {
+    showRenderingOverlay('Now rendering preset...');
+    window.setTimeout(() => {
+        try {
+            loadToEditor();
+        } finally {
+            hideRenderingOverlay();
+        }
+    }, 0);
 }

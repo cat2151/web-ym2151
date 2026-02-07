@@ -130,3 +130,45 @@ export function toggleStorageSection(): void {
         toggleText.textContent = isExpanded ? 'Show Save Section' : 'Hide Save Section';
     }
 }
+
+const RENDERING_OVERLAY_ID = 'renderOverlay';
+const RENDERING_BODY_CLASS = 'rendering';
+const RENDERING_TEXT_SELECTOR = '.render-overlay__text';
+const RENDERING_TARGET_IDS = ['presetSelect', 'presetToneSelect'];
+
+function toggleRenderingTargets(disabled: boolean): void {
+    RENDERING_TARGET_IDS.forEach(id => {
+        const element = document.getElementById(id) as HTMLSelectElement | null;
+        if (element) {
+            element.disabled = disabled;
+        }
+    });
+}
+
+export function showRenderingOverlay(message: string = 'Now rendering...'): void {
+    const overlay = document.getElementById(RENDERING_OVERLAY_ID);
+    if (!overlay) return;
+
+    overlay.classList.add('is-active');
+    overlay.setAttribute('aria-busy', 'true');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    const textElement = overlay.querySelector(RENDERING_TEXT_SELECTOR);
+    if (textElement) {
+        textElement.textContent = message;
+    }
+
+    document.body.classList.add(RENDERING_BODY_CLASS);
+    toggleRenderingTargets(true);
+}
+
+export function hideRenderingOverlay(): void {
+    const overlay = document.getElementById(RENDERING_OVERLAY_ID);
+    if (!overlay) return;
+
+    overlay.classList.remove('is-active');
+    overlay.setAttribute('aria-busy', 'false');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove(RENDERING_BODY_CLASS);
+    toggleRenderingTargets(false);
+}

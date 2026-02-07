@@ -28,8 +28,8 @@ import {
     importAllSlots 
 } from './storage';
 import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
-import { loadToEditor } from './presets';
-import { loadToneToEditor } from './preset-tones';
+import { loadToEditor, handlePresetChange } from './presets';
+import { loadToneToEditor, handlePresetToneChange } from './preset-tones';
 import { updateDurationDisplay, toggleStorageSection } from './ui';
 import { 
     generateRandomTone, 
@@ -54,6 +54,8 @@ declare global {
         parseJsonToToneEditor: typeof updateToneEditorFromJson;
         loadToEditor: typeof loadToEditor;
         loadToneToEditor: typeof loadToneToEditor;
+        handlePresetChange: typeof handlePresetChange;
+        handlePresetToneChange: typeof handlePresetToneChange;
         updateDurationDisplay: typeof updateDurationDisplay;
         toggleStorageSection: typeof toggleStorageSection;
         generateRandomTone: typeof generateRandomTone;
@@ -81,6 +83,8 @@ if (typeof window !== 'undefined') {
     window.parseJsonToToneEditor = updateToneEditorFromJson; // Keep original name for compatibility
     window.loadToEditor = loadToEditor;
     window.loadToneToEditor = loadToneToEditor;
+    window.handlePresetChange = handlePresetChange;
+    window.handlePresetToneChange = handlePresetToneChange;
     window.updateDurationDisplay = updateDurationDisplay;
     window.toggleStorageSection = toggleStorageSection;
     window.generateRandomTone = generateRandomTone;
