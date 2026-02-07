@@ -4,6 +4,7 @@ import {
     startOscilloscopeFromBuffer, 
     isOscilloscopeVisible 
 } from '../oscilloscope';
+import { renderWaveformPreview } from '../ui';
 
 let audioContext: AudioContext | null = null;
 
@@ -29,6 +30,8 @@ export function playAudio(): void {
     source.buffer = audioBuffer;
     source.connect(audioContext.destination);
     source.start();
+
+    renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
     
     // Update oscilloscope if it's visible
     if (isOscilloscopeVisible()) {

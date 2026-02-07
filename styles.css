@@ -101,6 +101,17 @@ body {
 select { padding: 10px; font-size: 16px; margin-right: 10px; min-width: 200px; }
 button { padding: 10px 30px; font-size: 16px; margin: 5px; cursor: pointer; font-weight: bold;}
 .duration-display { margin-left: 10px; font-size: 14px; color: #555; }
+.waveform-preview {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 10px;
+}
+.waveform-preview canvas {
+    display: block;
+    border: 2px solid #333;
+    border-radius: 4px;
+    background: #000;
+}
 textarea { 
     width: 100%; 
     height: 300px; 
@@ -233,6 +244,10 @@ h1 { margin-bottom: 5px; }
     
     .duration-display {
         color: #aaa;
+    }
+
+    .waveform-preview canvas {
+        border-color: #555;
     }
     
     select {

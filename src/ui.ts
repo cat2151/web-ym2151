@@ -40,6 +40,70 @@ export function updateDurationDisplay(events: Array<{ time: number | string }>):
 }
 
 /**
+ * Render a 1-second waveform preview to the UI canvas.
+ */
+export function renderWaveformPreview(samples: Float32Array, sampleRate: number): void {
+    const canvas = document.getElementById('waveformPreview') as HTMLCanvasElement | null;
+    if (!canvas) {
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        return;
+    }
+
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+
+    const framesToDisplay = Math.min(samples.length, Math.floor(sampleRate));
+    if (framesToDisplay <= 0) {
+        return;
+    }
+
+    const samplesPerPixel = framesToDisplay / width;
+    const mid = height / 2;
+    const amplitude = height / 2;
+
+    ctx.strokeStyle = '#f60';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x < width; x++) {
+        const start = Math.floor(x * samplesPerPixel);
+        let end = Math.floor((x + 1) * samplesPerPixel);
+        if (end <= start) {
+            end = start + 1;
+        }
+        if (start >= framesToDisplay) {
+            break;
+        }
+        if (end > framesToDisplay) {
+            end = framesToDisplay;
+        }
+        let min = 1;
+        let max = -1;
+        for (let i = start; i < end; i++) {
+            const value = samples[i];
+            if (value < min) {
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+        }
+        const yMax = mid - max * amplitude;
+        const yMin = mid - min * amplitude;
+        ctx.moveTo(x + 0.5, yMax);
+        ctx.lineTo(x + 0.5, yMin);
+    }
+
+    ctx.stroke();
+}
+
+/**
  * Toggle the storage section visibility
  */
 export function toggleStorageSection(): void {
