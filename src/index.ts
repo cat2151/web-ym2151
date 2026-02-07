@@ -20,7 +20,7 @@ export * from './oscilloscope';
 export * from './app';
 
 // Import necessary functions for global scope
-import { playAudio, exportWav } from './audio';
+import { playAudioWithOverlay, exportWav } from './audio';
 import { 
     handleSaveSlot, 
     refreshSlotInfo, 
@@ -44,7 +44,7 @@ import { initializeApplication } from './app';
 declare global {
     interface Window {
         Module: any;
-        playAudio: typeof playAudio;
+        playAudio: typeof playAudioWithOverlay;
         exportWav: typeof exportWav;
         handleSaveSlot: typeof handleSaveSlot;
         refreshSlotInfo: typeof refreshSlotInfo;
@@ -73,7 +73,7 @@ if (typeof window !== 'undefined') {
     };
     
     // Expose functions to global scope for HTML onclick handlers
-    window.playAudio = playAudio;
+    window.playAudio = playAudioWithOverlay;
     window.exportWav = exportWav;
     window.handleSaveSlot = handleSaveSlot;
     window.refreshSlotInfo = refreshSlotInfo;

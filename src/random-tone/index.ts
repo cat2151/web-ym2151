@@ -5,6 +5,7 @@
 
 import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playAudio } from '../audio';
+import { runWithRenderingOverlay } from '../ui';
 
 let currentConfig: RandomConfig | null = null;
 let configTextarea: HTMLTextAreaElement | null = null;
@@ -158,68 +159,82 @@ export function generateRandomTone(): void {
         console.error('Tone editor not found');
         return;
     }
-    
-    const lines: string[] = [];
-    
-    // Generate random parameters for each operator
-    for (let i = 0; i < 4; i++) {
-        const opConfig = getOperatorConfig(currentConfig, i);
-        const parts: string[] = [];
+    const config = currentConfig;
+
+    runWithRenderingOverlay(() => {
+        const lines: string[] = [];
         
-        const tl = formatParam('TL', randomValue(opConfig.TL));
-        if (tl) parts.push(tl);
+        // Generate random parameters for each operator
+        for (let i = 0; i < 4; i++) {
+            const opConfig = getOperatorConfig(config, i);
+            const parts: string[] = [];
+            
+            const tl = formatParam('TL', randomValue(opConfig.TL));
+            if (tl) parts.push(tl);
+            
+            const ar = formatParam('AR', randomValue(opConfig.AR));
+            if (ar) parts.push(ar);
+            
+            const dr = formatParam('DR', randomValue(opConfig.DR));
+            if (dr) parts.push(dr);
+            
+            const sr = formatParam('SR', randomValue(opConfig.SR));
+            if (sr) parts.push(sr);
+            
+            const rr = formatParam('RR', randomValue(opConfig.RR));
+            if (rr) parts.push(rr);
+            
+            const sl = formatParam('SL', randomValue(opConfig.SL));
+            if (sl) parts.push(sl);
+            
+            const ks = randomValue(opConfig.KS);
+            if (ks !== undefined) parts.push(`KS=${ks.toString(16).toUpperCase()}`);
+            
+            const mul = formatParam('MUL', randomValue(opConfig.MUL));
+            if (mul) parts.push(mul);
+            
+            const dt1 = randomValue(opConfig.DT1);
+            if (dt1 !== undefined) parts.push(`DT1=${dt1.toString(16).toUpperCase()}`);
+            
+            lines.push(parts.join(' '));
+        }
         
-        const ar = formatParam('AR', randomValue(opConfig.AR));
-        if (ar) parts.push(ar);
+        // Generate global parameters
+        const globalParts: string[] = [];
         
-        const dr = formatParam('DR', randomValue(opConfig.DR));
-        if (dr) parts.push(dr);
+        const con = randomValue(config.global.CON);
+        if (con !== undefined) globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
         
-        const sr = formatParam('SR', randomValue(opConfig.SR));
-        if (sr) parts.push(sr);
+        const fl = randomValue(config.global.FL);
+        if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
         
-        const rr = formatParam('RR', randomValue(opConfig.RR));
-        if (rr) parts.push(rr);
-        
-        const sl = formatParam('SL', randomValue(opConfig.SL));
-        if (sl) parts.push(sl);
-        
-        const ks = randomValue(opConfig.KS);
-        if (ks !== undefined) parts.push(`KS=${ks.toString(16).toUpperCase()}`);
-        
-        const mul = formatParam('MUL', randomValue(opConfig.MUL));
-        if (mul) parts.push(mul);
-        
-        const dt1 = randomValue(opConfig.DT1);
-        if (dt1 !== undefined) parts.push(`DT1=${dt1.toString(16).toUpperCase()}`);
-        
-        lines.push(parts.join(' '));
-    }
-    
-    // Generate global parameters
-    const globalParts: string[] = [];
-    
-    const con = randomValue(currentConfig.global.CON);
-    if (con !== undefined) globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
-    
-    const fl = randomValue(currentConfig.global.FL);
-    if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
-    
-    // Handle NOTE parameter
-    const noteConfig = currentConfig.global.NOTE;
-    if (noteConfig) {
-        // Check if NOTE is a ParamRange (has min/max) or enabled flag
-        const hasMinMax = 'min' in noteConfig && 'max' in noteConfig;
-        const isEnabled = 'enabled' in noteConfig && noteConfig.enabled;
-        
-        if (hasMinMax) {
-            // Generate random NOTE value when ParamRange is provided
-            const note = randomValue(noteConfig as ParamRange);
-            if (note !== undefined) {
-                globalParts.push(`NOTE=${note.toString(16).toUpperCase().padStart(2, '0')}`);
+        // Handle NOTE parameter
+        const noteConfig = config.global.NOTE;
+        if (noteConfig) {
+            // Check if NOTE is a ParamRange (has min/max) or enabled flag
+            const hasMinMax = 'min' in noteConfig && 'max' in noteConfig;
+            const isEnabled = 'enabled' in noteConfig && noteConfig.enabled;
+            
+            if (hasMinMax) {
+                // Generate random NOTE value when ParamRange is provided
+                const note = randomValue(noteConfig as ParamRange);
+                if (note !== undefined) {
+                    globalParts.push(`NOTE=${note.toString(16).toUpperCase().padStart(2, '0')}`);
+                }
+            } else if (!isEnabled) {
+                // Keep current NOTE value if NOTE randomization is disabled
+                const currentContent = toneEditor.value;
+                const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
+                if (noteMatch) {
+                    globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
+                } else {
+                    // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
+                    globalParts.push('NOTE=4A');
+                }
             }
-        } else if (!isEnabled) {
-            // Keep current NOTE value if NOTE randomization is disabled
+            // If enabled=true but no range, skip NOTE (invalid config)
+        } else {
+            // No NOTE config, keep current value
             const currentContent = toneEditor.value;
             const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
             if (noteMatch) {
@@ -229,31 +244,20 @@ export function generateRandomTone(): void {
                 globalParts.push('NOTE=4A');
             }
         }
-        // If enabled=true but no range, skip NOTE (invalid config)
-    } else {
-        // No NOTE config, keep current value
-        const currentContent = toneEditor.value;
-        const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
-        if (noteMatch) {
-            globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
-        } else {
-            // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
-            globalParts.push('NOTE=4A');
+        
+        lines.push(globalParts.join(' '));
+        
+        // Update tone editor
+        toneEditor.value = lines.join('\n');
+        
+        // Trigger change event to update JSON
+        if (window.onToneEditorChange) {
+            window.onToneEditorChange();
         }
-    }
-    
-    lines.push(globalParts.join(' '));
-    
-    // Update tone editor
-    toneEditor.value = lines.join('\n');
-    
-    // Trigger change event to update JSON
-    if (window.onToneEditorChange) {
-        window.onToneEditorChange();
-    }
-    
-    // Auto-play the generated tone
-    playAudio();
+        
+        // Auto-play the generated tone
+        playAudio();
+    }, 'Now rendering random tone...');
 }
 
 /**

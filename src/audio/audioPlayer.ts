@@ -4,7 +4,7 @@ import {
     startOscilloscopeFromBuffer, 
     isOscilloscopeVisible 
 } from '../oscilloscope';
-import { renderWaveformPreview } from '../ui';
+import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 
 let audioContext: AudioContext | null = null;
 
@@ -47,4 +47,11 @@ export function playAudio(): void {
     }
 
     Module._free_buffer();
+}
+
+/**
+ * Play audio while displaying the rendering overlay
+ */
+export function playAudioWithOverlay(): void {
+    runWithRenderingOverlay(playAudio);
 }
