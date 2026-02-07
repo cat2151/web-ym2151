@@ -40,6 +40,75 @@ export function updateDurationDisplay(events: Array<{ time: number | string }>):
 }
 
 /**
+ * Render a waveform preview to the UI canvas.
+ */
+const WAVEFORM_COLOR = '#f60';
+
+export function renderWaveformPreview(samples: Float32Array, sampleRate: number): void {
+    const canvas = document.getElementById('waveformPreview') as HTMLCanvasElement | null;
+    if (!canvas) {
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        return;
+    }
+
+    const width = canvas.width;
+    const height = canvas.height;
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+
+    const samplesToDisplay = Math.min(samples.length, Math.floor(sampleRate));
+    if (samplesToDisplay <= 0) {
+        return;
+    }
+
+    const samplesPerPixel = samplesToDisplay / width;
+    const mid = height / 2;
+    const amplitude = height / 2;
+
+    ctx.strokeStyle = WAVEFORM_COLOR;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x < width; x++) {
+        const start = Math.floor(x * samplesPerPixel);
+        let end = Math.floor((x + 1) * samplesPerPixel);
+        if (end <= start) {
+            end = start + 1;
+        }
+        if (start >= samplesToDisplay) {
+            break;
+        }
+        if (end > samplesToDisplay) {
+            end = samplesToDisplay;
+        }
+        let min = samples[start];
+        let max = samples[start];
+        for (let i = start + 1; i < end; i++) {
+            const value = samples[i];
+            if (value < min) {
+                min = value;
+            }
+            if (value > max) {
+                max = value;
+            }
+        }
+        const yMax = mid - max * amplitude;
+        const yMin = mid - min * amplitude;
+        ctx.moveTo(x + 0.5, yMax);
+        ctx.lineTo(x + 0.5, yMin);
+    }
+
+    ctx.stroke();
+}
+
+/**
  * Toggle the storage section visibility
  */
 export function toggleStorageSection(): void {

@@ -6,6 +6,7 @@
 import { generateAudioBuffers } from './audioGenerator';
 import { encodeWAV } from './wavEncoder';
 import { OPM_SAMPLE_RATE } from '../constants';
+import { renderWaveformPreview } from '../ui';
 
 const CLEANUP_DELAY_MS = 500;
 
@@ -25,6 +26,8 @@ export function exportWav(): void {
         }
         return;
     }
+
+    renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
     
     Module._free_buffer();
     
