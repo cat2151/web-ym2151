@@ -421,6 +421,7 @@ h1 { margin-bottom: 5px; }
     justify-content: center;
     z-index: 1100;
     backdrop-filter: blur(2px);
+    overscroll-behavior: none;
 }
 
 .render-overlay.is-active {
@@ -458,6 +459,7 @@ h1 { margin-bottom: 5px; }
 
 body.rendering {
     touch-action: none;
+    overflow: hidden;
 }
 
 body.rendering select:disabled {

@@ -149,14 +149,15 @@ export function showRenderingOverlay(message: string = 'Now rendering...'): void
     const overlay = document.getElementById(RENDERING_OVERLAY_ID);
     if (!overlay) return;
 
+    overlay.classList.add('is-active');
+    overlay.setAttribute('aria-busy', 'true');
+    overlay.setAttribute('aria-hidden', 'false');
+
     const textElement = overlay.querySelector(RENDERING_TEXT_SELECTOR);
     if (textElement) {
         textElement.textContent = message;
     }
 
-    overlay.classList.add('is-active');
-    overlay.setAttribute('aria-busy', 'true');
-    overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add(RENDERING_BODY_CLASS);
     toggleRenderingTargets(true);
 }
