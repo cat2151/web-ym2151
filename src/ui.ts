@@ -42,6 +42,8 @@ export function updateDurationDisplay(events: Array<{ time: number | string }>):
 /**
  * Render a 1-second waveform preview to the UI canvas.
  */
+const WAVEFORM_COLOR = '#f60';
+
 export function renderWaveformPreview(samples: Float32Array, sampleRate: number): void {
     const canvas = document.getElementById('waveformPreview') as HTMLCanvasElement | null;
     if (!canvas) {
@@ -67,7 +69,7 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
     const mid = height / 2;
     const amplitude = height / 2;
 
-    ctx.strokeStyle = '#f60';
+    ctx.strokeStyle = WAVEFORM_COLOR;
     ctx.lineWidth = 1;
     ctx.beginPath();
 
@@ -83,8 +85,8 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
         if (end > framesToDisplay) {
             end = framesToDisplay;
         }
-        let min = 1;
-        let max = -1;
+        let min = Infinity;
+        let max = -Infinity;
         for (let i = start; i < end; i++) {
             const value = samples[i];
             if (value < min) {
