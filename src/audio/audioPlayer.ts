@@ -4,6 +4,7 @@ import {
     startOscilloscopeFromBuffer, 
     isOscilloscopeVisible 
 } from '../oscilloscope';
+import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 
 let audioContext: AudioContext | null = null;
@@ -28,7 +29,7 @@ export function playAudio(): void {
     
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
+    startRealtimeVisualization(source, audioContext);
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
