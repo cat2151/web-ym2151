@@ -231,7 +231,7 @@ cp node_modules/web-ym2151/sine_test.wasm ./</code></pre>
       { time: 0.0, address: 0x08, data: 0x00 },
       
       // Set frequency for 440Hz (A4) on channel 0
-      { time: 0.001, address: 0x28, data: 0x4A }, // KF: Key Fraction
+      { time: 0.001, address: 0x28, data: 0x4A }, // KF: Key Frequency
       { time: 0.002, address: 0x30, data: 0x07 }, // KC: Key Code (octave 4, note A)
       
       // Configure operator parameters (using simple sine wave)
@@ -292,7 +292,9 @@ cp node_modules/web-ym2151/sine_test.wasm ./</code></pre>
         console.log(`Generating ${numFrames} frames (${durationSeconds.toFixed(2)}s)`);
 
         // Allocate memory for events data
-        const eventSize = 8; // sizeof(YM2151Event) in C: float(4) + uint8_t(1) + uint8_t(1) + padding(2)
+        // Note: This struct size must match the C definition exactly.
+        // Current C struct: float time (4 bytes) + uint8_t address (1) + uint8_t data (1) + padding (2)
+        const eventSize = 8; 
         const totalSize = events.length * eventSize;
         const dataPtr = Module._malloc(totalSize);
         const view = new DataView(Module.HEAPU8.buffer);

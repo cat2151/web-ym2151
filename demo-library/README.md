@@ -28,8 +28,8 @@ Or specify a specific branch, tag, or commit:
 # Install from a specific branch
 npm install cat2151/web-ym2151#main
 
-# Install from a specific tag (check available tags first)
-npm install cat2151/web-ym2151#vX.Y.Z
+# Install from a specific tag (check available tags with: git ls-remote --tags https://github.com/cat2151/web-ym2151)
+npm install cat2151/web-ym2151#v1.0.0
 
 # Install from a specific commit
 npm install cat2151/web-ym2151#commit-hash
