@@ -13,6 +13,7 @@ import { OPM_SAMPLE_RATE } from './constants';
 import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
 import { initializeRandomToneGenerator } from './random-tone';
 import { initializeOscilloscope } from './oscilloscope';
+import { initializeRealtimeVisualizer } from './audio/realtimeVisualizer';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -32,6 +33,9 @@ export function initializeApplication(): void {
     
     // Initialize random tone generator
     initializeRandomToneGenerator();
+
+    // Initialize realtime visualizer canvases
+    initializeRealtimeVisualizer();
     
     // Initialize oscilloscope when library is loaded
     // Check periodically if the library is available (max 50 retries = ~5 seconds)
