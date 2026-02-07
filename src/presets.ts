@@ -4,7 +4,7 @@
  */
 
 import { playAudio } from './audio';
-import { showRenderingOverlay, hideRenderingOverlay } from './ui';
+import { runWithRenderingOverlay } from './ui';
 
 interface Preset {
     name?: string;
@@ -104,12 +104,5 @@ export function loadToEditor(autoPlay: boolean = true): void {
 }
 
 export function handlePresetChange(): void {
-    showRenderingOverlay('Now rendering preset...');
-    window.setTimeout(() => {
-        try {
-            loadToEditor();
-        } finally {
-            hideRenderingOverlay();
-        }
-    }, 0);
+    runWithRenderingOverlay(loadToEditor, 'Now rendering preset...');
 }

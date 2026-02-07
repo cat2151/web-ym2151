@@ -4,6 +4,6 @@
 
 export { generateAudioBuffers } from './audioGenerator';
 export { encodeWAV } from './wavEncoder';
-export { playAudio } from './audioPlayer';
+export { playAudio, playAudioWithOverlay } from './audioPlayer';
 export { exportWav } from './wavExporter';
 export type { AudioData } from './audioGenerator';

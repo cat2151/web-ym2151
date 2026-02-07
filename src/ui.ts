@@ -172,3 +172,17 @@ export function hideRenderingOverlay(): void {
     document.body.classList.remove(RENDERING_BODY_CLASS);
     toggleRenderingTargets(false);
 }
+
+/**
+ * Run a task while showing the rendering overlay
+ */
+export function runWithRenderingOverlay(task: () => void, message?: string): void {
+    showRenderingOverlay(message);
+    window.setTimeout(() => {
+        try {
+            task();
+        } finally {
+            hideRenderingOverlay();
+        }
+    }, 0);
+}
