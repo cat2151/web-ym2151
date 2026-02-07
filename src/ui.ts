@@ -57,6 +57,9 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
 
     const width = canvas.width;
     const height = canvas.height;
+    if (width <= 0 || height <= 0) {
+        return;
+    }
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 

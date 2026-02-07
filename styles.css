@@ -105,12 +105,16 @@ button { padding: 10px 30px; font-size: 16px; margin: 5px; cursor: pointer; font
     display: inline-block;
     vertical-align: middle;
     margin: 0 10px;
+    max-width: 100%;
 }
 .waveform-preview canvas {
     display: block;
     border: 2px solid #333;
     border-radius: 4px;
     background: #000;
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
 }
 textarea { 
     width: 100%; 
