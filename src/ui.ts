@@ -145,7 +145,7 @@ function toggleRenderingTargets(disabled: boolean): void {
     });
 }
 
-export function showRenderingOverlay(message: string = 'Now rendering...'): void {
+export function showRenderingOverlay(message?: string): void {
     const overlay = document.getElementById(RENDERING_OVERLAY_ID);
     if (!overlay) return;
 
@@ -155,7 +155,7 @@ export function showRenderingOverlay(message: string = 'Now rendering...'): void
 
     const textElement = overlay.querySelector(RENDERING_TEXT_SELECTOR);
     if (textElement) {
-        textElement.textContent = message;
+        textElement.textContent = message ?? 'Now rendering...';
     }
 
     document.body.classList.add(RENDERING_BODY_CLASS);
