@@ -35,15 +35,36 @@ npm install cat2151/web-ym2151#v1.0.0
 npm install cat2151/web-ym2151#commit-hash
 ```
 
-### 2. Copy required WASM files
+### 2. Build or obtain WASM files
 
-The web-ym2151 library requires WASM files for the YM2151 emulator. You need to copy these files to your project:
+The web-ym2151 library requires WASM files for the YM2151 emulator. These files are **not included in the repository** and must be either built or obtained from the deployed GitHub Pages site.
+
+**Option A: Use prebuilt WASM from GitHub Pages (easiest)**
 
 ```bash
-# After installation, copy WASM files from node_modules
-cp node_modules/web-ym2151/sine_test.js ./
-cp node_modules/web-ym2151/sine_test.wasm ./
+# Download WASM files from the deployed site
+curl -O https://cat2151.github.io/web-ym2151/sine_test.js
+curl -O https://cat2151.github.io/web-ym2151/sine_test.wasm
 ```
+
+**Option B: Build WASM yourself (requires Emscripten)**
+
+```bash
+# After npm install, navigate to the installed package
+cd node_modules/web-ym2151
+
+# Install dependencies
+npm install
+
+# Build WASM (requires Emscripten SDK to be installed)
+./build.sh --build-only
+
+# Copy generated files to your project root
+cp sine_test.js ../../
+cp sine_test.wasm ../../
+```
+
+To install Emscripten SDK, see: https://emscripten.org/docs/getting_started/downloads.html
 
 ### 3. Use in your project
 
@@ -130,11 +151,13 @@ Events are JSON objects with the following structure:
 
 ```javascript
 {
-  "time": 0.0,        // Time in seconds
-  "address": 0x08,    // YM2151 register address
-  "data": 0x78        // Register data value
+  "time": 0.0,     // Time in seconds
+  "addr": "0x08",  // YM2151 register address (hex string in JSON format)
+  "data": "0x78"   // Register data value (hex string in JSON format)
 }
 ```
+
+**Note:** The demo-library example uses numeric values internally for simplicity, but the main application's JSON format uses hex strings for `addr` and `data` fields. When working with the main demo or presets.json, use the hex string format shown above.
 
 ## Next Steps
 
