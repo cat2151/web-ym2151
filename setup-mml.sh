@@ -42,6 +42,7 @@ ensure_cdylib_crate_type
 rm -rf ../../../lib/mmlabc-to-smf-pkg
 wasm-pack build --target web
 mv pkg ../../../lib/mmlabc-to-smf-pkg
+rm -rf target
 git checkout -- Cargo.toml
 cd ..
 cd ../..
@@ -63,6 +64,7 @@ echo "Building smf-to-ym2151log-rust WASM package..."
 rm -rf ../../lib/smf-to-ym2151log-pkg
 wasm-pack build --target web --features wasm
 mv pkg ../../lib/smf-to-ym2151log-pkg
+rm -rf target
 git checkout -- Cargo.toml
 cd ../..
 
