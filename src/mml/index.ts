@@ -27,9 +27,9 @@ export async function initializeMMLConverter(): Promise<boolean> {
     try {
         console.log('Initializing MML converter WASM modules...');
 
-        // Import mmlabc-to-smf-rust WASM
-        // @ts-ignore - WASM module generated at build time
-        const mmlModule = await import('../../lib/mmlabc-to-smf-pkg/mmlabc_to_smf.js');
+        // Import mmlabc-to-smf-rust WASM (prebuilt asset downloaded by setup-mml.sh)
+        // @ts-ignore - no TS types published for this generated module
+        const mmlModule = await import('../../lib/mmlabc-to-smf-pkg/mmlabc_to_smf_wasm.js');
         await mmlModule.default();
         mmlToSMFWasm = mmlModule as unknown as MMLtoSMFModule;
 

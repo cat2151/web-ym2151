@@ -66,10 +66,7 @@ The WASM libraries are set up during the build process:
 ./setup-mml.sh
 ```
 
-This script:
-1. Clones the required Rust repositories
-2. Builds WASM packages using `wasm-pack`
-3. Places the packages in `lib/` directory
+This script downloads the latest published prebuilt WASM bundles from GitHub Pages (produced by the CI/CD workflow) and places them in `lib/`, so no local Rust toolchain is required.
 
 ### Module Structure
 
@@ -80,10 +77,9 @@ This script:
 ### CI/CD Integration
 
 The GitHub Actions workflow automatically:
-1. Sets up Rust toolchain and wasm-pack
-2. Runs `setup-mml.sh` to build WASM libraries
-3. Builds TypeScript modules
-4. Deploys to GitHub Pages
+1. Runs `setup-mml.sh` to download the prebuilt WASM libraries
+2. Builds TypeScript modules
+3. Deploys to GitHub Pages
 
 ## Limitations
 
