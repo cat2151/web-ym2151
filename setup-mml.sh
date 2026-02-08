@@ -3,9 +3,9 @@ set -e
 
 echo "Setting up MML to YM2151 conversion libraries..."
 
-# Pin to specific commits for reproducible builds
-MMLABC_TO_SMF_COMMIT="23a01aec14aba51f91ec4c264eebf0af9dfc735d"
-SMF_TO_YM2151LOG_COMMIT="9204374692f166f2b24cd1daba504b81d7ee3a02"
+# Note: We always use the latest version from main branch
+# Version pinning is prohibited for cat2151 libraries due to daily critical bug fixes
+# See .github/AGENT_INSTRUCTIONS.md for details
 
 # Create lib directory if it doesn't exist
 mkdir -p lib
@@ -17,9 +17,11 @@ if [ ! -d "lib/mmlabc-to-smf-rust" ]; then
 fi
 
 cd lib/mmlabc-to-smf-rust
-echo "Checking out pinned commit ${MMLABC_TO_SMF_COMMIT}..."
+echo "Pulling latest changes from mmlabc-to-smf-rust..."
 git fetch origin
-git checkout ${MMLABC_TO_SMF_COMMIT}
+git checkout origin/main
+git pull
+CURRENT_COMMIT=$(git rev-parse --short HEAD)
 echo "Building mmlabc-to-smf-rust WASM package..."
 wasm-pack build --target web --out-dir ../../lib/mmlabc-to-smf-pkg
 cd ../..
@@ -31,13 +33,15 @@ if [ ! -d "lib/smf-to-ym2151log-rust" ]; then
 fi
 
 cd lib/smf-to-ym2151log-rust
-echo "Checking out pinned commit ${SMF_TO_YM2151LOG_COMMIT}..."
+echo "Pulling latest changes from smf-to-ym2151log-rust..."
 git fetch origin
-git checkout ${SMF_TO_YM2151LOG_COMMIT}
+git checkout origin/main
+git pull
+CURRENT_COMMIT2=$(git rev-parse --short HEAD)
 echo "Building smf-to-ym2151log-rust WASM package..."
 wasm-pack build --target web --features wasm --out-dir ../../lib/smf-to-ym2151log-pkg
 cd ../..
 
 echo "✓ MML libraries setup complete!"
-echo "  - mmlabc-to-smf: lib/mmlabc-to-smf-pkg/ (commit: ${MMLABC_TO_SMF_COMMIT})"
-echo "  - smf-to-ym2151log: lib/smf-to-ym2151log-pkg/ (commit: ${SMF_TO_YM2151LOG_COMMIT})"
+echo "  - mmlabc-to-smf: lib/mmlabc-to-smf-pkg/ (latest: ${CURRENT_COMMIT})"
+echo "  - smf-to-ym2151log: lib/smf-to-ym2151log-pkg/ (latest: ${CURRENT_COMMIT2})"
