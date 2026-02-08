@@ -1,5 +1,3 @@
-sine_test.wasm
-sine_test.js
 node_modules/
 dist/
 *.log

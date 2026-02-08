@@ -166,22 +166,21 @@
     <p class="subtitle">Library Installation Demo - Minimal Example for External Repository Usage</p>
 
     <div class="info-box">
-      <h3>📦 Installation (npm / GitHub source)</h3>
-      <p>This demo shows how to use web-ym2151 as a library in your own project for YM2151 FM synthesis and waveform rendering.</p>
-      <pre><code># Option 1: Use from deployed GitHub Pages (easiest for testing)
-# Copy WASM files from the deployed site:
+      <h3>📦 インストール手順（npm / GitHub）</h3>
+      <p>web-ym2151 を自分のプロジェクトで使うための最小手順です。WASM は同梱済みなのでそのまま利用できます。</p>
+      <pre><code># 1. GitHub から npm インストール（WASM 同梱・推奨）
+npm install cat2151/web-ym2151
+cp node_modules/web-ym2151/sine_test.js .
+cp node_modules/web-ym2151/sine_test.wasm .
+
+# 2. 公開ページからプリビルド版を取得する場合
 curl -O https://cat2151.github.io/web-ym2151/sine_test.js
 curl -O https://cat2151.github.io/web-ym2151/sine_test.wasm
 
-# Option 2: Install from GitHub source (requires Emscripten build)
-npm install cat2151/web-ym2151
+# 3. 自分でビルドする場合（Emscripten 必要）
 cd node_modules/web-ym2151
-
-# Build WASM (requires Emscripten SDK)
 npm install
 ./build.sh --build-only
-
-# Copy generated WASM files to your project
 cp sine_test.js ../../
 cp sine_test.wasm ../../</code></pre>
     </div>
