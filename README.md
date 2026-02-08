@@ -8,6 +8,9 @@
 
 ## 概要
 - ブラウザで440Hzの音を鳴らします
+- **New**: MML（Music Macro Language）入力による音符演奏機能を追加しました
+  - テキストで音楽記譜を入力して再生できます
+  - 詳細は [MML.md](./MML.md) を参照してください
 - **New**: ドレミファソラシド（C Major Scale）や和音のデモを追加しました
   - 詳細は [DEMOS.md](./DEMOS.md) を参照してください
 - **New**: 波形ビジュアライザ（オシロスコープ）機能を追加しました
@@ -51,6 +54,9 @@ npm run clean
 # オシロスコープライブラリのセットアップ（初回のみ）
 ./setup-oscilloscope.sh
 
+# MMLライブラリのセットアップ（初回のみ、MML機能を使用する場合）
+./setup-mml.sh
+
 # ローカルサーバー起動
 ./build.sh --server-only
 # または
@@ -67,6 +73,7 @@ TypeScript化により、コードベースは以下のように整理されま�
 - **src/tone-editor/** - トーンエディタ機能
 - **src/audio/** - オーディオ生成・再生・エクスポート機能
 - **src/oscilloscope/** - 波形ビジュアライザ機能（cat-oscilloscope統合）
+- **src/mml/** - MML（Music Macro Language）入力機能
 - **src/** - その他のコアモジュール
 
 詳細は [TYPESCRIPT.md](./TYPESCRIPT.md) を参照してください。
