@@ -78,23 +78,52 @@ jobs:
               q: searchQuery,
               per_page: 100,
             });
-            const existing = searchResult.data.items.find(item => !item.pull_request && item.title === title);
+            let existing = searchResult.data.items.find(item => !item.pull_request && item.title === title);
 
             if (existing) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existing.number,
-                body: [
-                  'Another failure detected.',
-                  '',
-                  `- Branch: \`${headBranch}\``,
-                  `- Commit: \`${shortSha}\``,
-                  `- Workflow run: ${runUrl}`,
-                ].join('\n'),
-              });
-              core.info(`Added comment to existing issue #${existing.number}`);
-            } else {
+              try {
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                });
+
+                if (issue.data.state !== 'open') {
+                  existing = null;
+                  core.info(`Skipping closed issue #${issue.data.number} for new failure`);
+                }
+              } catch (error) {
+                if (error.status === 404 || error.status === 410) {
+                  core.info(`Existing issue #${existing.number} is missing; will create a new one`);
+                  existing = null;
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+            if (existing) {
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existing.number,
+                  body: [
+                    'Another failure detected.',
+                    '',
+                    `- Branch: \`${headBranch}\``,
+                    `- Commit: \`${shortSha}\``,
+                    `- Workflow run: ${runUrl}`,
+                  ].join('\n'),
+                });
+                core.info(`Added comment to existing issue #${existing.number}`);
+              } catch (error) {
+                core.warning(`Failed to comment on issue #${existing.number} (${error.status || 'unknown'}); creating a new issue instead`);
+                existing = null;
+              }
+            }
+
+            if (!existing) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
