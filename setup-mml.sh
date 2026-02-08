@@ -11,9 +11,9 @@ echo "Setting up MML to YM2151 conversion libraries..."
 mkdir -p lib
 
 ensure_cdylib_crate_type() {
-    if ! grep -q 'crate-type' Cargo.toml; then
-        if grep -q '^\[lib\]' Cargo.toml; then
-            perl -0777 -pe 's/\[lib\]\n/\[lib\]\ncrate-type = ["cdylib", "rlib"]\n/' -i Cargo.toml
+    if ! grep -Eq '^[[:space:]]*crate-type[[:space:]]*=' Cargo.toml; then
+        if grep -Eq '^\[lib\]' Cargo.toml; then
+            perl -0777 -pe 's/^\[lib\][ \t]*\r?\n/[lib]\ncrate-type = ["cdylib", "rlib"]\n/m' -i Cargo.toml
         else
             cat <<'EOF' >> Cargo.toml
 
@@ -42,6 +42,7 @@ ensure_cdylib_crate_type
 rm -rf ../../../lib/mmlabc-to-smf-pkg
 wasm-pack build --target web
 mv pkg ../../../lib/mmlabc-to-smf-pkg
+git checkout -- Cargo.toml
 cd ..
 cd ../..
 
@@ -62,6 +63,7 @@ echo "Building smf-to-ym2151log-rust WASM package..."
 rm -rf ../../lib/smf-to-ym2151log-pkg
 wasm-pack build --target web --features wasm
 mv pkg ../../lib/smf-to-ym2151log-pkg
+git checkout -- Cargo.toml
 cd ../..
 
 echo "✓ MML libraries setup complete!"
