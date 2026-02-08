@@ -29,13 +29,13 @@ export async function initializeMMLConverter(): Promise<boolean> {
 
         // Import mmlabc-to-smf-rust WASM
         // @ts-ignore - WASM module generated at build time
-        const mmlModule = await import('../lib/mmlabc-to-smf-pkg/mmlabc_to_smf.js');
+        const mmlModule = await import('../../lib/mmlabc-to-smf-pkg/mmlabc_to_smf.js');
         await mmlModule.default();
         mmlToSMFWasm = mmlModule as unknown as MMLtoSMFModule;
 
         // Import smf-to-ym2151log-rust WASM
         // @ts-ignore - WASM module generated at build time
-        const smfModule = await import('../lib/smf-to-ym2151log-pkg/smf_to_ym2151log.js');
+        const smfModule = await import('../../lib/smf-to-ym2151log-pkg/smf_to_ym2151log.js');
         await smfModule.default();
         smfToYM2151Wasm = smfModule as unknown as SMFtoYM2151Module;
 

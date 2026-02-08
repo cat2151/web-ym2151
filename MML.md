@@ -50,9 +50,11 @@ Two Rust libraries compiled to WebAssembly are used:
 
 1. **mmlabc-to-smf-rust** - Converts MML to Standard MIDI File format
    - Repository: https://github.com/cat2151/mmlabc-to-smf-rust
+   - Pinned commit: `23a01aec14aba51f91ec4c264eebf0af9dfc735d`
 
 2. **smf-to-ym2151log-rust** - Converts SMF to YM2151 register log JSON
    - Repository: https://github.com/cat2151/smf-to-ym2151log-rust
+   - Pinned commit: `9204374692f166f2b24cd1daba504b81d7ee3a02`
 
 ### Setup
 
