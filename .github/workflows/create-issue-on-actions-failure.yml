@@ -33,9 +33,9 @@ jobs:
               `${workflowName} workflow failed.`,
               '',
               '## Details',
-              `- Branch: \\`${headBranch}\\``,
-              `- Commit: \\`${shortSha}\\``,
-              `- Event: \\`${workflow_run.event}\\``,
+              `- Branch: \`${headBranch}\``,
+              `- Commit: \`${shortSha}\``,
+              `- Event: \`${workflow_run.event}\``,
               `- Workflow run: ${runUrl}`,
             ].join('\n');
 
@@ -88,8 +88,8 @@ jobs:
                 body: [
                   'Another failure detected.',
                   '',
-                  `- Branch: \\`${headBranch}\\``,
-                  `- Commit: \\`${shortSha}\\``,
+                  `- Branch: \`${headBranch}\``,
+                  `- Commit: \`${shortSha}\``,
                   `- Workflow run: ${runUrl}`,
                 ].join('\n'),
               });
