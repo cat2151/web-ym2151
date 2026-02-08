@@ -29,7 +29,9 @@ function getCurrentJsonContent(): string | null {
  */
 function getAudioData(): AudioData | null {
     const currentJson = getCurrentJsonContent();
-    if (!currentJson) {
+    // Only return early if the textarea is missing; let generateAudioBuffers()
+    // handle empty/invalid JSON so users still get feedback.
+    if (currentJson === null) {
         return null;
     }
 
