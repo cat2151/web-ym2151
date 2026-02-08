@@ -1,71 +1,28 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-echo "Setting up MML to YM2151 conversion libraries..."
+echo "Setting up MML to YM2151 conversion libraries (prebuilt, no Rust toolchain)..."
 
-# Note: We always use the latest version from main branch
-# Version pinning is prohibited for cat2151 libraries due to daily critical bug fixes
-# See .github/AGENT_INSTRUCTIONS.md for details
+mkdir -p lib/mmlabc-to-smf-pkg lib/smf-to-ym2151log-pkg
 
-# Create lib directory if it doesn't exist
-mkdir -p lib
-
-ensure_cdylib_crate_type() {
-    if ! grep -Eq '^[[:space:]]*crate-type[[:space:]]*=' Cargo.toml; then
-        if grep -Eq '^\[lib\]' Cargo.toml; then
-            perl -0777 -pe 's/^\[lib\][ \t]*\r?\n/[lib]\ncrate-type = ["cdylib", "rlib"]\n/m' -i Cargo.toml
-        else
-            cat <<'EOF' >> Cargo.toml
-
-[lib]
-crate-type = ["cdylib", "rlib"]
-EOF
-        fi
-    fi
+download() {
+    local url="$1"
+    local dest="$2"
+    echo "Downloading $(basename "$dest") from $(dirname "$url")"
+    curl -fL "$url" -o "$dest"
 }
 
-# Clone and build mmlabc-to-smf-rust
-if [ ! -d "lib/mmlabc-to-smf-rust" ]; then
-    echo "Cloning mmlabc-to-smf-rust..."
-    git clone https://github.com/cat2151/mmlabc-to-smf-rust.git lib/mmlabc-to-smf-rust
-fi
+MML_BASE="https://cat2151.github.io/mmlabc-to-smf-rust/mmlabc-to-smf-wasm/pkg"
+download "${MML_BASE}/mmlabc_to_smf_wasm.js" "lib/mmlabc-to-smf-pkg/mmlabc_to_smf_wasm.js"
+download "${MML_BASE}/mmlabc_to_smf_wasm_bg.wasm" "lib/mmlabc-to-smf-pkg/mmlabc_to_smf_wasm_bg.wasm"
+download "${MML_BASE}/package.json" "lib/mmlabc-to-smf-pkg/package.json"
 
-cd lib/mmlabc-to-smf-rust
-echo "Pulling latest changes from mmlabc-to-smf-rust..."
-git fetch origin
-git checkout main
-git pull origin main
-CURRENT_COMMIT=$(git rev-parse --short HEAD)
-echo "Building mmlabc-to-smf-rust WASM package..."
-cd mmlabc-to-smf-wasm
-ensure_cdylib_crate_type
-rm -rf ../../../lib/mmlabc-to-smf-pkg
-wasm-pack build --target web
-mv pkg ../../../lib/mmlabc-to-smf-pkg
-git checkout -- Cargo.toml
-cd ..
-cd ../..
-
-# Clone and build smf-to-ym2151log-rust
-if [ ! -d "lib/smf-to-ym2151log-rust" ]; then
-    echo "Cloning smf-to-ym2151log-rust..."
-    git clone https://github.com/cat2151/smf-to-ym2151log-rust.git lib/smf-to-ym2151log-rust
-fi
-
-cd lib/smf-to-ym2151log-rust
-echo "Pulling latest changes from smf-to-ym2151log-rust..."
-git fetch origin
-git checkout main
-git pull origin main
-ensure_cdylib_crate_type
-CURRENT_COMMIT2=$(git rev-parse --short HEAD)
-echo "Building smf-to-ym2151log-rust WASM package..."
-rm -rf ../../lib/smf-to-ym2151log-pkg
-wasm-pack build --target web --features wasm
-mv pkg ../../lib/smf-to-ym2151log-pkg
-git checkout -- Cargo.toml
-cd ../..
+SMF_BASE="https://cat2151.github.io/smf-to-ym2151log-rust/pkg"
+download "${SMF_BASE}/smf_to_ym2151log.js" "lib/smf-to-ym2151log-pkg/smf_to_ym2151log.js"
+download "${SMF_BASE}/smf_to_ym2151log_bg.wasm" "lib/smf-to-ym2151log-pkg/smf_to_ym2151log_bg.wasm"
+download "${SMF_BASE}/smf_to_ym2151log.d.ts" "lib/smf-to-ym2151log-pkg/smf_to_ym2151log.d.ts"
+download "${SMF_BASE}/package.json" "lib/smf-to-ym2151log-pkg/package.json"
 
 echo "✓ MML libraries setup complete!"
-echo "  - mmlabc-to-smf: lib/mmlabc-to-smf-pkg/ (latest: ${CURRENT_COMMIT})"
-echo "  - smf-to-ym2151log: lib/smf-to-ym2151log-pkg/ (latest: ${CURRENT_COMMIT2})"
+echo "  - mmlabc-to-smf: lib/mmlabc-to-smf-pkg/ (prebuilt download)"
+echo "  - smf-to-ym2151log: lib/smf-to-ym2151log-pkg/ (prebuilt download)"
