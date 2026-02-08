@@ -1,0 +1,104 @@
+name: Create Issue on Actions Failure
+
+on:
+  workflow_run:
+    workflows:
+      - Build and Deploy
+    types:
+      - completed
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Create issue for failed workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { workflow_run } = context.payload;
+            const workflowName = workflow_run.name;
+            const runUrl = workflow_run.html_url;
+            const headBranch = workflow_run.head_branch || 'unknown';
+            const headSha = workflow_run.head_sha || '';
+            const shortSha = headSha ? headSha.substring(0, 7) : 'unknown';
+            const title = `[CI] ${workflowName} failure on ${headBranch}`;
+
+            const body = [
+              `${workflowName} workflow failed.`,
+              '',
+              '## Details',
+              `- Branch: \\`${headBranch}\\``,
+              `- Commit: \\`${shortSha}\\``,
+              `- Event: \\`${workflow_run.event}\\``,
+              `- Workflow run: ${runUrl}`,
+            ].join('\n');
+
+            const labelName = 'ci-failure';
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName,
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                    color: 'B60205',
+                    description: 'Created automatically when CI workflows fail',
+                  });
+                } catch (createError) {
+                  if (createError.status !== 422) {
+                    throw createError;
+                  }
+                }
+              } else {
+                throw error;
+              }
+            }
+
+            const searchQuery = [
+              `repo:${context.repo.owner}/${context.repo.repo}`,
+              'is:issue',
+              'is:open',
+              `label:"${labelName}"`,
+              'in:title',
+              title
+            ].join(' ');
+            const searchResult = await github.rest.search.issuesAndPullRequests({
+              q: searchQuery,
+              per_page: 100,
+            });
+            const existing = searchResult.data.items.find(item => !item.pull_request && item.title === title);
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: [
+                  'Another failure detected.',
+                  '',
+                  `- Branch: \\`${headBranch}\\``,
+                  `- Commit: \\`${shortSha}\\``,
+                  `- Workflow run: ${runUrl}`,
+                ].join('\n'),
+              });
+              core.info(`Added comment to existing issue #${existing.number}`);
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [labelName, 'bug'],
+              });
+              core.info('Created new issue for workflow failure');
+            }
