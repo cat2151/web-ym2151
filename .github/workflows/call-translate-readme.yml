@@ -9,10 +9,14 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   call-shared-workflow:
     uses: cat2151/github-actions/.github/workflows/translate-readme.yml@main
     with:
-      target-branch: main
+      target-branch: ${{ github.ref_name }}
     secrets:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

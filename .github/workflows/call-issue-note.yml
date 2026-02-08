@@ -4,11 +4,15 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   call-reusable-issue-note:
     uses: cat2151/github-actions/.github/workflows/issue-note.yml@main
     with:
-      issue_number: "${{ github.event.issue.number }}"
+      issue_number: ${{ github.event.issue.number }}
       issue_title: ${{ github.event.issue.title }}
       issue_body: ${{ github.event.issue.body }}
       issue_html_url: ${{ github.event.issue.html_url }}
