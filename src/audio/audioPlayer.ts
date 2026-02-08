@@ -12,6 +12,7 @@ let audioContext: AudioContext | null = null;
 // Cache for generated audio to avoid redundant generation
 let cachedJsonContent: string | null = null;
 let cachedAudioData: AudioData | null = null;
+let cachedMaxAmplitude: number | null = null;
 
 /**
  * Get current JSON editor content
@@ -48,8 +49,26 @@ function getAudioData(): AudioData | null {
         // Update cache
         cachedJsonContent = currentJson;
         cachedAudioData = audioData;
+        // Clear cached max amplitude when audio data changes
+        cachedMaxAmplitude = null;
     }
     return audioData;
+}
+
+/**
+ * Calculate maximum amplitude from audio buffer
+ */
+function calculateMaxAmplitude(audioData: AudioData): number {
+    let maxAmplitude = 0;
+
+    // Check both left and right channels
+    for (let i = 0; i < audioData.left.length; i++) {
+        const absLeft = Math.abs(audioData.left[i]);
+        const absRight = Math.abs(audioData.right[i]);
+        maxAmplitude = Math.max(maxAmplitude, absLeft, absRight);
+    }
+
+    return maxAmplitude;
 }
 
 /**
@@ -64,15 +83,22 @@ export function playAudio(): void {
     if (!audioContext) {
         audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    
+
+    // Calculate maximum amplitude from entire buffer for consistent normalization
+    // Use cached value if available to avoid rescanning on repeated playback
+    if (cachedMaxAmplitude === null) {
+        cachedMaxAmplitude = calculateMaxAmplitude(audioData);
+    }
+    const maxAmplitude = cachedMaxAmplitude;
+
     const audioBuffer = audioContext.createBuffer(2, audioData.left.length, OPM_SAMPLE_RATE);
-    
+
     audioBuffer.getChannelData(0).set(audioData.left);
     audioBuffer.getChannelData(1).set(audioData.right);
-    
+
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    startRealtimeVisualization(source, audioContext);
+    startRealtimeVisualization(source, audioContext, maxAmplitude);
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
@@ -107,5 +133,6 @@ export function playAudioWithOverlay(): void {
 export function clearAudioCache(): void {
     cachedJsonContent = null;
     cachedAudioData = null;
+    cachedMaxAmplitude = null;
     console.log("Audio cache cleared");
 }

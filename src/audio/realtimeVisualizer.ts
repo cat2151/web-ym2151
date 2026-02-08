@@ -26,6 +26,7 @@ let currentGain = 1.0;
 let targetGain = 1.0;
 const GAIN_INTERPOLATION = 0.1;
 const TARGET_AMPLITUDE = 0.8; // Use 80% of canvas height
+let bufferMaxAmplitude: number = 1.0; // Maximum amplitude across entire buffer
 
 const WAVEFORM_COLOR = '#4a90e2';
 const FFT_COLOR = '#f6a821';
@@ -182,20 +183,11 @@ function findBestCorrelationPosition(
 }
 
 /**
- * Calculate auto-gain to normalize amplitude
+ * Calculate auto-gain to normalize amplitude based on buffer-wide maximum
  */
-function calculateAutoGain(samples: Float32Array): number {
-    let maxAmplitude = 0;
-
-    for (let i = 0; i < samples.length; i++) {
-        const abs = Math.abs(samples[i]);
-        if (abs > maxAmplitude) {
-            maxAmplitude = abs;
-        }
-    }
-
-    if (maxAmplitude > 0.001) {
-        return TARGET_AMPLITUDE / maxAmplitude;
+function calculateAutoGain(): number {
+    if (bufferMaxAmplitude > 0.001) {
+        return TARGET_AMPLITUDE / bufferMaxAmplitude;
     }
 
     return 1.0;
@@ -246,8 +238,8 @@ function drawWaveform(): void {
     // Extract the segment to display
     const displaySamples = samples.slice(startIndex, endIndex);
 
-    // Calculate and apply auto-gain
-    targetGain = calculateAutoGain(displaySamples);
+    // Calculate and apply auto-gain based on buffer-wide maximum
+    targetGain = calculateAutoGain();
     currentGain += (targetGain - currentGain) * GAIN_INTERPOLATION;
 
     // Draw the waveform
@@ -347,13 +339,30 @@ export function initializeRealtimeVisualizer(): void {
 /**
  * Start realtime visualization for the given source.
  * Connects source -> analyser -> destination and starts a ~60 FPS render loop.
+ *
+ * @param source - The audio source to visualize
+ * @param context - The audio context
+ * @param maxAmplitude - Optional maximum amplitude from entire buffer for consistent normalization
  */
 export function startRealtimeVisualization(
     source: AudioBufferSourceNode,
-    context: AudioContext
+    context: AudioContext,
+    maxAmplitude?: number
 ): void {
     ensureCanvasContexts();
     const analyser = ensureAnalyser(context);
+
+    // Reset visualization state to avoid cross-playback artifacts
+    previousWaveform = null;
+    currentGain = 1.0;
+    targetGain = 1.0;
+
+    // Set buffer-wide maximum amplitude if provided
+    if (maxAmplitude !== undefined && maxAmplitude > 0) {
+        bufferMaxAmplitude = maxAmplitude;
+    } else {
+        bufferMaxAmplitude = 1.0; // Reset to default if not provided
+    }
 
     if (!analyser) {
         // Fallback: ensure audio still plays even if analyser cannot be created
