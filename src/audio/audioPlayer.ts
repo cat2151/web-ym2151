@@ -12,6 +12,7 @@ let audioContext: AudioContext | null = null;
 // Cache for generated audio to avoid redundant generation
 let cachedJsonContent: string | null = null;
 let cachedAudioData: AudioData | null = null;
+let cachedMaxAmplitude: number | null = null;
 
 /**
  * Get current JSON editor content
@@ -48,6 +49,8 @@ function getAudioData(): AudioData | null {
         // Update cache
         cachedJsonContent = currentJson;
         cachedAudioData = audioData;
+        // Clear cached max amplitude when audio data changes
+        cachedMaxAmplitude = null;
     }
     return audioData;
 }
@@ -82,7 +85,11 @@ export function playAudio(): void {
     }
 
     // Calculate maximum amplitude from entire buffer for consistent normalization
-    const maxAmplitude = calculateMaxAmplitude(audioData);
+    // Use cached value if available to avoid rescanning on repeated playback
+    if (cachedMaxAmplitude === null) {
+        cachedMaxAmplitude = calculateMaxAmplitude(audioData);
+    }
+    const maxAmplitude = cachedMaxAmplitude;
 
     const audioBuffer = audioContext.createBuffer(2, audioData.left.length, OPM_SAMPLE_RATE);
 
@@ -126,5 +133,6 @@ export function playAudioWithOverlay(): void {
 export function clearAudioCache(): void {
     cachedJsonContent = null;
     cachedAudioData = null;
+    cachedMaxAmplitude = null;
     console.log("Audio cache cleared");
 }

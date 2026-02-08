@@ -352,6 +352,11 @@ export function startRealtimeVisualization(
     ensureCanvasContexts();
     const analyser = ensureAnalyser(context);
 
+    // Reset visualization state to avoid cross-playback artifacts
+    previousWaveform = null;
+    currentGain = 1.0;
+    targetGain = 1.0;
+
     // Set buffer-wide maximum amplitude if provided
     if (maxAmplitude !== undefined && maxAmplitude > 0) {
         bufferMaxAmplitude = maxAmplitude;
