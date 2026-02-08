@@ -1,0 +1,77 @@
+# 大きなファイル検出設定
+# Configuration for detecting large files
+
+[settings]
+# 行数の閾値（この値を超えた場合にissueを起票）
+max_lines = 500
+
+# issue作成時のラベル
+issue_labels = ["refactoring", "code-quality", "automated"]
+
+# issueのタイトルテンプレート
+issue_title = "大きなファイルの検出: {count}個のファイルが{max_lines}行を超えています"
+
+[scan]
+# スキャン対象のファイルパターン（glob形式）
+# すべてのファイルを対象とし、除外パターンでフィルタリング
+include_patterns = [
+    "**/*",
+]
+
+# 除外するディレクトリパターン
+exclude_patterns = [
+    # Workflow temporary directory (automatically excluded by the workflow)
+    # ".github/actions-tmp/**",
+
+    # ビルド成果物・依存関係
+    "**/node_modules/**",
+    "**/dist/**",
+    "dist/**",
+    "**/build/**",
+    "**/pkg/**",
+    "**/public/wasm/**",
+    "**/.git/**",
+    "**/target/**",
+
+    # テストファイル
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.test.js",
+    "**/*.test.jsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.spec.js",
+    "**/*.spec.jsx",
+
+    # ドキュメント・設定ファイル（拡張子で除外）
+    "**/*.md",
+    "**/*.json",
+    "**/*.yml",
+    "**/*.yaml",
+    "**/*.toml",
+    "**/*.lock",
+    "**/*.html",
+    "**/*.css",
+
+    # ビルド成果物（拡張子で除外）
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "**/*.js.map",
+    "**/*.mjs",
+    "**/*.wasm",
+
+    # その他の非ソースファイル
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.gif",
+    "**/*.svg",
+    "**/*.ico",
+    "**/.gitignore",
+    "**/LICENSE",
+]
+
+# 除外する特定のファイル（ファイルパスで指定）
+exclude_files = [
+    # 例: "src/legacy/LargeOldFile.ts",
+]
