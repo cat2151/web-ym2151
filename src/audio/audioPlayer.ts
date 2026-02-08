@@ -53,6 +53,22 @@ function getAudioData(): AudioData | null {
 }
 
 /**
+ * Calculate maximum amplitude from audio buffer
+ */
+function calculateMaxAmplitude(audioData: AudioData): number {
+    let maxAmplitude = 0;
+
+    // Check both left and right channels
+    for (let i = 0; i < audioData.left.length; i++) {
+        const absLeft = Math.abs(audioData.left[i]);
+        const absRight = Math.abs(audioData.right[i]);
+        maxAmplitude = Math.max(maxAmplitude, absLeft, absRight);
+    }
+
+    return maxAmplitude;
+}
+
+/**
  * Play audio from current JSON editor content
  */
 export function playAudio(): void {
@@ -64,15 +80,18 @@ export function playAudio(): void {
     if (!audioContext) {
         audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    
+
+    // Calculate maximum amplitude from entire buffer for consistent normalization
+    const maxAmplitude = calculateMaxAmplitude(audioData);
+
     const audioBuffer = audioContext.createBuffer(2, audioData.left.length, OPM_SAMPLE_RATE);
-    
+
     audioBuffer.getChannelData(0).set(audioData.left);
     audioBuffer.getChannelData(1).set(audioData.right);
-    
+
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    startRealtimeVisualization(source, audioContext);
+    startRealtimeVisualization(source, audioContext, maxAmplitude);
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
