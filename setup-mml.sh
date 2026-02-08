@@ -19,8 +19,8 @@ fi
 cd lib/mmlabc-to-smf-rust
 echo "Pulling latest changes from mmlabc-to-smf-rust..."
 git fetch origin
-git checkout origin/main
-git pull
+git checkout main
+git pull origin main
 CURRENT_COMMIT=$(git rev-parse --short HEAD)
 echo "Building mmlabc-to-smf-rust WASM package..."
 wasm-pack build --target web --out-dir ../../lib/mmlabc-to-smf-pkg
@@ -35,8 +35,8 @@ fi
 cd lib/smf-to-ym2151log-rust
 echo "Pulling latest changes from smf-to-ym2151log-rust..."
 git fetch origin
-git checkout origin/main
-git pull
+git checkout main
+git pull origin main
 CURRENT_COMMIT2=$(git rev-parse --short HEAD)
 echo "Building smf-to-ym2151log-rust WASM package..."
 wasm-pack build --target web --features wasm --out-dir ../../lib/smf-to-ym2151log-pkg
