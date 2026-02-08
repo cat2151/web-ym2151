@@ -18,10 +18,21 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-    
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Install wasm-pack
+      run: cargo install wasm-pack --version 0.12.1 --locked
+
     - name: Install dependencies
       run: npm ci
-    
+
+    - name: Setup MML Libraries
+      run: ./setup-mml.sh
+
     - name: Build TypeScript
       run: npm run build
     

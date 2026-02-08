@@ -17,6 +17,7 @@ export * from './autoplay';
 export * from './midi';
 export * from './random-tone';
 export * from './oscilloscope';
+export * from './mml';
 export * from './app';
 
 // Import necessary functions for global scope
@@ -38,6 +39,7 @@ import {
     importRandomConfig 
 } from './random-tone';
 import { toggleOscilloscopeSection } from './oscilloscope';
+import { playMMLInput } from './mml/playback';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
@@ -63,6 +65,7 @@ declare global {
         exportRandomConfig: typeof exportRandomConfig;
         importRandomConfig: typeof importRandomConfig;
         toggleOscilloscopeSection: typeof toggleOscilloscopeSection;
+        playMML: typeof playMMLInput;
     }
 }
 
@@ -92,4 +95,5 @@ if (typeof window !== 'undefined') {
     window.exportRandomConfig = exportRandomConfig;
     window.importRandomConfig = importRandomConfig;
     window.toggleOscilloscopeSection = toggleOscilloscopeSection;
+    window.playMML = playMMLInput;
 }

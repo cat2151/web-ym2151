@@ -165,6 +165,11 @@ textarea {
     height: 150px;
     background: #f8fff8;
 }
+#mmlInput {
+    height: 100px;
+    background: #fffef8;
+    border: 2px solid #f0ad4e;
+}
 .info { margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
 h1 { margin-bottom: 5px; }
 .editor-label { margin-top: 20px; font-weight: bold; display: block; }
