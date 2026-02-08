@@ -2,7 +2,7 @@
 
 <p align="left">
   <a href="README.ja.md"><img src="https://img.shields.io/badge/🇯🇵-Japanese-red.svg" alt="Japanese"></a>
-  <a href="README.md"><img src="https://img.shields.io/badge/🇺🇸-English-blue.svg" alt="English"></a>
+  <a href="README.md"><img src="https://img.shields.io/badge/🇯🇵-Japanese_(main)-red.svg" alt="Japanese (main)"></a>
   <a href="https://deepwiki.com/cat2151/web-ym2151"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   <a href="https://cat2151.github.io/web-ym2151/"><img src="https://img.shields.io/badge/🌐-Live_Demo-green.svg" alt="Live Demo"></a>
 </p>
