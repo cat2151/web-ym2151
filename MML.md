@@ -66,7 +66,7 @@ The WASM libraries are set up during the build process:
 ./setup-mml.sh
 ```
 
-This script downloads the latest prebuilt WASM bundles published to GitHub Pages and places them in `lib/`, so no local Rust toolchain is required.
+This script downloads the latest published prebuilt WASM bundles from GitHub Pages (produced by the CI/CD workflow) and places them in `lib/`, so no local Rust toolchain is required.
 
 ### Module Structure
 
