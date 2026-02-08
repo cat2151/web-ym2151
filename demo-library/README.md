@@ -35,11 +35,19 @@ npm install cat2151/web-ym2151#v1.0.0
 npm install cat2151/web-ym2151#commit-hash
 ```
 
-### 2. Build or obtain WASM files
+### 2. Obtain WASM files
 
-The web-ym2151 library requires WASM files for the YM2151 emulator. These files are **not included in the repository** and must be either built or obtained from the deployed GitHub Pages site.
+The web-ym2151 library requires WASM files for the YM2151 emulator. When installing from GitHub, prebuilt files are already included.
 
-**Option A: Use prebuilt WASM from GitHub Pages (easiest)**
+**Option A: Use bundled WASM from the GitHub npm install (recommended)**
+
+```bash
+# Files are included in the package after install
+cp node_modules/web-ym2151/sine_test.js .
+cp node_modules/web-ym2151/sine_test.wasm .
+```
+
+**Option B: Use prebuilt WASM from GitHub Pages**
 
 ```bash
 # Download WASM files from the deployed site
@@ -47,7 +55,7 @@ curl -O https://cat2151.github.io/web-ym2151/sine_test.js
 curl -O https://cat2151.github.io/web-ym2151/sine_test.wasm
 ```
 
-**Option B: Build WASM yourself (requires Emscripten)**
+**Option C: Build WASM yourself (requires Emscripten)**
 
 ```bash
 # After npm install, navigate to the installed package

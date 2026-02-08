@@ -168,20 +168,19 @@
     <div class="info-box">
       <h3>📦 Installation (npm / GitHub source)</h3>
       <p>This demo shows how to use web-ym2151 as a library in your own project for YM2151 FM synthesis and waveform rendering.</p>
-      <pre><code># Option 1: Use from deployed GitHub Pages (easiest for testing)
-# Copy WASM files from the deployed site:
+      <pre><code># Option 1: Install from GitHub source (WASM bundled)
+npm install cat2151/web-ym2151
+cp node_modules/web-ym2151/sine_test.js .
+cp node_modules/web-ym2151/sine_test.wasm .
+
+# Option 2: Download prebuilt WASM from the deployed site
 curl -O https://cat2151.github.io/web-ym2151/sine_test.js
 curl -O https://cat2151.github.io/web-ym2151/sine_test.wasm
 
-# Option 2: Install from GitHub source (requires Emscripten build)
-npm install cat2151/web-ym2151
+# Option 3: Build WASM yourself (requires Emscripten SDK)
 cd node_modules/web-ym2151
-
-# Build WASM (requires Emscripten SDK)
 npm install
 ./build.sh --build-only
-
-# Copy generated WASM files to your project
 cp sine_test.js ../../
 cp sine_test.wasm ../../</code></pre>
     </div>
