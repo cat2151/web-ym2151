@@ -35,6 +35,7 @@
         <br><br>
         
         <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button>
+        <button onclick="playMML()" title="Play MML input">🎵 Play MML</button>
         <button onclick="playAudio()">Play</button>
         <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
         <span class="waveform-preview">
@@ -113,6 +114,9 @@
             </div>
         </div>
     </div>
+
+    <label class="editor-label" for="mmlInput">MML Input (Music Macro Language):</label>
+    <textarea id="mmlInput" spellcheck="false" placeholder="Enter MML notation (e.g., 'cdefgab' for scale, 'c;e;g' for chord). Press 🎵 Play MML button to convert and play."></textarea>
 
     <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
     <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params). Load a preset tone to see format examples."></textarea>
