@@ -55,19 +55,22 @@ build_smf_pkg_from_source() {
     echo "Primary download failed; building smf-to-ym2151log from source (main branch)..."
     local tmp_dir
     tmp_dir=$(mktemp -d)
-    git clone --depth 1 "$SMF_SOURCE_REPO" "$tmp_dir"
+    git clone --depth 1 --branch main "$SMF_SOURCE_REPO" "$tmp_dir"
     pushd "$tmp_dir" >/dev/null
+    trap 'popd >/dev/null 2>&1; rm -rf "$tmp_dir"' RETURN
+    if ! command -v cargo >/dev/null 2>&1 || ! command -v rustup >/dev/null 2>&1; then
+        echo "Rust toolchain (cargo/rustup) is required for fallback build. Please install rustup (https://rustup.rs/) and retry." >&2
+        exit 1
+    fi
     if ! command -v wasm-pack >/dev/null 2>&1; then
         echo "wasm-pack not found; installing ${WASM_PACK_VERSION}..."
         cargo install wasm-pack --version "${WASM_PACK_VERSION}" --locked
     fi
     rustup target add wasm32-unknown-unknown
     wasm-pack build --target web --features wasm
-    popd >/dev/null
     rm -rf lib/smf-to-ym2151log-pkg
     mkdir -p lib/smf-to-ym2151log-pkg
     cp "$tmp_dir/pkg/"* lib/smf-to-ym2151log-pkg/
-    rm -rf "$tmp_dir"
 }
 
 if ! download_smf_pkg; then
