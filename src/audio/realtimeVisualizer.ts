@@ -27,6 +27,7 @@ let targetGain = 1.0;
 const GAIN_INTERPOLATION = 0.1;
 const TARGET_AMPLITUDE = 0.8; // Use 80% of canvas height
 let bufferMaxAmplitude: number = 1.0; // Maximum amplitude across entire buffer
+let preferredFrequency: number | null = null;
 
 const WAVEFORM_COLOR = '#4a90e2';
 const FFT_COLOR = '#f6a821';
@@ -209,13 +210,16 @@ function drawWaveform(): void {
 
     // Estimate frequency
     const sampleRate = connectedContext?.sampleRate || 48000;
-    const frequency = estimateFrequency(samples, sampleRate);
+    const frequency =
+        preferredFrequency && preferredFrequency > 0
+            ? preferredFrequency
+            : estimateFrequency(samples, sampleRate);
 
     let startIndex = 0;
     let endIndex = samples.length;
 
     // If we have a valid frequency, show 4 cycles
-    if (frequency > 0) {
+    if (frequency && frequency > 0) {
         const cycleLength = sampleRate / frequency;
         const fourCyclesLength = Math.floor(cycleLength * CYCLES_TO_DISPLAY);
 
@@ -343,11 +347,13 @@ export function initializeRealtimeVisualizer(): void {
  * @param source - The audio source to visualize
  * @param context - The audio context
  * @param maxAmplitude - Optional maximum amplitude from entire buffer for consistent normalization
+ * @param frequencyHint - Optional base frequency hint derived from register data
  */
 export function startRealtimeVisualization(
     source: AudioBufferSourceNode,
     context: AudioContext,
-    maxAmplitude?: number
+    maxAmplitude?: number,
+    frequencyHint?: number
 ): void {
     ensureCanvasContexts();
     const analyser = ensureAnalyser(context);
@@ -363,6 +369,7 @@ export function startRealtimeVisualization(
     } else {
         bufferMaxAmplitude = 1.0; // Reset to default if not provided
     }
+    preferredFrequency = frequencyHint && frequencyHint > 0 ? frequencyHint : null;
 
     if (!analyser) {
         // Fallback: ensure audio still plays even if analyser cannot be created
@@ -426,6 +433,7 @@ export function stopRealtimeVisualization(): void {
         window.cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
+    preferredFrequency = null;
 
     if (currentSource && analyserNode) {
         try {

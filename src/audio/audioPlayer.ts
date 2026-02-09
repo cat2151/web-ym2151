@@ -98,7 +98,7 @@ export function playAudio(): void {
 
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    startRealtimeVisualization(source, audioContext, maxAmplitude);
+    startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate);
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
