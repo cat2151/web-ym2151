@@ -46,6 +46,7 @@ When adding external libraries or resources:
 2. **Add setup steps to CI/CD**: If files need setup scripts, add them to `.github/workflows/deploy.yml`
 3. **Test the full deployment pipeline**: Verify resources are available after deployment
 4. **Document setup requirements**: Update README and relevant documentation
+5. **Fail fast on cat2151 library 404s**: When cat2151-owned library assets (e.g., smf-to-ym2151log, mmlabc-to-smf) return 404 or similar, do not build from source as a fallback. Treat it as a publishing issue, surface the failure, and notify cat2151 instead of masking it.
 
 ### Common Issues to Check
 

@@ -22,11 +22,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Setup Rust toolchain (fallback build)
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: wasm32-unknown-unknown
-
     - name: Setup MML Libraries
       run: ./setup-mml.sh
 
