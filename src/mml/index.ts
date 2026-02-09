@@ -5,22 +5,64 @@
 
 // WASM module types will be imported dynamically
 type MMLtoSMFModule = {
-    mml_to_smf: (mml: string) => Uint8Array;
+    parse_tree_json_to_smf: (parseTreeJson: string, mmlSource: string) => Uint8Array;
 };
 
 type SMFtoYM2151Module = {
     smf_to_ym2151_json: (smfData: Uint8Array) => string;
 };
 
+type TreeSitterModule = {
+    Parser: {
+        init: (config?: { locateFile?: (scriptName: string, scriptDirectory?: string) => string }) => Promise<void>;
+        new (): TreeSitterParser;
+    };
+    Language: {
+        load: (path: string) => Promise<unknown>;
+    };
+};
+
+type TreeSitterParser = {
+    setLanguage: (language: unknown) => void;
+    parse: (input: string) => { rootNode: TreeSitterNode };
+};
+
+type TreeSitterPosition = {
+    row: number;
+    column: number;
+};
+
+type TreeSitterNode = {
+    type: string;
+    startIndex: number;
+    endIndex: number;
+    startPosition?: TreeSitterPosition;
+    endPosition?: TreeSitterPosition;
+    childCount: number;
+    child: (index: number) => TreeSitterNode;
+};
+
+type ParseTreeJSON = {
+    type: string;
+    startPosition?: TreeSitterPosition;
+    endPosition?: TreeSitterPosition;
+    text?: string;
+    children?: ParseTreeJSON[];
+};
+
 let mmlToSMFWasm: MMLtoSMFModule | null = null;
 let smfToYM2151Wasm: SMFtoYM2151Module | null = null;
-let wasmInitialized = false;
+let treeSitterParser: TreeSitterParser | null = null;
+let treeSitterLanguage: unknown | null = null;
+let mmlConverterReady = false;
+
+const TREE_SITTER_BASE_PATH = '../../lib/mml-parser/';
 
 /**
  * Initialize WASM modules for MML conversion
  */
 export async function initializeMMLConverter(): Promise<boolean> {
-    if (wasmInitialized) {
+    if (mmlConverterReady) {
         return true;
     }
 
@@ -39,7 +81,9 @@ export async function initializeMMLConverter(): Promise<boolean> {
         await smfModule.default();
         smfToYM2151Wasm = smfModule as unknown as SMFtoYM2151Module;
 
-        wasmInitialized = true;
+        await initializeTreeSitterParser();
+
+        mmlConverterReady = true;
         console.log('✓ MML converter WASM modules initialized successfully');
         return true;
     } catch (error) {
@@ -54,15 +98,18 @@ export async function initializeMMLConverter(): Promise<boolean> {
  * @returns JSON string with YM2151 events or error
  */
 export function convertMMLToYM2151JSON(mml: string): string | null {
-    if (!wasmInitialized || !mmlToSMFWasm || !smfToYM2151Wasm) {
-        console.error('MML converter WASM modules not initialized');
+    if (!mmlConverterReady || !mmlToSMFWasm || !smfToYM2151Wasm || !treeSitterParser || !treeSitterLanguage) {
+        console.error('MML converter modules not initialized');
         return null;
     }
 
     try {
+        console.log('Parsing MML to tree-sitter JSON...');
+        const parseTreeJson = buildParseTreeJSON(mml);
+
         // Step 1: Convert MML to SMF
         console.log('Converting MML to SMF...');
-        const smfData = mmlToSMFWasm.mml_to_smf(mml);
+        const smfData = mmlToSMFWasm.parse_tree_json_to_smf(JSON.stringify(parseTreeJson), mml);
         console.log(`✓ SMF generated (${smfData.length} bytes)`);
 
         // Step 2: Convert SMF to YM2151 JSON
@@ -81,5 +128,54 @@ export function convertMMLToYM2151JSON(mml: string): string | null {
  * Check if MML converter is ready
  */
 export function isMMLConverterReady(): boolean {
-    return wasmInitialized;
+    return mmlConverterReady;
+}
+
+async function initializeTreeSitterParser(): Promise<void> {
+    if (treeSitterParser && treeSitterLanguage) {
+        return;
+    }
+
+    // @ts-ignore - external ESM without types
+    const treeSitterModule = (await import('../../lib/mml-parser/web-tree-sitter.js')) as unknown as TreeSitterModule;
+    const { Parser, Language } = treeSitterModule;
+
+    await Parser.init({
+        locateFile: (scriptName: string) => `${TREE_SITTER_BASE_PATH}${scriptName}`
+    });
+
+    treeSitterLanguage = await Language.load(`${TREE_SITTER_BASE_PATH}tree-sitter-mml.wasm`);
+    treeSitterParser = new Parser();
+    treeSitterParser.setLanguage(treeSitterLanguage);
+}
+
+function buildParseTreeJSON(mml: string): ParseTreeJSON {
+    if (!treeSitterParser) {
+        throw new Error('Tree-sitter parser not initialized');
+    }
+
+    const tree = treeSitterParser.parse(mml);
+    return convertNodeToJSON(tree.rootNode, mml);
+}
+
+function convertNodeToJSON(node: TreeSitterNode, source: string): ParseTreeJSON {
+    const jsonNode: ParseTreeJSON = {
+        type: node.type
+    };
+
+    if (node.startPosition && node.endPosition) {
+        jsonNode.startPosition = { ...node.startPosition };
+        jsonNode.endPosition = { ...node.endPosition };
+    }
+
+    if (node.childCount === 0) {
+        jsonNode.text = source.substring(node.startIndex, node.endIndex);
+    } else {
+        jsonNode.children = [];
+        for (let i = 0; i < node.childCount; i++) {
+            jsonNode.children.push(convertNodeToJSON(node.child(i), source));
+        }
+    }
+
+    return jsonNode;
 }
