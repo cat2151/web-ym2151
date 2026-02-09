@@ -72,6 +72,67 @@ def create_issue(base_url, owner, repo, token, title, body, labels):
     )
 
 
+def build_issue_context(workflow_run):
+    workflow_name = workflow_run["name"]
+    run_url = workflow_run["html_url"]
+    head_branch = workflow_run.get("head_branch") or "unknown"
+    head_sha = workflow_run.get("head_sha") or ""
+    short_sha = head_sha[:7] if head_sha else "unknown"
+    return {
+        "workflow_name": workflow_name,
+        "run_url": run_url,
+        "head_branch": head_branch,
+        "short_sha": short_sha,
+        "title": f"[CI] {workflow_name} failure on {head_branch}",
+        "body": "\n".join(
+            [
+                f"{workflow_name} workflow failed.",
+                "",
+                "## Details",
+                f"- Branch: `{head_branch}`",
+                f"- Commit: `{short_sha}`",
+                f"- Event: `{workflow_run.get('event')}`",
+                f"- Workflow run: {run_url}",
+            ]
+        ),
+        "comment_body": "\n".join(
+            [
+                "Another failure detected.",
+                "",
+                f"- Branch: `{head_branch}`",
+                f"- Commit: `{short_sha}`",
+                f"- Workflow run: {run_url}",
+            ]
+        ),
+    }
+
+
+def resolve_issue(base_url, owner, repo, token, ctx, label):
+    ensure_label(base_url, owner, repo, token, label)
+    existing = search_issue(base_url, owner, repo, token, ctx["title"], label)
+
+    if existing:
+        status, issue = get_issue(base_url, owner, repo, token, existing["number"])
+        if status in (404, 410) or not issue or issue.get("state") != "open":
+            existing = None
+    return existing
+
+
+def ensure_issue_with_comment(base_url, owner, repo, token, ctx, label):
+    existing = resolve_issue(base_url, owner, repo, token, ctx, label)
+
+    if existing:
+        comment_status, _ = comment_issue(base_url, owner, repo, token, existing["number"], ctx["comment_body"])
+        if comment_status >= 400:
+            existing = None
+
+    if not existing:
+        status, _ = create_issue(base_url, owner, repo, token, ctx["title"], ctx["body"], [label, "bug"])
+        if status >= 300:
+            print(f"Failed to create issue (status {status})", file=sys.stderr)
+            sys.exit(1)
+
+
 def main():
     repo = os.environ["GITHUB_REPOSITORY"]
     owner, name = repo.split("/", 1)
@@ -81,53 +142,9 @@ def main():
         sys.exit(1)
 
     workflow_run = load_event()
-    workflow_name = workflow_run["name"]
-    run_url = workflow_run["html_url"]
-    head_branch = workflow_run.get("head_branch") or "unknown"
-    head_sha = workflow_run.get("head_sha") or ""
-    short_sha = head_sha[:7] if head_sha else "unknown"
-    title = f"[CI] {workflow_name} failure on {head_branch}"
-    body = "\n".join(
-        [
-          f"{workflow_name} workflow failed.",
-          "",
-          "## Details",
-          f"- Branch: `{head_branch}`",
-          f"- Commit: `{short_sha}`",
-          f"- Event: `{workflow_run.get('event')}`",
-          f"- Workflow run: {run_url}",
-        ]
-    )
-    label = "ci-failure"
+    context = build_issue_context(workflow_run)
     base_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
-
-    ensure_label(base_url, owner, name, token, label)
-    existing = search_issue(base_url, owner, name, token, title, label)
-
-    if existing:
-        status, issue = get_issue(base_url, owner, name, token, existing["number"])
-        if status in (404, 410) or not issue or issue.get("state") != "open":
-            existing = None
-
-    if existing:
-        comment_body = "\n".join(
-            [
-                "Another failure detected.",
-                "",
-                f"- Branch: `{head_branch}`",
-                f"- Commit: `{short_sha}`",
-                f"- Workflow run: {run_url}",
-            ]
-        )
-        comment_status, _ = comment_issue(base_url, owner, name, token, existing["number"], comment_body)
-        if comment_status >= 400:
-            existing = None
-
-    if not existing:
-        status, _ = create_issue(base_url, owner, name, token, title, body, [label, "bug"])
-        if status >= 300:
-            print(f"Failed to create issue (status {status})", file=sys.stderr)
-            sys.exit(1)
+    ensure_issue_with_comment(base_url, owner, name, token, context, "ci-failure")
 
 
 if __name__ == "__main__":
