@@ -6,6 +6,7 @@
 import { YM2151Event } from '../types';
 import { calculateDuration, updateDurationDisplay } from '../ui';
 import { OPM_SAMPLE_RATE } from '../constants';
+import { NOTE_TABLE } from '../midi/noteTable';
 
 /**
  * Audio data returned from generation
@@ -15,6 +16,93 @@ export interface AudioData {
     right: Float32Array;
     frames: number;
     duration: number;
+    frequencyEstimate?: number;
+}
+
+function parseHexByte(value: string | number): number | null {
+    const parsed = typeof value === 'number' ? value : parseInt(value, 16);
+    if (Number.isNaN(parsed)) {
+        return null;
+    }
+    return parsed & 0xff;
+}
+
+function kcToFrequencyHz(kc: number): number | null {
+    const noteCode = kc & 0x0f;
+    const block = (kc >> 4) & 0x07;
+    const noteIndex = NOTE_TABLE.indexOf(noteCode);
+    if (noteIndex === -1) {
+        return null;
+    }
+
+    const midiNote = (block + 2) * 12 + noteIndex + 1;
+    return 440 * Math.pow(2, (midiNote - 69) / 12);
+}
+
+function extractMinMul(events: YM2151Event[]): number | null {
+    let minMul: number | null = null;
+
+    events.forEach(evt => {
+        const addrValue = parseHexByte(evt.addr);
+        const dataValue = parseHexByte(evt.data);
+        if (addrValue === null || dataValue === null) {
+            return;
+        }
+
+        const opBase = addrValue & 0xf8;
+        const isMulRegister =
+            opBase === 0x40 || opBase === 0x48 || opBase === 0x50 || opBase === 0x58;
+        if (!isMulRegister) {
+            return;
+        }
+
+        const mulRaw = dataValue & 0x0f;
+        const multiplier = mulRaw === 0 ? 0.5 : mulRaw;
+        if (minMul === null || multiplier < minMul) {
+            minMul = multiplier;
+        }
+    });
+
+    return minMul;
+}
+
+function findLatestKc(events: YM2151Event[]): number | null {
+    let kc: number | null = null;
+    let latestTime = -Infinity;
+
+    events.forEach(evt => {
+        const addrValue = parseHexByte(evt.addr);
+        const dataValue = parseHexByte(evt.data);
+        if (addrValue === null || dataValue === null) {
+            return;
+        }
+
+        if ((addrValue & 0xf8) === 0x28) {
+            const time = parseFloat(evt.time as any);
+            if (!Number.isNaN(time) && time >= latestTime) {
+                latestTime = time;
+                kc = dataValue & 0x7f;
+            }
+        }
+    });
+
+    return kc;
+}
+
+function estimateFrequencyFromEvents(events: YM2151Event[]): number | null {
+    const kcValue = findLatestKc(events);
+    if (kcValue === null) {
+        return null;
+    }
+
+    const baseFrequency = kcToFrequencyHz(kcValue);
+    if (baseFrequency === null) {
+        return null;
+    }
+
+    const minMul = extractMinMul(events);
+    const mulScale = minMul ?? 1;
+    return baseFrequency * mulScale;
 }
 
 /**
@@ -53,6 +141,7 @@ export function generateAudioBuffers(): AudioData | null {
 
     const durationSec = calculateDuration(currentEvents);
     updateDurationDisplay(currentEvents);
+    const estimatedFrequency = estimateFrequencyFromEvents(currentEvents);
 
     // Generate samples at OPM sample rate
     const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
@@ -93,6 +182,7 @@ export function generateAudioBuffers(): AudioData | null {
         left: rawLeft,
         right: rawRight,
         frames: actualFrames,
-        duration: durationSec
+        duration: durationSec,
+        frequencyEstimate: estimatedFrequency ?? undefined
     };
 }
