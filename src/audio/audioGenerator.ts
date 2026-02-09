@@ -68,6 +68,7 @@ function extractMinMul(events: YM2151Event[]): number | null {
 
 function findLatestKc(events: YM2151Event[]): number | null {
     let kc: number | null = null;
+    let latestTime = -Infinity;
 
     events.forEach(evt => {
         const addrValue = parseHexByte(evt.addr);
@@ -77,7 +78,11 @@ function findLatestKc(events: YM2151Event[]): number | null {
         }
 
         if ((addrValue & 0xf8) === 0x28) {
-            kc = dataValue & 0x7f;
+            const time = parseFloat(evt.time as any);
+            if (!Number.isNaN(time) && time >= latestTime) {
+                latestTime = time;
+                kc = dataValue & 0x7f;
+            }
         }
     });
 
