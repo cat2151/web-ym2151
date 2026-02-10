@@ -29,8 +29,6 @@ exclude_patterns = [
     "dist/**",
     "**/build/**",
     "**/pkg/**",
-    # Legacy pre-TypeScript JS bundle (kept only for reference)
-    "js/**",
     "**/public/wasm/**",
     "**/.git/**",
     "**/target/**",

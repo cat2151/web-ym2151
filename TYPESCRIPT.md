@@ -95,7 +95,7 @@ All modules now have full TypeScript type annotations:
 
 ## Migration from JavaScript
 
-The original JavaScript files are still present in the `js/` directory but are no longer loaded by `index.html`. The HTML now loads `dist/index.js` as an ES module.
+The original monolithic JavaScript files have been fully replaced by the TypeScript build. They are no longer included in the repository; the HTML now loads `dist/index.js` as an ES module. The `Before` snippet below reflects the historical `js/` paths used prior to migration.
 
 ### Before
 ```html
