@@ -330,6 +330,12 @@ h1 { margin-bottom: 5px; }
         border-color: #444;
     }
     
+    #mmlInput {
+        background: #1f1f1f;
+        color: #f2f2f2;
+        border-color: #d48b2c;
+    }
+    
     #toneEditor {
         background: #1e2a1e;
         color: #e0e0e0;
