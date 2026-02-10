@@ -30,7 +30,7 @@ exclude_patterns = [
     "**/build/**",
     "**/pkg/**",
     # Legacy pre-TypeScript JS bundle (kept only for reference)
-    "js/**",
+    "legacy-js/**",
     "**/public/wasm/**",
     "**/.git/**",
     "**/target/**",

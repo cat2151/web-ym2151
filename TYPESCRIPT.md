@@ -95,17 +95,17 @@ All modules now have full TypeScript type annotations:
 
 ## Migration from JavaScript
 
-The original JavaScript files are still present in the `js/` directory but are no longer loaded by `index.html`. The HTML now loads `dist/index.js` as an ES module.
+The original JavaScript files are still present in the `legacy-js/` directory but are no longer loaded by `index.html`. The HTML now loads `dist/index.js` as an ES module.
 
 ### Before
 ```html
-<script src="js/constants.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/tone-editor.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/presets.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/emscripten-wrapper.js"></script>
+<script src="legacy-js/constants.js"></script>
+<script src="legacy-js/ui.js"></script>
+<script src="legacy-js/tone-editor.js"></script>
+<script src="legacy-js/audio.js"></script>
+<script src="legacy-js/presets.js"></script>
+<script src="legacy-js/storage.js"></script>
+<script src="legacy-js/emscripten-wrapper.js"></script>
 ```
 
 ### After

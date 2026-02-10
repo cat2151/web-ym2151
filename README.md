@@ -75,6 +75,7 @@ TypeScript化により、コードベースは以下のように整理されま�
 - **src/oscilloscope/** - 波形ビジュアライザ機能（cat-oscilloscope統合）
 - **src/mml/** - MML（Music Macro Language）入力機能
 - **src/** - その他のコアモジュール
+- **legacy-js/** - TypeScript移行前のJavaScript実装（参照用途のみでビルドには未使用）
 
 詳細は [TYPESCRIPT.md](./TYPESCRIPT.md) を参照してください。
 
