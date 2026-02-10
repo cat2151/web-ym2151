@@ -26,7 +26,8 @@ import {
     handleSaveSlot, 
     refreshSlotInfo, 
     exportAllSlots, 
-    importAllSlots 
+    importAllSlots,
+    initializeSlotUI 
 } from './storage';
 import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor, handlePresetChange } from './presets';
@@ -71,6 +72,8 @@ declare global {
 
 // Setup Emscripten Module configuration
 if (typeof window !== 'undefined') {
+    initializeSlotUI();
+
     window.Module = {
         onRuntimeInitialized: initializeApplication
     };
