@@ -1,4 +1,0 @@
-// OPM (YM2151) Constants
-const OPM_CLOCK = 3579545;
-const CLOCK_STEP = 64;
-const OPM_SAMPLE_RATE = OPM_CLOCK / CLOCK_STEP; // 約55930Hz
