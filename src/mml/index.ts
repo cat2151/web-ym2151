@@ -56,7 +56,7 @@ let treeSitterParser: TreeSitterParser | null = null;
 let treeSitterLanguage: unknown | null = null;
 let mmlConverterReady = false;
 
-const TREE_SITTER_BASE_PATH = '../../lib/mml-parser/';
+const TREE_SITTER_BASE_PATH = new URL('../../lib/mml-parser/', import.meta.url).toString();
 
 /**
  * Initialize WASM modules for MML conversion
@@ -141,10 +141,20 @@ async function initializeTreeSitterParser(): Promise<void> {
     const { Parser, Language } = treeSitterModule;
 
     await Parser.init({
-        locateFile: (scriptName: string) => `${TREE_SITTER_BASE_PATH}${scriptName}`
+        locateFile: (scriptName: string, scriptDirectory?: string) => {
+            if (scriptDirectory) {
+                const normalizedDir = scriptDirectory.endsWith('/') ? scriptDirectory : `${scriptDirectory}/`;
+                return `${normalizedDir}${scriptName}`;
+            }
+
+            const baseUrl = new URL(TREE_SITTER_BASE_PATH, import.meta.url);
+            return new URL(scriptName, baseUrl).toString();
+        }
     });
 
-    treeSitterLanguage = await Language.load(`${TREE_SITTER_BASE_PATH}tree-sitter-mml.wasm`);
+    const treeSitterBaseUrl = new URL(TREE_SITTER_BASE_PATH, import.meta.url);
+    const treeSitterWasmUrl = new URL('tree-sitter-mml.wasm', treeSitterBaseUrl);
+    treeSitterLanguage = await Language.load(treeSitterWasmUrl.toString());
     treeSitterParser = new Parser();
     treeSitterParser.setLanguage(treeSitterLanguage);
 }
