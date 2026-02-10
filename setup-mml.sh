@@ -3,8 +3,8 @@ set -euo pipefail
 
 echo "Setting up MML to YM2151 conversion libraries (prebuilt, no Rust toolchain)..."
 
-rm -rf lib/mmlabc-to-smf-pkg lib/smf-to-ym2151log-pkg
-mkdir -p lib/mmlabc-to-smf-pkg lib/smf-to-ym2151log-pkg
+rm -rf lib/mmlabc-to-smf-pkg lib/smf-to-ym2151log-pkg lib/mml-parser
+mkdir -p lib/mmlabc-to-smf-pkg lib/smf-to-ym2151log-pkg lib/mml-parser
 
 download() {
     local url="$1"
@@ -30,6 +30,7 @@ verify_sha() {
 
 MML_BASE="${MML_BASE:-https://cat2151.github.io/mmlabc-to-smf-rust/mmlabc-to-smf-wasm/pkg}"
 SMF_BASE="${SMF_BASE:-https://cat2151.github.io/smf-to-ym2151log-rust/pkg}"
+TREE_SITTER_BASE="${TREE_SITTER_BASE:-https://cat2151.github.io/mmlabc-to-smf-rust}"
 
 download "${MML_BASE}/mmlabc_to_smf_wasm.js" "lib/mmlabc-to-smf-pkg/mmlabc_to_smf_wasm.js"
 verify_sha "lib/mmlabc-to-smf-pkg/mmlabc_to_smf_wasm.js" "MML_JS_SHA256"
@@ -47,6 +48,14 @@ verify_sha "lib/smf-to-ym2151log-pkg/smf_to_ym2151log.d.ts" "SMF_DTS_SHA256"
 download "${SMF_BASE}/package.json" "lib/smf-to-ym2151log-pkg/package.json"
 verify_sha "lib/smf-to-ym2151log-pkg/package.json" "SMF_PKG_SHA256"
 
+download "${TREE_SITTER_BASE}/demo/web-tree-sitter.js" "lib/mml-parser/web-tree-sitter.js"
+verify_sha "lib/mml-parser/web-tree-sitter.js" "TREE_SITTER_JS_SHA256"
+download "${TREE_SITTER_BASE}/demo/web-tree-sitter.wasm" "lib/mml-parser/web-tree-sitter.wasm"
+verify_sha "lib/mml-parser/web-tree-sitter.wasm" "TREE_SITTER_WASM_SHA256"
+download "${TREE_SITTER_BASE}/tree-sitter-mml/tree-sitter-mml.wasm" "lib/mml-parser/tree-sitter-mml.wasm"
+verify_sha "lib/mml-parser/tree-sitter-mml.wasm" "MML_GRAMMAR_WASM_SHA256"
+
 echo "✓ MML libraries setup complete!"
 echo "  - mmlabc-to-smf: lib/mmlabc-to-smf-pkg/ (prebuilt download)"
 echo "  - smf-to-ym2151log: lib/smf-to-ym2151log-pkg/ (prebuilt download)"
+echo "  - tree-sitter parser: lib/mml-parser/ (web-tree-sitter + grammar)"
