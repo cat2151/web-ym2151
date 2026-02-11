@@ -19,13 +19,16 @@ let animationFrameId: number | null = null;
 let currentSource: AudioNode | null = null;
 let connectedContext: AudioContext | null = null;
 let analyserConnected = false;
+export type WaveformScalingMode = 'frame-dynamic' | 'buffer-max';
+let waveformScalingMode: WaveformScalingMode = 'frame-dynamic';
 
 // Enhanced visualization state
 let previousWaveform: Float32Array | null = null;
 let currentGain = 1.0;
 let targetGain = 1.0;
 const GAIN_INTERPOLATION = 0.1;
-const TARGET_AMPLITUDE = 0.8; // Use 80% of canvas height
+const FRAME_TARGET_AMPLITUDE = 0.95; // Use 95% of canvas height
+const BUFFER_TARGET_AMPLITUDE = 0.8; // Use 80% of canvas height
 let bufferMaxAmplitude: number = 1.0; // Maximum amplitude across entire buffer
 let preferredFrequency: number | null = null;
 
@@ -184,11 +187,32 @@ function findBestCorrelationPosition(
 }
 
 /**
- * Calculate auto-gain to normalize amplitude based on buffer-wide maximum
+ * Calculate auto-gain to normalize amplitude
  */
-function calculateAutoGain(): number {
+function calculateFrameMaxAmplitude(samples: Float32Array): number {
+    let maxAmplitude = 0;
+
+    for (let i = 0; i < samples.length; i++) {
+        const absValue = Math.abs(samples[i]);
+        if (absValue > maxAmplitude) {
+            maxAmplitude = absValue;
+        }
+    }
+
+    return maxAmplitude;
+}
+
+function calculateAutoGain(displaySamples: Float32Array): number {
+    if (waveformScalingMode === 'frame-dynamic') {
+        const frameMaxAmplitude = calculateFrameMaxAmplitude(displaySamples);
+        if (frameMaxAmplitude > 0.001) {
+            return FRAME_TARGET_AMPLITUDE / frameMaxAmplitude;
+        }
+        return 1.0;
+    }
+
     if (bufferMaxAmplitude > 0.001) {
-        return TARGET_AMPLITUDE / bufferMaxAmplitude;
+        return BUFFER_TARGET_AMPLITUDE / bufferMaxAmplitude;
     }
 
     return 1.0;
@@ -242,8 +266,8 @@ function drawWaveform(): void {
     // Extract the segment to display
     const displaySamples = samples.slice(startIndex, endIndex);
 
-    // Calculate and apply auto-gain based on buffer-wide maximum
-    targetGain = calculateAutoGain();
+    // Calculate and apply auto-gain based on selected scaling mode
+    targetGain = calculateAutoGain(displaySamples);
     currentGain += (targetGain - currentGain) * GAIN_INTERPOLATION;
 
     // Draw the waveform
@@ -450,4 +474,10 @@ export function stopRealtimeVisualization(): void {
     if (fftCanvas && fftCtx) {
         clearCanvas(fftCtx, fftCanvas.width, fftCanvas.height);
     }
+}
+
+export function setWaveformScalingMode(mode: WaveformScalingMode): void {
+    waveformScalingMode = mode;
+    currentGain = 1.0;
+    targetGain = 1.0;
 }
