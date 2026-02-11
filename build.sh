@@ -229,7 +229,7 @@ build_project() {
     
     print_info "コンパイル中..."
     
-    emcc sine_test.c opm.c -O3 \
+    emcc sine_test.c -O3 \
       -s WASM=1 \
       -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
       -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8']" \

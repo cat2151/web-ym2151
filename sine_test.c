@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <emscripten.h>
-#include "opm.h"
+#include "opm.c"
 
 // --- 定数定義 ---
 #define BUSY_CYCLES 128     
