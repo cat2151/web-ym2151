@@ -34,6 +34,7 @@ let preferredFrequency: number | null = null;
 
 const WAVEFORM_COLOR = '#4a90e2';
 const FFT_COLOR = '#f6a821';
+const FFT_MARKER_COLOR = '#cde2ff';
 const BACKGROUND_COLOR = '#0b0b0f';
 const CYCLES_TO_DISPLAY = 4;
 
@@ -299,6 +300,7 @@ function drawFFT(): void {
 
     const width = fftCanvas.width;
     const height = fftCanvas.height;
+    const sampleRate = connectedContext?.sampleRate ?? 48000;
 
     clearCanvas(fftCtx, width, height);
 
@@ -330,6 +332,30 @@ function drawFFT(): void {
 
         fftCtx.fillRect(x, y, barWidth, barHeight);
         x += barWidth;
+    }
+
+    const baseFrequency = preferredFrequency;
+    if (!baseFrequency || baseFrequency <= 0 || sampleRate <= 0) return;
+
+    const nyquist = sampleRate / 2;
+    if (nyquist <= 0 || baseFrequency >= nyquist) return;
+
+    const maxHarmonic = Math.min(Math.floor(nyquist / baseFrequency), 12);
+    if (maxHarmonic <= 0) return;
+
+    fftCtx.fillStyle = FFT_MARKER_COLOR;
+    fftCtx.font = '10px Arial';
+    fftCtx.textBaseline = 'top';
+
+    for (let harmonic = 1; harmonic <= maxHarmonic; harmonic++) {
+        const freq = baseFrequency * harmonic;
+        const xPos = (freq / nyquist) * width;
+        const text = `${harmonic}x`;
+        const textWidth = fftCtx.measureText(text).width;
+        const labelX = Math.min(Math.max(xPos - textWidth / 2, 0), width - textWidth);
+
+        fftCtx.fillRect(Math.round(xPos), 12, 1, height - 14);
+        fftCtx.fillText(text, labelX, 2);
     }
 }
 
