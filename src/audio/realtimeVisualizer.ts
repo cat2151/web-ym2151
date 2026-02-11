@@ -340,7 +340,10 @@ function drawFFT(): void {
     const nyquist = sampleRate / 2;
     if (nyquist <= 0 || baseFrequency >= nyquist) return;
 
-    const maxHarmonic = Math.min(Math.floor(nyquist / baseFrequency), 12);
+    let maxHarmonic = Math.min(Math.floor(nyquist / baseFrequency), 12);
+    while (maxHarmonic > 0 && baseFrequency * maxHarmonic >= nyquist) {
+        maxHarmonic--;
+    }
     if (maxHarmonic <= 0) return;
 
     fftCtx.fillStyle = FFT_MARKER_COLOR;
@@ -350,11 +353,12 @@ function drawFFT(): void {
     for (let harmonic = 1; harmonic <= maxHarmonic; harmonic++) {
         const freq = baseFrequency * harmonic;
         const xPos = (freq / nyquist) * width;
+        const clampedX = Math.min(Math.max(xPos, 0), width - 1);
         const text = `${harmonic}x`;
         const textWidth = fftCtx.measureText(text).width;
-        const labelX = Math.min(Math.max(xPos - textWidth / 2, 0), width - textWidth);
+        const labelX = Math.min(Math.max(clampedX - textWidth / 2, 0), width - textWidth);
 
-        fftCtx.fillRect(Math.round(xPos), 12, 1, height - 14);
+        fftCtx.fillRect(Math.round(clampedX), 12, 1, height - 14);
         fftCtx.fillText(text, labelX, 2);
     }
 }
