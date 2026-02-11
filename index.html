@@ -17,6 +17,13 @@
                 <canvas id="realtimeFFT" width="380" height="120" aria-label="Realtime frequency spectrum"></canvas>
             </div>
         </div>
+        <div class="visualizer-config">
+            <label for="waveformScaleMode"><strong>Waveform vertical scaling:</strong></label>
+            <select id="waveformScaleMode">
+                <option value="frame-dynamic" selected>Frame-based (expand to 95%)</option>
+                <option value="buffer-max">Normalize by overall maximum amplitude</option>
+            </select>
+        </div>
     </div>
 
     <h1>YM2151 JSON Editor</h1>

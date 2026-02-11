@@ -28,6 +28,17 @@ body {
     color: #cde2ff;
     margin-bottom: 4px;
 }
+.visualizer-config {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: #cde2ff;
+}
+.visualizer-config label {
+    font-size: 13px;
+}
 .realtime-visualizer canvas {
     width: 100%;
     display: block;
