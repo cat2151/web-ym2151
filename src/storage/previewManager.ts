@@ -118,11 +118,19 @@ export function previewSlot(slotNumber: number): void {
         
         // Play the preview
         previewState.markPreviewPlaybackActive();
-        try {
-            if (typeof (window as any).playAudio === 'function') {
+        if (typeof (window as any).playAudio === 'function') {
+            try {
+                // playAudioWithOverlay defers the real playAudio via setTimeout(..., 0).
+                // Keep the flag set through that deferred execution.
                 (window as any).playAudio();
+                window.setTimeout(() => {
+                    previewState.clearPreviewPlaybackActive();
+                }, 0);
+            } catch (e) {
+                previewState.clearPreviewPlaybackActive();
+                throw e;
             }
-        } finally {
+        } else {
             previewState.clearPreviewPlaybackActive();
         }
         
