@@ -15,6 +15,7 @@ class PreviewState {
     backup: PreviewBackup | null = null;
     lastPreviewedSlot: number | null = null;
     autoRestoreTimeout: number | null = null;
+    previewPlaybackActive = false;
 
     hasBackup(): boolean {
         return this.backup !== null;
@@ -53,6 +54,18 @@ class PreviewState {
             clearTimeout(this.autoRestoreTimeout);
             this.autoRestoreTimeout = null;
         }
+    }
+
+    isPreviewPlaybackActive(): boolean {
+        return this.previewPlaybackActive;
+    }
+
+    markPreviewPlaybackActive(): void {
+        this.previewPlaybackActive = true;
+    }
+
+    clearPreviewPlaybackActive(): void {
+        this.previewPlaybackActive = false;
     }
 }
 
@@ -104,8 +117,21 @@ export function previewSlot(slotNumber: number): void {
         showLoadPreviewedButton();
         
         // Play the preview
+        previewState.markPreviewPlaybackActive();
         if (typeof (window as any).playAudio === 'function') {
-            (window as any).playAudio();
+            try {
+                // playAudioWithOverlay defers the real playAudio via setTimeout(..., 0).
+                // Keep the flag set through that deferred execution.
+                (window as any).playAudio();
+                window.setTimeout(() => {
+                    previewState.clearPreviewPlaybackActive();
+                }, 0);
+            } catch (e) {
+                previewState.clearPreviewPlaybackActive();
+                throw e;
+            }
+        } else {
+            previewState.clearPreviewPlaybackActive();
         }
         
         // Auto-restore after configured timeout
@@ -165,6 +191,26 @@ export function loadPreviewedSlot(): void {
     
     console.log(`Loaded slot ${lastSlot} permanently`);
     window.alert(`Slot ${lastSlot} loaded!`);
+}
+
+/**
+ * If a preview is active and the user explicitly plays audio, keep the previewed tone.
+ * This prevents the auto-restore timer from reverting to the previous tone mid-playback.
+ */
+export function finalizePreviewOnUserPlayback(): void {
+    if (!previewState.hasBackup() || previewState.isPreviewPlaybackActive()) {
+        return;
+    }
+
+    previewState.clearAutoRestoreTimeout();
+    previewState.clearBackup();
+    hideLoadPreviewedButton();
+
+    autoSaveState.resume();
+    saveToneEditorToStorage();
+    saveJsonEditorToStorage();
+    
+    console.log('Preview finalized during user playback');
 }
 
 /**
