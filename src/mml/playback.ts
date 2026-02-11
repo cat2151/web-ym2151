@@ -7,6 +7,7 @@ import { convertMMLToYM2151JSON, initializeMMLConverter, isMMLConverterReady } f
 import { clearAudioCache, playAudioWithOverlay } from '../audio';
 import { updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
+import { parseToneEditorToJson } from '../tone-editor';
 
 /**
  * Get MML input textarea element
@@ -23,6 +24,21 @@ function getJSONEditor(): HTMLTextAreaElement | null {
 }
 
 /**
+ * Build tone initialization events from the tone editor (excluding key on/note)
+ */
+function getToneInitializationEvents(): YM2151Event[] {
+    const toneData = parseToneEditorToJson();
+    if (!toneData?.events?.length) {
+        return [];
+    }
+
+    return toneData.events.filter(evt => {
+        const addr = parseInt(evt.addr as string);
+        return addr !== 0x08 && addr !== 0x28;
+    });
+}
+
+/**
  * Play MML input by converting to YM2151 JSON and playing
  */
 export async function playMMLInput(): Promise<void> {
@@ -34,10 +50,10 @@ export async function playMMLInput(): Promise<void> {
         return;
     }
 
-    const mml = mmlInput.value.trim();
+    let mml = mmlInput.value.trim();
     if (!mml) {
-        alert('Please enter MML notation (e.g., "cdefgab" for scale or "c;e;g" for chord)');
-        return;
+        mml = 'c';
+        mmlInput.value = mml;
     }
 
     // Initialize WASM if not already done
@@ -99,19 +115,20 @@ export async function playMMLInput(): Promise<void> {
 
     // Update JSON editor with the converted events
     if (result.events && Array.isArray(result.events)) {
-        const jsonData = {
-            events: result.events as YM2151Event[]
-        };
-        jsonEditor.value = JSON.stringify(jsonData, null, 2);
+        const toneEvents = getToneInitializationEvents();
+        const combinedEvents = [...toneEvents, ...(result.events as YM2151Event[])];
+
+        jsonEditor.value = JSON.stringify({ events: combinedEvents }, null, 2);
 
         // Update duration display
-        updateDurationDisplay(result.events);
+        updateDurationDisplay(combinedEvents);
 
         // Clear audio cache since we have new JSON
         clearAudioCache();
 
         if (infoDiv) {
-            infoDiv.textContent = `✓ Converted MML to ${result.event_count || result.events.length} YM2151 events`;
+            const totalEvents = combinedEvents.length;
+            infoDiv.textContent = `✓ Converted MML to ${totalEvents} YM2151 events (tone + sequence)`;
         }
 
         // Automatically play the converted MML
