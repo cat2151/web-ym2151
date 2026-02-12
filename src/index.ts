@@ -21,7 +21,7 @@ export * from './mml';
 export * from './app';
 
 // Import necessary functions for global scope
-import { exportWav } from './audio';
+import { exportWav, playAudioWithOverlay } from './audio';
 import { 
     handleSaveSlot, 
     refreshSlotInfo, 
@@ -67,6 +67,7 @@ declare global {
         importRandomConfig: typeof importRandomConfig;
         toggleOscilloscopeSection: typeof toggleOscilloscopeSection;
         playMML: typeof playMMLInput;
+        playJsonAudio: typeof playAudioWithOverlay;
     }
 }
 
@@ -79,7 +80,8 @@ if (typeof window !== 'undefined') {
     };
     
     // Expose functions to global scope for HTML onclick handlers
-    window.playAudio = playWithMMLFallback;
+    window.playAudio = () => playWithMMLFallback();
+    window.playJsonAudio = playAudioWithOverlay;
     window.exportWav = exportWav;
     window.handleSaveSlot = handleSaveSlot;
     window.refreshSlotInfo = refreshSlotInfo;

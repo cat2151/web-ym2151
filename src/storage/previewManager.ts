@@ -118,11 +118,11 @@ export function previewSlot(slotNumber: number): void {
         
         // Play the preview
         previewState.markPreviewPlaybackActive();
-        if (typeof (window as any).playAudio === 'function') {
+        const playJson = (window as any).playJsonAudio ?? (window as any).playAudio;
+        if (typeof playJson === 'function') {
             try {
-                // playAudioWithOverlay defers the real playAudio via setTimeout(..., 0).
-                // Keep the flag set through that deferred execution.
-                (window as any).playAudio();
+                // playJsonAudio may defer via setTimeout(..., 0); keep the flag set through that deferred execution.
+                playJson();
                 window.setTimeout(() => {
                     previewState.clearPreviewPlaybackActive();
                 }, 0);

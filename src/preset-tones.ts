@@ -90,7 +90,7 @@ export function loadToneToEditor(autoPlay: boolean = true): void {
         
         // Auto-play the loaded preset tone if requested
         if (autoPlay) {
-            playWithMMLFallback();
+            playWithMMLFallback(false);
         }
     }
 }

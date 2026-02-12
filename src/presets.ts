@@ -96,7 +96,7 @@ export function loadToEditor(autoPlay: boolean = true): void {
     
     // Auto-play the loaded preset if requested
     if (autoPlay) {
-        playWithMMLFallback();
+        playWithMMLFallback(false);
     }
     
     // Note: We don't auto-save when loading a preset to avoid overwriting

@@ -256,7 +256,7 @@ export function generateRandomTone(): void {
         }
         
         // Auto-play the generated tone
-        playWithMMLFallback();
+        playWithMMLFallback(false);
     }, 'Now rendering random tone...');
 }
 

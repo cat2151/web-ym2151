@@ -62,6 +62,6 @@ export function triggerAutoPlay(): void {
     // Use cached element if available, otherwise query DOM as fallback
     const checkbox = checkboxElement || document.getElementById('autoPlayCheckbox');
     if (checkbox && checkbox instanceof HTMLInputElement && checkbox.checked) {
-        playWithMMLFallback();
+        playWithMMLFallback(false);
     }
 }

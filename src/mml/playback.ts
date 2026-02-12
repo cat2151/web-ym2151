@@ -4,7 +4,7 @@
  */
 
 import { convertMMLToYM2151JSON, initializeMMLConverter, isMMLConverterReady } from '../mml';
-import { clearAudioCache, playAudioWithOverlay } from '../audio';
+import { clearAudioCache, playAudioWithOverlay, playAudio } from '../audio';
 import { updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
 import { parseToneEditorToJson } from '../tone-editor';
@@ -41,9 +41,10 @@ function getToneInitializationEvents(): YM2151Event[] {
 /**
  * Play MML input by converting to YM2151 JSON and playing
  */
-export async function playMMLInput(): Promise<void> {
+export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<void> {
     const mmlInput = getMMLInput();
     const jsonEditor = getJSONEditor();
+    const useOverlay = options?.useOverlay !== false;
 
     if (!mmlInput || !jsonEditor) {
         console.error('MML input or JSON editor not found');
@@ -133,7 +134,11 @@ export async function playMMLInput(): Promise<void> {
 
         // Automatically play the converted MML
         setTimeout(() => {
-            playAudioWithOverlay();
+            if (useOverlay) {
+                playAudioWithOverlay();
+            } else {
+                playAudio();
+            }
         }, 100);
     } else {
         alert('Unexpected conversion result format');
@@ -146,14 +151,18 @@ export async function playMMLInput(): Promise<void> {
 /**
  * Play audio using MML input when available, otherwise fall back to current JSON
  */
-export function playWithMMLFallback(): void {
+export function playWithMMLFallback(useOverlay: boolean = true): void {
     const mmlInput = getMMLInput();
     const hasMML = mmlInput && mmlInput.value.trim().length > 0;
 
     if (hasMML) {
-        void playMMLInput();
+        void playMMLInput({ useOverlay });
         return;
     }
 
-    playAudioWithOverlay();
+    if (useOverlay) {
+        playAudioWithOverlay();
+    } else {
+        playAudio();
+    }
 }
