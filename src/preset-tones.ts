@@ -3,7 +3,7 @@
  * Loads and manages preset tones from preset-tones.json
  */
 
-import { playAudio } from './audio';
+import { playWithMMLFallback } from './mml/playback';
 import { runWithRenderingOverlay } from './ui';
 
 interface PresetTone {
@@ -90,7 +90,7 @@ export function loadToneToEditor(autoPlay: boolean = true): void {
         
         // Auto-play the loaded preset tone if requested
         if (autoPlay) {
-            playAudio();
+            playWithMMLFallback(false);
         }
     }
 }

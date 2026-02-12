@@ -23,7 +23,7 @@ MML Input → SMF (MIDI) → YM2151 JSON → Audio Playback
 2. Enter MML notation in the "MML Input" textarea
    - Example: `cdefgab` for a C major scale
    - Example: `c;e;g` for a C major chord (simultaneous notes)
-3. Click the "🎵 Play MML" button
+3. Click the "Play" button
 4. The MML will be converted and played automatically
 
 ## MML Notation Examples
