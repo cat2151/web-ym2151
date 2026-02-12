@@ -4,7 +4,7 @@
  */
 
 import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
-import { playAudio } from '../audio';
+import { playWithMMLFallback } from '../mml/playback';
 import { runWithRenderingOverlay } from '../ui';
 
 let currentConfig: RandomConfig | null = null;
@@ -256,7 +256,7 @@ export function generateRandomTone(): void {
         }
         
         // Auto-play the generated tone
-        playAudio();
+        playWithMMLFallback();
     }, 'Now rendering random tone...');
 }
 

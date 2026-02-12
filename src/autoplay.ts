@@ -3,7 +3,7 @@
  * Manages auto-play on edit functionality
  */
 
-import { playAudio } from './audio';
+import { playWithMMLFallback } from './mml/playback';
 
 const AUTO_PLAY_STORAGE_KEY = 'ym2151_auto_play_on_edit';
 
@@ -62,6 +62,6 @@ export function triggerAutoPlay(): void {
     // Use cached element if available, otherwise query DOM as fallback
     const checkbox = checkboxElement || document.getElementById('autoPlayCheckbox');
     if (checkbox && checkbox instanceof HTMLInputElement && checkbox.checked) {
-        playAudio();
+        playWithMMLFallback();
     }
 }

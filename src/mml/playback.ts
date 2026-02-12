@@ -142,3 +142,18 @@ export async function playMMLInput(): Promise<void> {
         }
     }
 }
+
+/**
+ * Play audio using MML input when available, otherwise fall back to current JSON
+ */
+export function playWithMMLFallback(): void {
+    const mmlInput = getMMLInput();
+    const hasMML = mmlInput && mmlInput.value.trim().length > 0;
+
+    if (hasMML) {
+        void playMMLInput();
+        return;
+    }
+
+    playAudioWithOverlay();
+}

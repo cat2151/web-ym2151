@@ -21,7 +21,7 @@ export * from './mml';
 export * from './app';
 
 // Import necessary functions for global scope
-import { playAudioWithOverlay, exportWav } from './audio';
+import { exportWav } from './audio';
 import { 
     handleSaveSlot, 
     refreshSlotInfo, 
@@ -40,14 +40,14 @@ import {
     importRandomConfig 
 } from './random-tone';
 import { toggleOscilloscopeSection } from './oscilloscope';
-import { playMMLInput } from './mml/playback';
+import { playMMLInput, playWithMMLFallback } from './mml/playback';
 import { initializeApplication } from './app';
 
 // Declare Emscripten Module interface
 declare global {
     interface Window {
         Module: any;
-        playAudio: typeof playAudioWithOverlay;
+        playAudio: typeof playWithMMLFallback;
         exportWav: typeof exportWav;
         handleSaveSlot: typeof handleSaveSlot;
         refreshSlotInfo: typeof refreshSlotInfo;
@@ -79,7 +79,7 @@ if (typeof window !== 'undefined') {
     };
     
     // Expose functions to global scope for HTML onclick handlers
-    window.playAudio = playAudioWithOverlay;
+    window.playAudio = playWithMMLFallback;
     window.exportWav = exportWav;
     window.handleSaveSlot = handleSaveSlot;
     window.refreshSlotInfo = refreshSlotInfo;
