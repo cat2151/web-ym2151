@@ -43,35 +43,39 @@ export function estimateFrequency(samples: Float32Array, sampleRate: number): nu
 /**
  * Calculate correlation coefficient between two waveforms
  */
-export function calculateCorrelation(wave1: Float32Array, wave2: Float32Array): number {
-    if (wave1.length !== wave2.length || wave1.length === 0) {
+function calculateCorrelationAtOffset(
+    reference: Float32Array,
+    samples: Float32Array,
+    start: number
+): number {
+    const n = reference.length;
+    if (n === 0 || start + n > samples.length) {
         return 0;
     }
 
-    const n = wave1.length;
-    let mean1 = 0;
-    let mean2 = 0;
+    let referenceMean = 0;
+    let sampleMean = 0;
 
     for (let i = 0; i < n; i++) {
-        mean1 += wave1[i];
-        mean2 += wave2[i];
+        referenceMean += reference[i];
+        sampleMean += samples[start + i];
     }
-    mean1 /= n;
-    mean2 /= n;
+    referenceMean /= n;
+    sampleMean /= n;
 
     let numerator = 0;
-    let sumSq1 = 0;
-    let sumSq2 = 0;
+    let referenceSumSq = 0;
+    let sampleSumSq = 0;
 
     for (let i = 0; i < n; i++) {
-        const diff1 = wave1[i] - mean1;
-        const diff2 = wave2[i] - mean2;
-        numerator += diff1 * diff2;
-        sumSq1 += diff1 * diff1;
-        sumSq2 += diff2 * diff2;
+        const referenceDiff = reference[i] - referenceMean;
+        const sampleDiff = samples[start + i] - sampleMean;
+        numerator += referenceDiff * sampleDiff;
+        referenceSumSq += referenceDiff * referenceDiff;
+        sampleSumSq += sampleDiff * sampleDiff;
     }
 
-    const denominator = Math.sqrt(sumSq1 * sumSq2);
+    const denominator = Math.sqrt(referenceSumSq * sampleSumSq);
 
     if (denominator === 0) {
         return 0;
@@ -101,8 +105,7 @@ export function findBestCorrelationPosition(
     let bestPosition = 0;
 
     for (let pos = 0; pos <= searchRange; pos++) {
-        const candidate = samples.slice(pos, pos + previousWave.length);
-        const correlation = calculateCorrelation(previousWave, candidate);
+        const correlation = calculateCorrelationAtOffset(previousWave, samples, pos);
 
         if (correlation > bestCorrelation) {
             bestCorrelation = correlation;
