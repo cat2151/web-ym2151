@@ -56,11 +56,19 @@ function renderOneItem(): boolean {
 function onIdle(deadline: { timeRemaining(): number; didTimeout: boolean }): void {
     pendingCallbackId = null;
 
-    // Render as many items as we can within the idle window
-    while (deadline.timeRemaining() > 5 || deadline.didTimeout) {
+    // Limit work to 1 item per callback when the deadline has timed out to avoid
+    // blocking the main thread.  When time is genuinely available, keep rendering.
+    const limitToOne = deadline.didTimeout;
+    let itemsProcessed = 0;
+
+    while (deadline.timeRemaining() > 5 || (deadline.didTimeout && itemsProcessed < 1)) {
         const hadWork = renderOneItem();
         if (!hadWork) {
             return; // All items rendered; stop scheduling
+        }
+        itemsProcessed++;
+        if (limitToOne) {
+            break;
         }
     }
 

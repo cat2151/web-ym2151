@@ -116,7 +116,7 @@ function buildFavoriteItem(entry: FavoriteEntry): HTMLElement {
     delBtn.textContent = '★ Remove';
     delBtn.title = 'Remove from favorites';
     delBtn.className = 'item-btn fav-btn fav-active';
-    delBtn.addEventListener('click', () => deleteFavoriteEntry(entry.id));
+    delBtn.addEventListener('click', () => deleteFavoriteEntry(entry.jsonEditor));
 
     actions.appendChild(loadBtn);
     actions.appendChild(playBtn);
@@ -159,8 +159,8 @@ export function playFavoriteEntry(id: string): void {
     }
 }
 
-export function deleteFavoriteEntry(id: string): void {
-    removeFromFavorites(id);
+export function deleteFavoriteEntry(jsonEditor: string): void {
+    removeFromFavorites(jsonEditor);
     refreshFavoritesUI();
     // Refresh history UI to update the ★ button state
     if (typeof (window as any).refreshHistoryUI === 'function') {

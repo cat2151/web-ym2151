@@ -25,12 +25,13 @@ export function getFavorites(): FavoriteEntry[] {
 
 /**
  * Add a tone to favorites.
- * Does nothing if the id is already in favorites or the list is full.
+ * Deduplicates by jsonEditor content so re-playing the same tone doesn't create duplicate entries.
+ * Does nothing if the same json is already in favorites or the list is full.
  * @returns true if successfully added, false otherwise
  */
 export function addToFavorites(entry: FavoriteEntry): boolean {
     const favorites = getFavorites();
-    if (favorites.some(f => f.id === entry.id)) {
+    if (favorites.some(f => f.jsonEditor === entry.jsonEditor)) {
         return false;
     }
     if (favorites.length >= MAX_FAVORITES) {
@@ -47,10 +48,10 @@ export function addToFavorites(entry: FavoriteEntry): boolean {
 }
 
 /**
- * Remove a favorite entry by id.
+ * Remove a favorite entry by its jsonEditor content (stable key).
  */
-export function removeFromFavorites(id: string): void {
-    const favorites = getFavorites().filter(f => f.id !== id);
+export function removeFromFavorites(jsonEditor: string): void {
+    const favorites = getFavorites().filter(f => f.jsonEditor !== jsonEditor);
     try {
         localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
     } catch (error) {
@@ -59,10 +60,10 @@ export function removeFromFavorites(id: string): void {
 }
 
 /**
- * Check whether an id is already saved as a favorite.
+ * Check whether a tone (identified by its jsonEditor content) is already saved as a favorite.
  */
-export function isFavorite(id: string): boolean {
-    return getFavorites().some(f => f.id === id);
+export function isFavorite(jsonEditor: string): boolean {
+    return getFavorites().some(f => f.jsonEditor === jsonEditor);
 }
 
 /**

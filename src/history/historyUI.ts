@@ -3,7 +3,7 @@
  * Renders and manages the collapsible "History" section.
  */
 
-import { getHistory, addToHistory, removeFromHistory, clearHistory } from './historyManager';
+import { getHistory, removeFromHistory, clearHistory } from './historyManager';
 import { getFavorites, addToFavorites, removeFromFavorites, isFavorite } from '../favorites/favoritesManager';
 import { getCachedAudio } from '../audio/audioCache';
 import { drawWaveformOnCanvas } from '../audio/itemWaveform';
@@ -114,10 +114,12 @@ function buildHistoryItem(entry: HistoryEntry): HTMLElement {
     playBtn.className = 'item-btn';
     playBtn.addEventListener('click', () => playHistoryEntry(entry.id));
 
+    const isFav = isFavorite(entry.jsonEditor);
+
     const favBtn = document.createElement('button');
-    favBtn.title = isFavorite(entry.id) ? 'Remove from favorites' : 'Add to favorites';
-    favBtn.textContent = isFavorite(entry.id) ? '★' : '☆';
-    favBtn.className = `item-btn fav-btn ${isFavorite(entry.id) ? 'fav-active' : ''}`;
+    favBtn.title = isFav ? 'Remove from favorites' : 'Add to favorites';
+    favBtn.textContent = isFav ? '★' : '☆';
+    favBtn.className = `item-btn fav-btn ${isFav ? 'fav-active' : ''}`;
     favBtn.addEventListener('click', () => toggleFavoriteFromHistory(entry.id));
 
     const delBtn = document.createElement('button');
@@ -172,8 +174,8 @@ export function toggleFavoriteFromHistory(id: string): void {
     const entry = findHistoryEntry(id);
     if (!entry) { return; }
 
-    if (isFavorite(id)) {
-        removeFromFavorites(id);
+    if (isFavorite(entry.jsonEditor)) {
+        removeFromFavorites(entry.jsonEditor);
     } else {
         const favorites = getFavorites();
         if (favorites.length >= 20) {
@@ -207,8 +209,3 @@ export function clearHistoryAndRefresh(): void {
     clearHistory();
     refreshHistoryUI();
 }
-
-/**
- * Re-export addToHistory for use by the audio player hook.
- */
-export { addToHistory };
