@@ -55,8 +55,10 @@ cp sine_test.wasm ../../</code></pre>
     <a href="../index.html">Demo</a>
   </div>
 
-  <!-- demo-library.js defines the global Module object read by Emscripten,
-       and must appear before sine_test.js in document order (both are deferred). -->
+  <!-- demo-library.js is generated from demo-library.ts by `npm run build`.
+       If this file is missing, run `npm install && npm run build` from the repository root.
+       It must appear before sine_test.js in document order (both are deferred) so that
+       the global Module object is defined before Emscripten reads it. -->
   <script defer src="demo-library.js"></script>
 
   <!-- WASM Module: uses relative path to parent directory.
