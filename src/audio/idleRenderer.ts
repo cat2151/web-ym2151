@@ -43,6 +43,10 @@ function renderOneItem(): boolean {
 
     const audioData = generateAudioFromJson(pending.jsonEditor);
     if (audioData) {
+        // Free the WASM sample buffer now that we have the JS-side copy
+        if (typeof Module !== 'undefined' && Module._free_buffer) {
+            Module._free_buffer();
+        }
         setCachedAudio(pending.jsonEditor, audioData);
         drawItemWaveform(pending.id, pending.type, audioData.left);
     }

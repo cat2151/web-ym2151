@@ -140,11 +140,8 @@ export function playAudio(): void {
     const toneEl = document.getElementById('toneEditor') as HTMLTextAreaElement | null;
     const jsonEl = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
     if (toneEl && jsonEl && jsonEl.value.trim()) {
-        if (typeof (window as any).refreshHistoryUI === 'function') {
-            // addToHistory is called by the historyUI module which is imported in index.ts
-            if (typeof (window as any).addToHistoryAndRefresh === 'function') {
-                (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
-            }
+        if (typeof (window as any).addToHistoryAndRefresh === 'function') {
+            (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
         }
     }
 

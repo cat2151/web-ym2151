@@ -148,7 +148,7 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
         rawRight[i] = Module._get_sample(i * 2 + 1);
     }
 
-    Module._free_buffer();
+    // NOTE: caller is responsible for calling Module._free_buffer() after use.
 
     return {
         left: rawLeft,
@@ -162,6 +162,7 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
 /**
  * Generate audio buffers from a JSON string without modifying the DOM.
  * Returns null silently on parse errors – suitable for background rendering.
+ * NOTE: caller is responsible for calling Module._free_buffer() after use.
  */
 export function generateAudioFromJson(jsonString: string): AudioData | null {
     if (typeof Module === 'undefined' || !Module._generate_sound) {
