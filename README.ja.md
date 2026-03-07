@@ -47,6 +47,7 @@
 npm install
 
 # TypeScript → JavaScript コンパイル
+# （src/ 以下のメインアプリと demo-library/demo-library.ts を両方コンパイルします）
 npm run build
 
 # 開発時の自動ビルド
@@ -55,6 +56,8 @@ npm run watch
 # ビルド成果物のクリーン
 npm run clean
 ```
+
+> **Note**: `demo-library/demo-library.js` は `npm run build` で生成されるビルド成果物であり、リポジトリには含まれていません（`.gitignore` 済み）。`demo-library/index.html` を動かすには必ず `npm run build` を実行してください。
 
 ### 実行
 ```bash
@@ -82,6 +85,7 @@ TypeScript化により、コードベースは以下のように整理されま�
 - **src/oscilloscope/** - 波形ビジュアライザ機能（cat-oscilloscope統合）
 - **src/mml/** - MML（Music Macro Language）入力機能
 - **src/** - その他のコアモジュール
+- **demo-library/** - ライブラリ利用デモ（`demo-library.ts` → `demo-library.js` にコンパイル、`demo-library.css`）
 
 詳細は [TYPESCRIPT.md](./TYPESCRIPT.md) を参照してください。
 
