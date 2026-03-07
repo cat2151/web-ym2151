@@ -9,6 +9,8 @@ export interface StorageKeys {
     readonly TONE_EDITOR: string;
     readonly JSON_EDITOR: string;
     readonly SLOT_PREFIX: string;
+    readonly HISTORY: string;
+    readonly FAVORITES: string;
 }
 
 /**
@@ -66,6 +68,28 @@ export interface YM2151Event {
  */
 export interface JsonEditorData {
     events: YM2151Event[];
+}
+
+/**
+ * History entry – one recently-played tone
+ */
+export interface HistoryEntry {
+    id: string;
+    timestamp: string;
+    label: string;
+    toneEditor: string;
+    jsonEditor: string;
+}
+
+/**
+ * Favorite entry – one user-saved tone
+ */
+export interface FavoriteEntry {
+    id: string;
+    timestamp: string;
+    label: string;
+    toneEditor: string;
+    jsonEditor: string;
 }
 
 /**

@@ -106,6 +106,87 @@ function estimateFrequencyFromEvents(events: YM2151Event[]): number | null {
 }
 
 /**
+ * Core audio generation from a pre-parsed event array.
+ * Does NOT access the DOM – safe to call from background tasks.
+ * @returns AudioData or null if generation fails
+ */
+export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null {
+    if (typeof Module === 'undefined' || !Module._generate_sound) {
+        return null;
+    }
+    if (events.length === 0) {
+        return null;
+    }
+
+    const durationSec = calculateDuration(events);
+    const estimatedFrequency = estimateFrequencyFromEvents(events);
+    const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
+
+    const STRUCT_SIZE = 8;
+    const bufferSize = events.length * STRUCT_SIZE;
+    const dataPtr = Module._malloc(bufferSize);
+    const view = new DataView(Module.HEAPU8.buffer);
+
+    events.forEach((evt, i) => {
+        const baseAddr = dataPtr + (i * STRUCT_SIZE);
+        view.setFloat32(baseAddr, parseFloat(evt.time as any), true);
+        Module.HEAPU8[baseAddr + 4] = parseInt(evt.addr as string);
+        Module.HEAPU8[baseAddr + 5] = parseInt(evt.data as string);
+    });
+
+    const actualFrames = Module._generate_sound(dataPtr, events.length, numFramesRaw);
+    Module._free(dataPtr);
+
+    if (actualFrames <= 0) {
+        return null;
+    }
+
+    const rawLeft = new Float32Array(actualFrames);
+    const rawRight = new Float32Array(actualFrames);
+    for (let i = 0; i < actualFrames; i++) {
+        rawLeft[i] = Module._get_sample(i * 2);
+        rawRight[i] = Module._get_sample(i * 2 + 1);
+    }
+
+    // NOTE: caller is responsible for calling Module._free_buffer() after use.
+
+    return {
+        left: rawLeft,
+        right: rawRight,
+        frames: actualFrames,
+        duration: durationSec,
+        frequencyEstimate: estimatedFrequency ?? undefined
+    };
+}
+
+/**
+ * Generate audio buffers from a JSON string without modifying the DOM.
+ * Returns null silently on parse errors – suitable for background rendering.
+ * NOTE: caller is responsible for calling Module._free_buffer() after use.
+ */
+export function generateAudioFromJson(jsonString: string): AudioData | null {
+    if (typeof Module === 'undefined' || !Module._generate_sound) {
+        return null;
+    }
+
+    let events: YM2151Event[];
+    try {
+        const data = JSON.parse(jsonString);
+        if (!data.events || !Array.isArray(data.events)) {
+            return null;
+        }
+        events = data.events as YM2151Event[];
+        if (events.length === 0) {
+            return null;
+        }
+    } catch {
+        return null;
+    }
+
+    return generateAudioFromEvents(events);
+}
+
+/**
  * Generate audio buffers from JSON events
  * @returns AudioData or null if generation fails
  */

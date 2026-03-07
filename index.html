@@ -150,6 +150,46 @@
             <canvas id="oscilloscope" width="800" height="400" aria-label="Waveform visualization canvas"></canvas>
         </div>
     </div>
+
+    <div class="history-controls">
+        <button
+            id="historyToggleBtn"
+            class="history-toggle-btn"
+            aria-controls="historyContent"
+            aria-expanded="false"
+            onclick="toggleHistorySection()"
+            title="Show/hide play history">
+            <span class="toggle-icon" aria-hidden="true"></span>
+            <span class="toggle-text">Show History (0)</span>
+        </button>
+
+        <div id="historyContent" class="history-content" aria-hidden="true" style="display: none;">
+            <div class="history-toolbar">
+                <button onclick="clearHistoryAndRefresh()" class="history-clear-btn" title="Clear all history">🗑 Clear History</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <div class="favorites-controls">
+        <button
+            id="favoritesToggleBtn"
+            class="favorites-toggle-btn"
+            aria-controls="favoritesContent"
+            aria-expanded="false"
+            onclick="toggleFavoritesSection()"
+            title="Show/hide favorites">
+            <span class="toggle-icon" aria-hidden="true"></span>
+            <span class="toggle-text">Show Favorites (0)</span>
+        </button>
+
+        <div id="favoritesContent" class="favorites-content" aria-hidden="true" style="display: none;">
+            <div class="history-toolbar">
+                <button onclick="clearFavoritesAndRefresh()" class="history-clear-btn" title="Clear all favorites">🗑 Clear Favorites</button>
+            </div>
+            <div id="favoritesList" class="history-list"></div>
+        </div>
+    </div>
     
     <!-- Load cat-oscilloscope library locally -->
     <script type="module">

@@ -7,10 +7,13 @@ import {
 import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 import { finalizePreviewOnUserPlayback } from '../storage/previewManager';
+import { getCachedAudio, setCachedAudio } from './audioCache';
+import { scheduleIdleRendering } from './idleRenderer';
 
 let audioContext: AudioContext | null = null;
 
-// Cache for generated audio to avoid redundant generation
+// In-player cache for generated audio to avoid redundant generation
+// (separate from the global LRU audio cache used by history/favorites)
 let cachedJsonContent: string | null = null;
 let cachedAudioData: AudioData | null = null;
 let cachedMaxAmplitude: number | null = null;
@@ -37,21 +40,33 @@ function getAudioData(): AudioData | null {
         return null;
     }
 
-    // Check if we can use cached audio
+    // Check if we can use the in-player cache
     if (cachedJsonContent === currentJson && cachedAudioData) {
         console.log("Using cached audio (JSON unchanged)");
         return cachedAudioData;
+    }
+
+    // Check global LRU audio cache (shared with history/favorites idle renderer)
+    const globalCached = getCachedAudio(currentJson);
+    if (globalCached) {
+        console.log("Using global audio cache");
+        cachedJsonContent = currentJson;
+        cachedAudioData = globalCached;
+        cachedMaxAmplitude = null;
+        return globalCached;
     }
 
     // Generate new audio
     console.log("Generating new audio (JSON changed or no cache)");
     const audioData = generateAudioBuffers();
     if (audioData) {
-        // Update cache
+        // Update in-player cache
         cachedJsonContent = currentJson;
         cachedAudioData = audioData;
         // Clear cached max amplitude when audio data changes
         cachedMaxAmplitude = null;
+        // Store in global LRU cache
+        setCachedAudio(currentJson, audioData);
     }
     return audioData;
 }
@@ -120,6 +135,18 @@ export function playAudio(): void {
     }
 
     Module._free_buffer();
+
+    // Add to history and refresh UI
+    const toneEl = document.getElementById('toneEditor') as HTMLTextAreaElement | null;
+    const jsonEl = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
+    if (toneEl && jsonEl && jsonEl.value.trim()) {
+        if (typeof (window as any).addToHistoryAndRefresh === 'function') {
+            (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
+        }
+    }
+
+    // Schedule background rendering of remaining history/favorites items
+    scheduleIdleRendering();
 }
 
 /**
