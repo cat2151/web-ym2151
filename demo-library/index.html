@@ -70,6 +70,15 @@
       background-color: #cccccc;
       cursor: not-allowed;
     }
+    #downloadWavButton {
+      background-color: #2196F3;
+    }
+    #downloadWavButton:hover:not(:disabled) {
+      background-color: #1976D2;
+    }
+    #downloadWavButton:active:not(:disabled) {
+      background-color: #1565C0;
+    }
     pre {
       background-color: #f4f4f4;
       padding: 15px;
@@ -191,6 +200,7 @@ cp sine_test.wasm ../../</code></pre>
     </div>
 
     <button id="playButton" disabled>▶ Play 440Hz Tone</button>
+    <button id="downloadWavButton" disabled title="Download the generated audio as a WAV file for inspection" aria-label="Download WAV file">⬇ Download WAV</button>
 
     <h2>Event Data:</h2>
     <pre id="eventDisplay"></pre>
@@ -215,7 +225,7 @@ cp sine_test.wasm ../../</code></pre>
       onRuntimeInitialized: function() {
         console.log('WASM Module initialized successfully');
         updateWasmStatus('ready', '✓ WASM module loaded and ready');
-        document.getElementById('playButton').disabled = false;
+        setAudioButtonsEnabled(true);
       },
       print: function(text) {
         console.log('[WASM stdout]:', text);
@@ -274,6 +284,111 @@ cp sine_test.wasm ../../</code></pre>
       statusEl.textContent = message;
     }
 
+    // Enable or disable audio buttons together
+    function setAudioButtonsEnabled(enabled) {
+      document.getElementById('playButton').disabled = !enabled;
+      document.getElementById('downloadWavButton').disabled = !enabled;
+    }
+
+    // Generate audio frames from YM2151 events via WASM
+    // Returns { left: Float32Array, right: Float32Array, actualFrames: number }
+    function generateAudio() {
+      const maxTime = Math.max(...events.map(e => e.time));
+      const durationSeconds = maxTime + 0.5; // Add buffer
+      const numFrames = Math.floor(durationSeconds * OPM_SAMPLE_RATE);
+
+      console.log(`Generating ${numFrames} frames (${durationSeconds.toFixed(2)}s)`);
+
+      // Allocate memory for events data
+      // Note: This struct size must match the C definition exactly.
+      // Current C struct: float time (4 bytes) + uint8_t address (1) + uint8_t data (1) + padding (2)
+      const eventSize = 8;
+      const totalSize = events.length * eventSize;
+      const dataPtr = Module._malloc(totalSize);
+      const view = new DataView(Module.HEAPU8.buffer);
+
+      try {
+        // Write events to WASM memory
+        for (let i = 0; i < events.length; i++) {
+          const baseAddr = dataPtr + (i * eventSize);
+          view.setFloat32(baseAddr, events[i].time, true); // time as float32
+          Module.HEAPU8[baseAddr + 4] = events[i].address; // address as uint8_t
+          Module.HEAPU8[baseAddr + 5] = events[i].data;    // data as uint8_t
+        }
+
+        // Generate audio
+        console.log('Calling Module._generate_sound...');
+        const actualFrames = Module._generate_sound(dataPtr, events.length, numFrames);
+        console.log(`Generated ${actualFrames} frames`);
+
+        // Read audio samples
+        const rawLeft = new Float32Array(actualFrames);
+        const rawRight = new Float32Array(actualFrames);
+
+        for (let i = 0; i < actualFrames; i++) {
+          rawLeft[i] = Module._get_sample(i * 2);
+          rawRight[i] = Module._get_sample(i * 2 + 1);
+        }
+
+        // Free the audio buffer
+        Module._free_buffer();
+
+        return { left: rawLeft, right: rawRight, actualFrames };
+      } finally {
+        // Free allocated memory
+        Module._free(dataPtr);
+      }
+    }
+
+    // Encode stereo Float32 audio as a 16-bit PCM WAV ArrayBuffer
+    function encodeWAV(leftChannel, rightChannel, sampleRate) {
+      const numChannels = 2;
+      const bitsPerSample = 16;
+      const bytesPerSample = bitsPerSample / 8;
+      const numFrames = leftChannel.length;
+      const dataSize = numFrames * numChannels * bytesPerSample;
+      const headerSize = 44;
+      const buffer = new ArrayBuffer(headerSize + dataSize);
+      const dv = new DataView(buffer);
+
+      function writeString(offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          dv.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+
+      // RIFF chunk descriptor
+      writeString(0, 'RIFF');
+      dv.setUint32(4, 36 + dataSize, true);
+      writeString(8, 'WAVE');
+
+      // fmt sub-chunk
+      writeString(12, 'fmt ');
+      dv.setUint32(16, 16, true);
+      dv.setUint16(20, 1, true);  // PCM
+      dv.setUint16(22, numChannels, true);
+      dv.setUint32(24, sampleRate, true);
+      dv.setUint32(28, sampleRate * numChannels * bytesPerSample, true);
+      dv.setUint16(32, numChannels * bytesPerSample, true);
+      dv.setUint16(34, bitsPerSample, true);
+
+      // data sub-chunk
+      writeString(36, 'data');
+      dv.setUint32(40, dataSize, true);
+
+      // Write interleaved PCM samples
+      let offset = 44;
+      for (let i = 0; i < numFrames; i++) {
+        const sL = Math.max(-1, Math.min(1, leftChannel[i]));
+        const sR = Math.max(-1, Math.min(1, rightChannel[i]));
+        dv.setInt16(offset,     sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
+        dv.setInt16(offset + 2, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
+        offset += 4;
+      }
+
+      return buffer;
+    }
+
     // Check WASM loading status periodically
     let wasmCheckRetries = 0;
     const maxRetries = 50;
@@ -282,7 +397,7 @@ cp sine_test.wasm ../../</code></pre>
       if (typeof Module !== 'undefined' && Module._generate_sound) {
         clearInterval(checkInterval);
         updateWasmStatus('ready', '✓ WASM module loaded and ready');
-        document.getElementById('playButton').disabled = false;
+        setAudioButtonsEnabled(true);
       } else if (wasmCheckRetries >= maxRetries) {
         clearInterval(checkInterval);
         updateWasmStatus('error', '✗ WASM module failed to load. Please reload the page.');
@@ -297,67 +412,57 @@ cp sine_test.wasm ../../</code></pre>
           return;
         }
 
-        // Calculate duration from events
-        const maxTime = Math.max(...events.map(e => e.time));
-        const durationSeconds = maxTime + 0.5; // Add buffer
-        const numFrames = Math.floor(durationSeconds * OPM_SAMPLE_RATE);
+        const { left, right, actualFrames } = generateAudio();
 
-        console.log(`Generating ${numFrames} frames (${durationSeconds.toFixed(2)}s)`);
+        // Create Web Audio context and play
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioBuffer = audioCtx.createBuffer(2, actualFrames, OPM_SAMPLE_RATE);
+        
+        audioBuffer.getChannelData(0).set(left);
+        audioBuffer.getChannelData(1).set(right);
 
-        // Allocate memory for events data
-        // Note: This struct size must match the C definition exactly.
-        // Current C struct: float time (4 bytes) + uint8_t address (1) + uint8_t data (1) + padding (2)
-        const eventSize = 8; 
-        const totalSize = events.length * eventSize;
-        const dataPtr = Module._malloc(totalSize);
-        const view = new DataView(Module.HEAPU8.buffer);
+        const source = audioCtx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
 
-        try {
-          // Write events to WASM memory
-          for (let i = 0; i < events.length; i++) {
-            const baseAddr = dataPtr + (i * eventSize);
-            view.setFloat32(baseAddr, events[i].time, true); // time as float32
-            Module.HEAPU8[baseAddr + 4] = events[i].address; // address as uint8_t
-            Module.HEAPU8[baseAddr + 5] = events[i].data;    // data as uint8_t
-          }
-
-          // Generate audio
-          console.log('Calling Module._generate_sound...');
-          const actualFrames = Module._generate_sound(dataPtr, events.length, numFrames);
-          console.log(`Generated ${actualFrames} frames`);
-
-          // Read audio samples
-          const rawLeft = new Float32Array(actualFrames);
-          const rawRight = new Float32Array(actualFrames);
-          
-          for (let i = 0; i < actualFrames; i++) {
-            rawLeft[i] = Module._get_sample(i * 2);
-            rawRight[i] = Module._get_sample(i * 2 + 1);
-          }
-
-          // Free the audio buffer
-          Module._free_buffer();
-
-          // Create Web Audio context and play
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const audioBuffer = audioCtx.createBuffer(2, actualFrames, OPM_SAMPLE_RATE);
-          
-          audioBuffer.getChannelData(0).set(rawLeft);
-          audioBuffer.getChannelData(1).set(rawRight);
-
-          const source = audioCtx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(audioCtx.destination);
-          source.start(0);
-
-          console.log('Audio playback started');
-        } finally {
-          // Free allocated memory
-          Module._free(dataPtr);
-        }
+        console.log('Audio playback started');
       } catch (error) {
         console.error('Error playing audio:', error);
         alert('Error playing audio. Check console for details.');
+      }
+    });
+
+    // Download WAV function
+    document.getElementById('downloadWavButton').addEventListener('click', () => {
+      try {
+        if (typeof Module === 'undefined' || !Module._generate_sound) {
+          alert('WASM module not loaded yet. Please wait...');
+          return;
+        }
+
+        const { left, right } = generateAudio();
+        const wavBuffer = encodeWAV(left, right, OPM_SAMPLE_RATE);
+        const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 23);
+        a.download = `ym2151_demo_${timestamp}.wav`;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          try { document.body.removeChild(a); } catch (err) { console.warn('Could not remove download link:', err); }
+          try { URL.revokeObjectURL(url); } catch (err) { console.warn('Could not revoke object URL:', err); }
+        }, 500);
+
+        console.log('WAV download triggered');
+      } catch (error) {
+        console.error('Error downloading WAV:', error);
+        alert('Error generating WAV. Check console for details.');
       }
     });
   </script>
