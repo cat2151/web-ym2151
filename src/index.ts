@@ -19,6 +19,8 @@ export * from './random-tone';
 export * from './oscilloscope';
 export * from './mml';
 export * from './app';
+export * from './history';
+export * from './favorites';
 
 // Import necessary functions for global scope
 import { exportWav, playAudioWithOverlay } from './audio';
@@ -42,6 +44,17 @@ import {
 import { toggleOscilloscopeSection } from './oscilloscope';
 import { playMMLInput, playWithMMLFallback } from './mml/playback';
 import { initializeApplication } from './app';
+import {
+    toggleHistorySection,
+    refreshHistoryUI,
+    addToHistory,
+    clearHistoryAndRefresh
+} from './history';
+import {
+    toggleFavoritesSection,
+    refreshFavoritesUI,
+    clearFavoritesAndRefresh
+} from './favorites';
 
 // Declare Emscripten Module interface
 declare global {
@@ -68,6 +81,13 @@ declare global {
         toggleOscilloscopeSection: typeof toggleOscilloscopeSection;
         playMML: typeof playMMLInput;
         playJsonAudio: typeof playAudioWithOverlay;
+        toggleHistorySection: typeof toggleHistorySection;
+        refreshHistoryUI: typeof refreshHistoryUI;
+        addToHistoryAndRefresh: (toneEditor: string, jsonEditor: string) => void;
+        clearHistoryAndRefresh: typeof clearHistoryAndRefresh;
+        toggleFavoritesSection: typeof toggleFavoritesSection;
+        refreshFavoritesUI: typeof refreshFavoritesUI;
+        clearFavoritesAndRefresh: typeof clearFavoritesAndRefresh;
     }
 }
 
@@ -101,4 +121,26 @@ if (typeof window !== 'undefined') {
     window.importRandomConfig = importRandomConfig;
     window.toggleOscilloscopeSection = toggleOscilloscopeSection;
     window.playMML = playMMLInput;
+    window.toggleHistorySection = toggleHistorySection;
+    window.refreshHistoryUI = refreshHistoryUI;
+    window.addToHistoryAndRefresh = (toneEditor: string, jsonEditor: string) => {
+        addToHistory(toneEditor, jsonEditor);
+        refreshHistoryUI();
+    };
+    window.clearHistoryAndRefresh = clearHistoryAndRefresh;
+    window.toggleFavoritesSection = toggleFavoritesSection;
+    window.refreshFavoritesUI = refreshFavoritesUI;
+    window.clearFavoritesAndRefresh = clearFavoritesAndRefresh;
+
+    // Initialize history and favorites UI on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshHistoryUI();
+            refreshFavoritesUI();
+        });
+    } else {
+        refreshHistoryUI();
+        refreshFavoritesUI();
+    }
 }
+
