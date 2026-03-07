@@ -12,6 +12,13 @@
     <p class="subtitle">Library Installation Demo - Minimal Example for External Repository Usage</p>
 
     <div class="info-box">
+      <h3>🔨 このページのビルド手順</h3>
+      <p>このページは <code>demo-library.ts</code> を TypeScript でコンパイルして動作します。<code>demo-library.js</code> はビルド成果物のためリポジトリには含まれていません。</p>
+      <p>ページが正常に動作しない場合（ボタンが無効のままなど）は、リポジトリのルートで以下を実行してください：</p>
+      <pre><code>npm install &amp;&amp; npm run build</code></pre>
+    </div>
+
+    <div class="info-box">
       <h3>📦 インストール手順（npm / GitHub）</h3>
       <p>web-ym2151 を自分のプロジェクトで使うための最小手順です。WASM は同梱済みなのでそのまま利用できます。</p>
       <pre><code># 1. GitHub から npm インストール（WASM 同梱・推奨）
@@ -55,10 +62,8 @@ cp sine_test.wasm ../../</code></pre>
     <a href="../index.html">Demo</a>
   </div>
 
-  <!-- demo-library.js is generated from demo-library.ts by `npm run build`.
-       If this file is missing, run `npm install && npm run build` from the repository root.
-       It must appear before sine_test.js in document order (both are deferred) so that
-       the global Module object is defined before Emscripten reads it. -->
+  <!-- demo-library.js is generated from demo-library.ts by `npm run build` (see build instructions above).
+       It must appear before sine_test.js so the global Module object is defined before Emscripten reads it. -->
   <script defer src="demo-library.js"></script>
 
   <!-- WASM Module: uses relative path to parent directory.
