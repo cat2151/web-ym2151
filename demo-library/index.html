@@ -23,19 +23,19 @@
       <p>web-ym2151 を自分のプロジェクトで使うための最小手順です。WASM は同梱済みなのでそのまま利用できます。</p>
       <pre><code># 1. GitHub から npm インストール（WASM 同梱・推奨）
 npm install cat2151/web-ym2151
-cp node_modules/web-ym2151/sine_test.js .
-cp node_modules/web-ym2151/sine_test.wasm .
+cp node_modules/web-ym2151/ym2151.js .
+cp node_modules/web-ym2151/ym2151.wasm .
 
 # 2. 公開ページからプリビルド版を取得する場合
-curl -O https://cat2151.github.io/web-ym2151/sine_test.js
-curl -O https://cat2151.github.io/web-ym2151/sine_test.wasm
+curl -O https://cat2151.github.io/web-ym2151/ym2151.js
+curl -O https://cat2151.github.io/web-ym2151/ym2151.wasm
 
 # 3. 自分でビルドする場合（Emscripten 必要）
 cd node_modules/web-ym2151
 npm install
 ./build.sh --build-only
-cp sine_test.js ../../
-cp sine_test.wasm ../../</code></pre>
+cp ym2151.js ../../
+cp ym2151.wasm ../../</code></pre>
     </div>
 
     <div class="warning-box">
@@ -63,11 +63,11 @@ cp sine_test.wasm ../../</code></pre>
   </div>
 
   <!-- demo-library.js is generated from demo-library.ts by `npm run build` (see build instructions above).
-       It must appear before sine_test.js so the global Module object is defined before Emscripten reads it. -->
+       It must appear before ym2151.js so the global Module object is defined before Emscripten reads it. -->
   <script defer src="demo-library.js"></script>
 
   <!-- WASM Module: uses relative path to parent directory.
        In your own project after npm install, this would be in your project root. -->
-  <script defer src="../sine_test.js"></script>
+  <script defer src="../ym2151.js"></script>
 </body>
 </html>

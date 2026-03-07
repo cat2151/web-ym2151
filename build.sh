@@ -216,24 +216,24 @@ build_project() {
     print_section "プロジェクトビルド"
     
     # ソースファイルの存在確認
-    if [ ! -f "sine_test.c" ]; then
-        print_error "sine_test.c が見つからない"
+    if [ ! -f "wasm-src/ym2151.c" ]; then
+        print_error "wasm-src/ym2151.c が見つからない"
         print_info "プロジェクトのルートディレクトリで実行しろ"
         return 1
     fi
     
-    if [ ! -f "opm.c" ]; then
-        print_error "opm.c が見つからない"
+    if [ ! -f "wasm-src/opm.c" ]; then
+        print_error "wasm-src/opm.c が見つからない"
         return 1
     fi
     
     print_info "コンパイル中..."
     
-    emcc sine_test.c -O3 \
+    emcc wasm-src/ym2151.c -O3 \
       -s WASM=1 \
       -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
       -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8']" \
-      -o sine_test.js
+      -o ym2151.js
     
     if [ $? -ne 0 ]; then
         print_error "ビルドが失敗した"
@@ -243,9 +243,9 @@ build_project() {
     print_info "ビルド完了"
     
     # 成果物の確認
-    if [ -f "sine_test.js" ] && [ -f "sine_test.wasm" ]; then
+    if [ -f "ym2151.js" ] && [ -f "ym2151.wasm" ]; then
         print_info "成果物:"
-        ls -lh sine_test.js sine_test.wasm | awk '{print "  " $9 " (" $5 ")"}'
+        ls -lh ym2151.js ym2151.wasm | awk '{print "  " $9 " (" $5 ")"}'
     else
         print_error "成果物が見つからない"
         return 1
