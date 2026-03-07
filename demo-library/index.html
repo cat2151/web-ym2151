@@ -305,6 +305,9 @@ cp sine_test.wasm ../../</code></pre>
       const eventSize = 8;
       const totalSize = events.length * eventSize;
       const dataPtr = Module._malloc(totalSize);
+      if (!dataPtr) {
+        throw new Error('WASM memory allocation failed (out of memory)');
+      }
       const view = new DataView(Module.HEAPU8.buffer);
 
       try {
@@ -320,6 +323,10 @@ cp sine_test.wasm ../../</code></pre>
         console.log('Calling Module._generate_sound...');
         const actualFrames = Module._generate_sound(dataPtr, events.length, numFrames);
         console.log(`Generated ${actualFrames} frames`);
+
+        if (actualFrames <= 0) {
+          throw new Error('WASM audio generation failed: no frames were produced');
+        }
 
         // Read audio samples
         const rawLeft = new Float32Array(actualFrames);
