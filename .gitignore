@@ -1,5 +1,6 @@
 node_modules/
 dist/
+demo-library/demo-library.js
 *.log
 lib/
 wasm/
