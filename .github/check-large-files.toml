@@ -74,5 +74,5 @@ exclude_patterns = [
 # 除外する特定のファイル（ファイルパスで指定）
 exclude_files = [
     # 例: "src/legacy/LargeOldFile.ts",
-    "opm.c",
+    "wasm-src/opm.c",
 ]

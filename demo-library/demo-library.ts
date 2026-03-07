@@ -17,7 +17,7 @@ interface YM2151Module {
   HEAPU8?: Uint8Array;
 }
 
-// Global Module object — must be assigned before sine_test.js loads (Emscripten reads it)
+// Global Module object — must be assigned before ym2151.js loads (Emscripten reads it)
 // Emscripten will augment this object with _malloc, _generate_sound, etc. at runtime
 // eslint-disable-next-line no-var
 var Module: YM2151Module = {
