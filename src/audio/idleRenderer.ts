@@ -19,6 +19,9 @@ declare function cancelIdleCallback(id: number): void;
 
 let pendingCallbackId: number | null = null;
 let scheduledViaTimeout = false;
+let debounceTimerId: number | null = null;
+
+const IDLE_RENDERING_RESUME_DELAY_MS = 1500;
 
 function getItemsToRender(): Array<{ id: string; jsonEditor: string; type: 'history' | 'favorite' }> {
     const history = getHistory().map(h => ({
@@ -103,9 +106,13 @@ export function scheduleIdleRendering(): void {
 }
 
 /**
- * Cancel any pending idle rendering pass.
+ * Cancel any pending idle rendering pass and any pending debounce timer.
  */
 export function cancelIdleRendering(): void {
+    if (debounceTimerId !== null) {
+        clearTimeout(debounceTimerId);
+        debounceTimerId = null;
+    }
     if (pendingCallbackId === null) {
         return;
     }
@@ -115,4 +122,17 @@ export function cancelIdleRendering(): void {
         clearTimeout(pendingCallbackId);
     }
     pendingCallbackId = null;
+}
+
+/**
+ * Schedule idle rendering to start after a delay (debounced).
+ * Cancels any existing idle rendering or pending debounce before setting the timer.
+ * Use this after playback ends to avoid competing with active audio generation.
+ */
+export function scheduleIdleRenderingDebounced(): void {
+    cancelIdleRendering();
+    debounceTimerId = window.setTimeout(() => {
+        debounceTimerId = null;
+        scheduleIdleRendering();
+    }, IDLE_RENDERING_RESUME_DELAY_MS);
 }

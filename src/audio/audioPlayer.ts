@@ -7,7 +7,7 @@ import {
 import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 import { getCachedAudio, setCachedAudio } from './audioCache';
-import { scheduleIdleRendering } from './idleRenderer';
+import { cancelIdleRendering, scheduleIdleRenderingDebounced } from './idleRenderer';
 
 let audioContext: AudioContext | null = null;
 
@@ -90,6 +90,9 @@ function calculateMaxAmplitude(audioData: AudioData): number {
  * Play audio from current JSON editor content
  */
 export function playAudio(): void {
+    // Interrupt any background caching so it doesn't compete with playback
+    cancelIdleRendering();
+
     const audioData = getAudioData();
     if (!audioData) {
         return;
@@ -114,6 +117,10 @@ export function playAudio(): void {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate);
+    // Resume background caching 1.5 seconds after playback ends
+    source.onended = () => {
+        scheduleIdleRenderingDebounced();
+    };
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
@@ -141,9 +148,6 @@ export function playAudio(): void {
             (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
         }
     }
-
-    // Schedule background rendering of remaining history/favorites items
-    scheduleIdleRendering();
 }
 
 /**
