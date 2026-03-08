@@ -11,6 +11,10 @@ import { cancelIdleRendering, scheduleIdleRenderingDebounced } from './idleRende
 
 let audioContext: AudioContext | null = null;
 
+// Tracks the number of AudioBufferSourceNodes that are currently playing.
+// Idle rendering is only resumed once this drops back to 0.
+let activePlaybackCount = 0;
+
 // In-player cache for generated audio to avoid redundant generation
 // (separate from the global LRU audio cache used by history/favorites)
 let cachedJsonContent: string | null = null;
@@ -117,10 +121,14 @@ export function playAudio(): void {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate);
-    // Resume background caching 1.5 seconds after playback ends
-    source.onended = () => {
-        scheduleIdleRenderingDebounced();
-    };
+    // Resume background caching 1.5 seconds after all active playbacks have ended
+    activePlaybackCount++;
+    source.addEventListener('ended', () => {
+        activePlaybackCount = Math.max(0, activePlaybackCount - 1);
+        if (activePlaybackCount === 0) {
+            scheduleIdleRenderingDebounced();
+        }
+    }, { once: true });
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
