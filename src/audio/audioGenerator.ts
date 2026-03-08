@@ -143,9 +143,13 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
 
     const rawLeft = new Float32Array(actualFrames);
     const rawRight = new Float32Array(actualFrames);
+
+    const bufPtr = Module._get_buffer_ptr();
+    const floatOffset = bufPtr >> 2; // byte address to Float32Array index
+    const interleaved = Module.HEAPF32.subarray(floatOffset, floatOffset + actualFrames * 2);
     for (let i = 0; i < actualFrames; i++) {
-        rawLeft[i] = Module._get_sample(i * 2);
-        rawRight[i] = Module._get_sample(i * 2 + 1);
+        rawLeft[i] = interleaved[i * 2];
+        rawRight[i] = interleaved[i * 2 + 1];
     }
 
     // NOTE: caller is responsible for calling Module._free_buffer() after use.
@@ -253,10 +257,12 @@ export function generateAudioBuffers(): AudioData | null {
     const rawLeft = new Float32Array(actualFrames);
     const rawRight = new Float32Array(actualFrames);
     
-    // C-side buffer is [L0, R0, L1, R1, ...]
+    const bufPtr = Module._get_buffer_ptr();
+    const floatOffset = bufPtr >> 2; // byte address to Float32Array index
+    const interleaved = Module.HEAPF32.subarray(floatOffset, floatOffset + actualFrames * 2);
     for (let i = 0; i < actualFrames; i++) {
-        rawLeft[i] = Module._get_sample(i * 2);
-        rawRight[i] = Module._get_sample(i * 2 + 1);
+        rawLeft[i] = interleaved[i * 2];
+        rawRight[i] = interleaved[i * 2 + 1];
     }
     
     return {
