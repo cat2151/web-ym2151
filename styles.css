@@ -85,6 +85,11 @@ textarea {
     height: 150px;
     background: #f8fff8;
 }
+#registersEditor {
+    height: 60px;
+    background: #f8f8ff;
+    font-size: 12px;
+}
 #mmlInput {
     height: 100px;
     background: #fffef8;
@@ -210,6 +215,10 @@ h1 { margin-bottom: 5px; }
     #toneEditor {
         background: #1e2a1e;
         color: #e0e0e0;
+    }
+
+    #registersEditor {
+        background: #1e1e2a;
     }
     
     .info {
