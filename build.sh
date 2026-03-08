@@ -231,8 +231,8 @@ build_project() {
     
     emcc wasm-src/ym2151.c -O3 \
       -s WASM=1 \
-      -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_free_buffer','_malloc','_free']" \
-      -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8']" \
+      -s EXPORTED_FUNCTIONS="['_generate_sound','_get_sample','_get_buffer_ptr','_free_buffer','_malloc','_free']" \
+      -s EXPORTED_RUNTIME_METHODS="['cwrap','getValue','HEAPU8','HEAPF32']" \
       -o ym2151.js
     
     if [ $? -ne 0 ]; then

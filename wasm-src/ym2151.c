@@ -172,6 +172,11 @@ float get_sample(int index) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+float* get_buffer_ptr() {
+    return global_buffer;
+}
+
+EMSCRIPTEN_KEEPALIVE
 void free_buffer() {
     if (global_buffer) {
         free(global_buffer);
