@@ -5,6 +5,7 @@
 
 import { playWithMMLFallback } from './mml/playback';
 import { runWithRenderingOverlay } from './ui';
+import { updateRegistersEditor } from './tone-editor/registersFormat';
 
 interface Preset {
     name?: string;
@@ -93,6 +94,9 @@ export function loadToEditor(autoPlay: boolean = true): void {
     if (window.parseJsonToToneEditor) {
         window.parseJsonToToneEditor(editObj.events as any);
     }
+    
+    // Update registers editor from the loaded events
+    updateRegistersEditor(editObj.events as any);
     
     // Auto-play the loaded preset if requested
     if (autoPlay) {

@@ -7,9 +7,14 @@ import { JsonEditorData, OperatorParams, GlobalParams } from '../types';
 import { parseParamLine, getDefaultOperatorParams } from './parser';
 import { generateEvents } from './eventGenerator';
 import { updateDurationDisplay } from '../ui';
+import { updateRegistersEditor, registersStringToEvents } from './registersFormat';
+import { updateToneEditorFromJson } from './jsonParser';
 
 // Export both JSON parser functions with their original names
 export { parseJsonToToneEditor, updateToneEditorFromJson } from './jsonParser';
+
+// Export registers format utilities
+export { eventsToRegistersString, eventsToToneJsonString } from './registersFormat';
 
 /**
  * Parse tone editor textarea and generate YM2151 register events
@@ -69,5 +74,32 @@ export function onToneEditorChange(): void {
             jsonEditor.value = JSON.stringify(result, null, 2);
         }
         updateDurationDisplay(result.events);
+        updateRegistersEditor(result.events);
+    }
+}
+
+/**
+ * Update JSON and tone editor when registers editor changes
+ */
+export function onRegistersEditorChange(): void {
+    const registersEditor = document.getElementById('registersEditor') as HTMLTextAreaElement | null;
+    if (!registersEditor) return;
+
+    try {
+        const json = JSON.parse(registersEditor.value);
+        if (json.registers && typeof json.registers === 'string') {
+            const events = registersStringToEvents(json.registers);
+            if (events.length > 0) {
+                const jsonEditor = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
+                if (jsonEditor) {
+                    jsonEditor.value = JSON.stringify({ events }, null, 2);
+                }
+                // Update tone editor text without triggering its change handler
+                updateToneEditorFromJson(events);
+                updateDurationDisplay(events);
+            }
+        }
+    } catch (_e) {
+        // Invalid JSON – ignore silently
     }
 }

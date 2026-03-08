@@ -6,7 +6,7 @@
 import { loadPresets } from './presets';
 import { loadPresetTones } from './preset-tones';
 import { loadFromStorage, saveToneEditorToStorage, saveJsonEditorToStorage } from './storage';
-import { onToneEditorChange } from './tone-editor';
+import { onToneEditorChange, onRegistersEditorChange } from './tone-editor';
 import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
@@ -154,6 +154,20 @@ export function setupEditorListeners(): void {
                 if (isValidJson) {
                     triggerAutoPlay();
                 }
+            }, AUTOSAVE_DEBOUNCE_MS);
+        });
+    }
+
+    const registersEditor = document.getElementById('registersEditor');
+    if (registersEditor) {
+        let registersTimeoutId: number | null = null;
+        registersEditor.addEventListener('input', function() {
+            if (registersTimeoutId) clearTimeout(registersTimeoutId);
+            registersTimeoutId = window.setTimeout(() => {
+                onRegistersEditorChange();
+                saveJsonEditorToStorage();
+                saveToneEditorToStorage();
+                triggerAutoPlay();
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
