@@ -8,50 +8,8 @@
 export interface StorageKeys {
     readonly TONE_EDITOR: string;
     readonly JSON_EDITOR: string;
-    readonly SLOT_PREFIX: string;
     readonly HISTORY: string;
     readonly FAVORITES: string;
-}
-
-/**
- * Slot data stored in localStorage
- */
-export interface SlotData {
-    toneEditor: string;
-    jsonEditor: string;
-    timestamp: string;
-    name: string;
-}
-
-/**
- * Slot information for display
- */
-export interface SlotInfo {
-    number: number;
-    name: string;
-    timestamp: string | null;
-    isEmpty: boolean;
-    isCorrupt: boolean;
-}
-
-/**
- * Backup data for preview functionality
- */
-export interface PreviewBackup {
-    toneEditor: string;
-    jsonEditor: string;
-}
-
-/**
- * All slots export data structure
- */
-export interface AllSlotsExportData {
-    version: string;
-    exportDate: string;
-    slots: Array<{
-        slotNumber: number;
-        data: SlotData;
-    }>;
 }
 
 /**

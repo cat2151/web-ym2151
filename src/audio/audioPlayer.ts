@@ -6,7 +6,6 @@ import {
 } from '../oscilloscope';
 import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
-import { finalizePreviewOnUserPlayback } from '../storage/previewManager';
 import { getCachedAudio, setCachedAudio } from './audioCache';
 import { scheduleIdleRendering } from './idleRenderer';
 
@@ -91,8 +90,6 @@ function calculateMaxAmplitude(audioData: AudioData): number {
  * Play audio from current JSON editor content
  */
 export function playAudio(): void {
-    finalizePreviewOnUserPlayback();
-
     const audioData = getAudioData();
     if (!audioData) {
         return;

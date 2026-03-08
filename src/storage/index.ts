@@ -11,30 +11,6 @@ export {
     clearStorage
 } from './localStorageService';
 
-// Slot Manager
-export {
-    saveToSlot,
-    loadFromSlot,
-    getAllSlots,
-    clearSlot,
-    exportAllSlots,
-    importAllSlots
-} from './slotManager';
-
-// Preview Manager
-export {
-    previewSlot,
-    restoreBackup,
-    loadPreviewedSlot
-} from './previewManager';
-
-// UI Manager
-export {
-    handleSaveSlot,
-    refreshSlotInfo,
-    initializeSlotUI
-} from './uiManager';
-
 // Constants
 export {
     STORAGE_KEYS,

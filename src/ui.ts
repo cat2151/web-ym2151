@@ -108,29 +108,6 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
     ctx.stroke();
 }
 
-/**
- * Toggle the storage section visibility
- */
-export function toggleStorageSection(): void {
-    const btn = document.getElementById('storageToggleBtn');
-    const content = document.getElementById('storageContent');
-    const toggleText = btn?.querySelector('.toggle-text');
-    
-    if (!btn || !content) return;
-    
-    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-    
-    // Toggle state
-    btn.setAttribute('aria-expanded', String(!isExpanded));
-    content.setAttribute('aria-hidden', String(!isExpanded));
-    content.style.display = isExpanded ? 'none' : 'block';
-    
-    // Update button text
-    if (toggleText) {
-        toggleText.textContent = isExpanded ? 'Show Save Section' : 'Hide Save Section';
-    }
-}
-
 const RENDERING_OVERLAY_ID = 'renderOverlay';
 const RENDERING_BODY_CLASS = 'rendering';
 const RENDERING_TEXT_SELECTOR = '.render-overlay__text';
