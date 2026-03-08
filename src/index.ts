@@ -24,17 +24,10 @@ export * from './favorites';
 
 // Import necessary functions for global scope
 import { exportWav, playAudioWithOverlay } from './audio';
-import { 
-    handleSaveSlot, 
-    refreshSlotInfo, 
-    exportAllSlots, 
-    importAllSlots,
-    initializeSlotUI 
-} from './storage';
 import { onToneEditorChange, updateToneEditorFromJson } from './tone-editor';
 import { loadToEditor, handlePresetChange } from './presets';
 import { loadToneToEditor, handlePresetToneChange } from './preset-tones';
-import { updateDurationDisplay, toggleStorageSection } from './ui';
+import { updateDurationDisplay } from './ui';
 import { 
     generateRandomTone, 
     toggleRandomConfigSection, 
@@ -62,10 +55,6 @@ declare global {
         Module: any;
         playAudio: typeof playWithMMLFallback;
         exportWav: typeof exportWav;
-        handleSaveSlot: typeof handleSaveSlot;
-        refreshSlotInfo: typeof refreshSlotInfo;
-        exportAllSlots: typeof exportAllSlots;
-        importAllSlots: typeof importAllSlots;
         onToneEditorChange: typeof onToneEditorChange;
         parseJsonToToneEditor: typeof updateToneEditorFromJson;
         loadToEditor: typeof loadToEditor;
@@ -73,7 +62,6 @@ declare global {
         handlePresetChange: typeof handlePresetChange;
         handlePresetToneChange: typeof handlePresetToneChange;
         updateDurationDisplay: typeof updateDurationDisplay;
-        toggleStorageSection: typeof toggleStorageSection;
         generateRandomTone: typeof generateRandomTone;
         toggleRandomConfigSection: typeof toggleRandomConfigSection;
         exportRandomConfig: typeof exportRandomConfig;
@@ -93,8 +81,6 @@ declare global {
 
 // Setup Emscripten Module configuration
 if (typeof window !== 'undefined') {
-    initializeSlotUI();
-
     window.Module = {
         onRuntimeInitialized: initializeApplication
     };
@@ -103,10 +89,6 @@ if (typeof window !== 'undefined') {
     window.playAudio = () => playWithMMLFallback();
     window.playJsonAudio = playAudioWithOverlay;
     window.exportWav = exportWav;
-    window.handleSaveSlot = handleSaveSlot;
-    window.refreshSlotInfo = refreshSlotInfo;
-    window.exportAllSlots = exportAllSlots;
-    window.importAllSlots = importAllSlots;
     window.onToneEditorChange = onToneEditorChange;
     window.parseJsonToToneEditor = updateToneEditorFromJson; // Keep original name for compatibility
     window.loadToEditor = loadToEditor;
@@ -114,7 +96,6 @@ if (typeof window !== 'undefined') {
     window.handlePresetChange = handlePresetChange;
     window.handlePresetToneChange = handlePresetToneChange;
     window.updateDurationDisplay = updateDurationDisplay;
-    window.toggleStorageSection = toggleStorageSection;
     window.generateRandomTone = generateRandomTone;
     window.toggleRandomConfigSection = toggleRandomConfigSection;
     window.exportRandomConfig = exportRandomConfig;
