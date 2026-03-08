@@ -163,15 +163,6 @@ int generate_sound(void *event_data_ptr, int event_count, int num_samples) {
 // ------------------------------------------------------------
 
 EMSCRIPTEN_KEEPALIVE
-float get_sample(int index) {
-    // 範囲チェックは global_total_floats (確保した全要素数) で行う
-    if (global_buffer && index >= 0 && index < global_total_floats) {
-        return global_buffer[index];
-    }
-    return 0.0f;
-}
-
-EMSCRIPTEN_KEEPALIVE
 float* get_buffer_ptr() {
     return global_buffer;
 }

@@ -12,9 +12,10 @@ interface YM2151Module {
   _malloc?(size: number): number;
   _free?(ptr: number): void;
   _generate_sound?(dataPtr: number, eventCount: number, numFrames: number): number;
-  _get_sample?(index: number): number;
+  _get_buffer_ptr?(): number;
   _free_buffer?(): void;
   HEAPU8?: Uint8Array;
+  HEAPF32?: Float32Array;
 }
 
 // Global Module object — must be assigned before ym2151.js loads (Emscripten reads it)
@@ -143,12 +144,15 @@ function generateAudio(): AudioSamples {
       throw new Error('WASM audio generation failed: no frames were produced');
     }
 
-    // Read back interleaved L/R samples
+    // Read back interleaved L/R samples via HEAPF32 bulk copy
     const rawLeft = new Float32Array(actualFrames);
     const rawRight = new Float32Array(actualFrames);
+    const bufPtr = Module._get_buffer_ptr!();
+    const floatOffset = bufPtr >> 2; // byte address to Float32Array index
+    const interleaved = Module.HEAPF32!.subarray(floatOffset, floatOffset + actualFrames * 2);
     for (let i = 0; i < actualFrames; i++) {
-      rawLeft[i]  = Module._get_sample!(i * 2);
-      rawRight[i] = Module._get_sample!(i * 2 + 1);
+      rawLeft[i]  = interleaved[i * 2];
+      rawRight[i] = interleaved[i * 2 + 1];
     }
 
     Module._free_buffer!();
