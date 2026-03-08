@@ -164,10 +164,33 @@ export function setupEditorListeners(): void {
         registersEditor.addEventListener('input', function() {
             if (registersTimeoutId) clearTimeout(registersTimeoutId);
             registersTimeoutId = window.setTimeout(() => {
+                // Validate registers JSON before triggering auto-play to avoid stale tone playback
+                let isValidRegistersJson = false;
+                const registersText = (registersEditor as HTMLTextAreaElement).value;
+                try {
+                    const parsed = JSON.parse(registersText);
+                    if (
+                        typeof parsed === 'object' &&
+                        parsed !== null &&
+                        typeof parsed.registers === 'string' &&
+                        parsed.registers.length > 0 &&
+                        (parsed.type === undefined || parsed.type === 'YM2151 tone')
+                    ) {
+                        isValidRegistersJson = true;
+                    }
+                } catch (_e) {
+                    isValidRegistersJson = false;
+                }
+
+                // Apply changes and save editors
                 onRegistersEditorChange();
                 saveJsonEditorToStorage();
                 saveToneEditorToStorage();
-                triggerAutoPlay();
+
+                // Trigger auto-play only when registers JSON is valid
+                if (isValidRegistersJson) {
+                    triggerAutoPlay();
+                }
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }

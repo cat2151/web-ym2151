@@ -13,10 +13,17 @@ import { toHex } from '../ui';
  * @returns Registers hex string (e.g. "40016014801FA00A...")
  */
 export function eventsToRegistersString(events: YM2151Event[]): string {
+    const isValidByte = (value: number): boolean =>
+        Number.isFinite(value) && Number.isInteger(value) && value >= 0x00 && value <= 0xFF;
+
     return events.map(evt => {
         const addr = parseInt(evt.addr as string, 16);
         const data = parseInt(evt.data as string, 16);
-        if (isNaN(addr) || isNaN(data)) return '';
+        if (!isValidByte(addr) || !isValidByte(data)) {
+            throw new Error(
+                `Invalid YM2151 event address/data: addr=${evt.addr}, data=${evt.data}`
+            );
+        }
         return addr.toString(16).toUpperCase().padStart(2, '0') +
                data.toString(16).toUpperCase().padStart(2, '0');
     }).join('');

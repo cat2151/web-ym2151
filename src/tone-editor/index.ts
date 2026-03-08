@@ -7,7 +7,7 @@ import { JsonEditorData, OperatorParams, GlobalParams } from '../types';
 import { parseParamLine, getDefaultOperatorParams } from './parser';
 import { generateEvents } from './eventGenerator';
 import { updateDurationDisplay } from '../ui';
-import { updateRegistersEditor, registersStringToEvents } from './registersFormat';
+import { updateRegistersEditor, registersStringToEvents, eventsToToneJsonString } from './registersFormat';
 import { updateToneEditorFromJson } from './jsonParser';
 
 // Export both JSON parser functions with their original names
@@ -86,17 +86,30 @@ export function onRegistersEditorChange(): void {
     if (!registersEditor) return;
 
     try {
-        const json = JSON.parse(registersEditor.value);
-        if (json.registers && typeof json.registers === 'string') {
-            const events = registersStringToEvents(json.registers);
-            if (events.length > 0) {
-                const jsonEditor = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
-                if (jsonEditor) {
-                    jsonEditor.value = JSON.stringify({ events }, null, 2);
+        const json: unknown = JSON.parse(registersEditor.value);
+        if (typeof json === 'object' && json !== null) {
+            const registersJson = json as { type?: unknown; registers?: unknown };
+
+            // If a type is declared, require it to match the expected YM2151 tone format
+            if (registersJson.type !== undefined && registersJson.type !== 'YM2151 tone') {
+                return;
+            }
+
+            if (typeof registersJson.registers === 'string') {
+                const events = registersStringToEvents(registersJson.registers);
+                if (events.length > 0) {
+                    // Normalize the registers editor content to keep it self-consistent
+                    // (recomputes note_number from the KC register in the parsed events)
+                    registersEditor.value = eventsToToneJsonString(events);
+
+                    const jsonEditor = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
+                    if (jsonEditor) {
+                        jsonEditor.value = JSON.stringify({ events }, null, 2);
+                    }
+                    // Update tone editor text without triggering its change handler
+                    updateToneEditorFromJson(events);
+                    updateDurationDisplay(events);
                 }
-                // Update tone editor text without triggering its change handler
-                updateToneEditorFromJson(events);
-                updateDurationDisplay(events);
             }
         }
     } catch (_e) {
