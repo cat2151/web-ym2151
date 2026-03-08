@@ -7,9 +7,13 @@ import {
 import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 import { getCachedAudio, setCachedAudio } from './audioCache';
-import { scheduleIdleRendering } from './idleRenderer';
+import { cancelIdleRendering, scheduleIdleRenderingDebounced } from './idleRenderer';
 
 let audioContext: AudioContext | null = null;
+
+// Tracks the number of AudioBufferSourceNodes that are currently playing.
+// Idle rendering is only resumed once this drops back to 0.
+let activePlaybackCount = 0;
 
 // In-player cache for generated audio to avoid redundant generation
 // (separate from the global LRU audio cache used by history/favorites)
@@ -90,6 +94,9 @@ function calculateMaxAmplitude(audioData: AudioData): number {
  * Play audio from current JSON editor content
  */
 export function playAudio(): void {
+    // Interrupt any background caching so it doesn't compete with playback
+    cancelIdleRendering();
+
     const audioData = getAudioData();
     if (!audioData) {
         return;
@@ -114,6 +121,14 @@ export function playAudio(): void {
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
     startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate);
+    // Resume background caching 1.5 seconds after all active playbacks have ended
+    activePlaybackCount++;
+    source.addEventListener('ended', () => {
+        activePlaybackCount = Math.max(0, activePlaybackCount - 1);
+        if (activePlaybackCount === 0) {
+            scheduleIdleRenderingDebounced();
+        }
+    }, { once: true });
     source.start();
 
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
@@ -141,9 +156,6 @@ export function playAudio(): void {
             (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
         }
     }
-
-    // Schedule background rendering of remaining history/favorites items
-    scheduleIdleRendering();
 }
 
 /**
