@@ -8,10 +8,10 @@ declare global {
         _free(ptr: number): void;
         _generate_sound(dataPtr: number, eventCount: number, numFrames: number): number;
         _get_sample(index: number): number;
-        _get_buffer_ptr(): number;
+        _get_buffer_ptr?(): number;
         _free_buffer(): void;
         HEAPU8: Uint8Array;
-        HEAPF32: Float32Array;
+        HEAPF32?: Float32Array;
         onRuntimeInitialized?: () => void;
     }
     
