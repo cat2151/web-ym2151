@@ -32,12 +32,28 @@ export function getHistory(): HistoryEntry[] {
 
 /**
  * Add a new entry to the front of the history list.
- * Duplicate JSON content (same jsonEditor value) is removed before inserting.
+ * If the same jsonEditor content already exists, update it in-place (preserving position).
  * List is trimmed to MAX_HISTORY entries.
- * @returns the new HistoryEntry
+ * @returns the new or updated HistoryEntry
  */
 export function addToHistory(toneEditor: string, jsonEditor: string): HistoryEntry {
     const now = new Date();
+    const history = getHistory();
+
+    const existingIndex = history.findIndex(h => h.jsonEditor === jsonEditor);
+    if (existingIndex !== -1) {
+        // Update in-place without reordering
+        history[existingIndex].timestamp = now.toISOString();
+        history[existingIndex].label = formatLabel(now);
+        history[existingIndex].toneEditor = toneEditor;
+        try {
+            localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
+        } catch (error) {
+            console.warn('Failed to save history to localStorage:', error);
+        }
+        return history[existingIndex];
+    }
+
     const entry: HistoryEntry = {
         id: `hist_${now.getTime()}`,
         timestamp: now.toISOString(),
@@ -46,7 +62,6 @@ export function addToHistory(toneEditor: string, jsonEditor: string): HistoryEnt
         jsonEditor
     };
 
-    const history = getHistory().filter(h => h.jsonEditor !== jsonEditor);
     history.unshift(entry);
     const trimmed = history.slice(0, MAX_HISTORY);
 
