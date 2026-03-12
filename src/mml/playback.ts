@@ -7,7 +7,7 @@ import { convertMMLToYM2151JSON, initializeMMLConverter, isMMLConverterReady } f
 import { clearAudioCache, playAudioWithOverlay, playAudio } from '../audio';
 import { updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
-import { parseToneEditorToJson } from '../tone-editor';
+import { parseToneEditorToJson, eventsToToneJsonString } from '../tone-editor';
 
 /**
  * Get MML input textarea element
@@ -24,7 +24,24 @@ function getJSONEditor(): HTMLTextAreaElement | null {
 }
 
 /**
- * Build tone initialization events from the tone editor (excluding key on/note)
+ * Get combined MML textarea element (shows tone JSON + MML)
+ */
+function getCombinedMMLEditor(): HTMLTextAreaElement | null {
+    return document.getElementById('combinedMML') as HTMLTextAreaElement | null;
+}
+
+/**
+ * Check if a YM2151 event is a note/key event (not a tone parameter register)
+ * Note events: Key On/Off (0x08), KC (0x28-0x2F), KF (0x30-0x37)
+ * Tone parameter events: 0x20-0x27, 0x38-0xFF
+ */
+function isNoteEvent(evt: YM2151Event): boolean {
+    const addr = parseInt(evt.addr as string);
+    return addr === 0x08 || (addr >= 0x28 && addr <= 0x37);
+}
+
+/**
+ * Build tone initialization events from the tone editor (excluding key on/note events)
  */
 function getToneInitializationEvents(): YM2151Event[] {
     const toneData = parseToneEditorToJson();
@@ -32,10 +49,7 @@ function getToneInitializationEvents(): YM2151Event[] {
         return [];
     }
 
-    return toneData.events.filter(evt => {
-        const addr = parseInt(evt.addr as string);
-        return addr !== 0x08 && addr !== 0x28;
-    });
+    return toneData.events.filter(evt => !isNoteEvent(evt));
 }
 
 /**
@@ -117,9 +131,25 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
     // Update JSON editor with the converted events
     if (result.events && Array.isArray(result.events)) {
         const toneEvents = getToneInitializationEvents();
-        const combinedEvents = [...toneEvents, ...(result.events as YM2151Event[])];
+
+        // When tone events are available, strip the default tone initialization from the
+        // MML-converted events so the edited tone is not overridden by the sine default.
+        const mmlNoteEvents = toneEvents.length > 0
+            ? (result.events as YM2151Event[]).filter(isNoteEvent)
+            : (result.events as YM2151Event[]);
+
+        const combinedEvents = [...toneEvents, ...mmlNoteEvents];
 
         jsonEditor.value = JSON.stringify({ events: combinedEvents }, null, 2);
+
+        // Update combined MML textarea (tone JSON + MML text)
+        const combinedMMLEditor = getCombinedMMLEditor();
+        if (combinedMMLEditor) {
+            const toneJson = toneEvents.length
+                ? eventsToToneJsonString(toneEvents)
+                : '';
+            combinedMMLEditor.value = toneJson ? `${toneJson}\n${mml}` : mml;
+        }
 
         // Update duration display
         updateDurationDisplay(combinedEvents);
@@ -149,20 +179,9 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
 }
 
 /**
- * Play audio using MML input when available, otherwise fall back to current JSON
+ * Play audio using MML pipeline (always), defaulting to "c" if no MML is entered.
+ * This ensures the edited tone is always applied via the MML playback path.
  */
 export function playWithMMLFallback(useOverlay: boolean = true): void {
-    const mmlInput = getMMLInput();
-    const hasMML = mmlInput && mmlInput.value.trim().length > 0;
-
-    if (hasMML) {
-        void playMMLInput({ useOverlay });
-        return;
-    }
-
-    if (useOverlay) {
-        playAudioWithOverlay();
-    } else {
-        playAudio();
-    }
+    void playMMLInput({ useOverlay });
 }
