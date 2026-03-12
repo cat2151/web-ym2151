@@ -41,7 +41,7 @@ function isNoteEvent(evt: YM2151Event): boolean {
 }
 
 /**
- * Build tone initialization events from the tone editor (excluding key on/note)
+ * Build tone initialization events from the tone editor (excluding key on/note events)
  */
 function getToneInitializationEvents(): YM2151Event[] {
     const toneData = parseToneEditorToJson();
@@ -49,10 +49,7 @@ function getToneInitializationEvents(): YM2151Event[] {
         return [];
     }
 
-    return toneData.events.filter(evt => {
-        const addr = parseInt(evt.addr as string);
-        return addr !== 0x08 && addr !== 0x28;
-    });
+    return toneData.events.filter(evt => !isNoteEvent(evt));
 }
 
 /**
@@ -148,9 +145,8 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
         // Update combined MML textarea (tone JSON + MML text)
         const combinedMMLEditor = getCombinedMMLEditor();
         if (combinedMMLEditor) {
-            const toneData = parseToneEditorToJson();
-            const toneJson = toneData?.events?.length
-                ? eventsToToneJsonString(toneData.events)
+            const toneJson = toneEvents.length
+                ? eventsToToneJsonString(toneEvents)
                 : '';
             combinedMMLEditor.value = toneJson ? `${toneJson}\n${mml}` : mml;
         }
