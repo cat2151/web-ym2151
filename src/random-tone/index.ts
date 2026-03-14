@@ -148,7 +148,7 @@ function getOperatorConfig(config: RandomConfig, operatorIndex: number): Operato
 /**
  * YM2151 algorithm (CON 0-7) carrier/modulator definitions.
  *
- * Carrier operators per ALG:
+ * Carrier operators per CON:
  *   CON=0: OP3 only         (OP0→OP1→OP2→OP3→OUT, FB on OP0)
  *   CON=1: OP3 only         ((OP0,OP1)→OP2→OP3→OUT, FB on OP0)
  *   CON=2: OP3 only         (OP0→OP2→OP3, OP1→OP3→OUT, FB on OP0)
@@ -211,6 +211,15 @@ function getModulatorTLForCON(con: number): number {
 }
 
 /**
+ * Read the current CON value from the tone editor textarea.
+ * Returns the clamped (0–7) value, or 7 (all-carriers default) if not present.
+ */
+function getEditorCON(toneEditor: HTMLTextAreaElement): number {
+    const match = toneEditor.value.match(/CON=([0-9A-Fa-f]+)/i);
+    return match ? (parseInt(match[1], 16) & 0x7) : 7;
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -229,8 +238,10 @@ export function generateRandomTone(): void {
     runWithRenderingOverlay(() => {
         const lines: string[] = [];
         
-        // Generate CON first so we can determine carrier/modulator roles for TL assignment
-        const con = randomValue(config.global.CON) ?? 0;
+        // Generate CON first so we can determine carrier/modulator roles for TL assignment.
+        // Clamp to 0-7 to match the YM2151 hardware behaviour (same masking as event generation).
+        const conRaw = randomValue(config.global.CON);
+        const con = conRaw !== undefined ? (conRaw & 0x7) : getEditorCON(toneEditor);
         const modulatorTL = getModulatorTLForCON(con);
         
         // Generate random parameters for each operator
@@ -239,8 +250,8 @@ export function generateRandomTone(): void {
             const parts: string[] = [];
             
             // Carriers keep TL=0; modulators use a fixed TL based on modulation stage count
-            const tlValue = isCarrierOp(con, i) ? 0 : modulatorTL;
-            parts.push(`TL=${tlValue.toString(16).toUpperCase().padStart(2, '0')}`);
+            const tl = formatParam('TL', isCarrierOp(con, i) ? 0 : modulatorTL);
+            if (tl) parts.push(tl);
             
             const ar = formatParam('AR', randomValue(opConfig.AR));
             if (ar) parts.push(ar);
@@ -272,7 +283,12 @@ export function generateRandomTone(): void {
         // Generate global parameters (CON already determined above)
         const globalParts: string[] = [];
         
-        globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        // Only emit CON= when a range was configured; otherwise keep the editor's current value
+        if (conRaw !== undefined) {
+            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        } else if (toneEditor.value.match(/CON=/i)) {
+            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        }
         
         const fl = randomValue(config.global.FL);
         if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
