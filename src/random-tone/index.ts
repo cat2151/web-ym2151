@@ -5,7 +5,7 @@
 
 import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playWithMMLFallback } from '../mml/playback';
-import { runWithRenderingOverlay } from '../ui';
+import { RANDOM_TONE_STATUS_ID } from '../constants';
 
 let currentConfig: RandomConfig | null = null;
 let configTextarea: HTMLTextAreaElement | null = null;
@@ -332,6 +332,20 @@ export function generateRandomToneString(config: RandomConfig, currentContent?: 
     return lines.join('\n');
 }
 
+function showRandomToneBalloon(message: string): void {
+    const el = document.getElementById(RANDOM_TONE_STATUS_ID);
+    if (el) {
+        el.textContent = message;
+    }
+}
+
+export function hideRandomToneBalloon(): void {
+    const el = document.getElementById(RANDOM_TONE_STATUS_ID);
+    if (el) {
+        el.textContent = '';
+    }
+}
+
 /**
  * Generate random tone and update editor
  */
@@ -346,19 +360,34 @@ export function generateRandomTone(): void {
         console.error('Tone editor not found');
         return;
     }
+    
+    showRandomToneBalloon('⏳ Now generating...');
+
     const config = currentConfig;
 
-    runWithRenderingOverlay(() => {
-        toneEditor.value = generateRandomToneString(config, toneEditor.value);
-        
-        // Trigger change event to update JSON
-        if (window.onToneEditorChange) {
-            window.onToneEditorChange();
+    // Defer heavy work so the browser can paint the balloon before processing starts.
+    // The balloon is cleared when playback actually starts (in audioPlayer.ts).
+    // A timeout fallback ensures the balloon is cleared if playback never starts
+    // (e.g. MML conversion fails with an early return rather than a thrown error).
+    const balloonClearTimeout = window.setTimeout(hideRandomToneBalloon, 8000);
+
+    window.setTimeout(() => {
+        try {
+            toneEditor.value = generateRandomToneString(config, toneEditor.value);
+            
+            // Trigger change event to update JSON
+            if (window.onToneEditorChange) {
+                window.onToneEditorChange();
+            }
+            
+            // Auto-play the generated tone
+            playWithMMLFallback(false);
+        } catch (e) {
+            console.error('Random tone generation failed:', e);
+            clearTimeout(balloonClearTimeout);
+            hideRandomToneBalloon();
         }
-        
-        // Auto-play the generated tone
-        playWithMMLFallback(false);
-    }, 'Now rendering random tone...');
+    }, 0);
 }
 
 /**
