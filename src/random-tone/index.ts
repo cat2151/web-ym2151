@@ -5,6 +5,7 @@
 
 import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playWithMMLFallback } from '../mml/playback';
+import { RANDOM_TONE_STATUS_ID } from '../constants';
 
 let currentConfig: RandomConfig | null = null;
 let configTextarea: HTMLTextAreaElement | null = null;
@@ -331,8 +332,6 @@ export function generateRandomToneString(config: RandomConfig, currentContent?: 
     return lines.join('\n');
 }
 
-const RANDOM_TONE_STATUS_ID = 'randomToneStatus';
-
 function showRandomToneBalloon(message: string): void {
     const el = document.getElementById(RANDOM_TONE_STATUS_ID);
     if (el) {
@@ -365,15 +364,30 @@ export function generateRandomTone(): void {
     showRandomToneBalloon('⏳ Now generating...');
 
     const config = currentConfig;
-    toneEditor.value = generateRandomToneString(config, toneEditor.value);
-    
-    // Trigger change event to update JSON
-    if (window.onToneEditorChange) {
-        window.onToneEditorChange();
-    }
-    
-    // Auto-play the generated tone
-    playWithMMLFallback(false);
+
+    // Defer heavy work so the browser can paint the balloon before processing starts.
+    // The balloon is cleared when playback actually starts (in audioPlayer.ts).
+    // A timeout fallback ensures the balloon is cleared if playback never starts
+    // (e.g. MML conversion fails with an early return rather than a thrown error).
+    const balloonClearTimeout = window.setTimeout(hideRandomToneBalloon, 8000);
+
+    window.setTimeout(() => {
+        try {
+            toneEditor.value = generateRandomToneString(config, toneEditor.value);
+            
+            // Trigger change event to update JSON
+            if (window.onToneEditorChange) {
+                window.onToneEditorChange();
+            }
+            
+            // Auto-play the generated tone
+            playWithMMLFallback(false);
+        } catch (e) {
+            console.error('Random tone generation failed:', e);
+            clearTimeout(balloonClearTimeout);
+            hideRandomToneBalloon();
+        }
+    }, 0);
 }
 
 /**

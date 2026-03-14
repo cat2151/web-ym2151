@@ -8,6 +8,7 @@ import { startRealtimeVisualization } from './realtimeVisualizer';
 import { renderWaveformPreview, runWithRenderingOverlay } from '../ui';
 import { getCachedAudio, setCachedAudio } from './audioCache';
 import { cancelIdleRendering, scheduleIdleRenderingDebounced } from './idleRenderer';
+import { RANDOM_TONE_STATUS_ID } from '../constants';
 
 let audioContext: AudioContext | null = null;
 
@@ -134,7 +135,7 @@ export function playAudio(): void {
     // Clear the random tone status balloon now that playback has started.
     // We access the DOM directly by ID to avoid a circular import
     // (random-tone → mml/playback → audio → audioPlayer).
-    const randomToneStatus = document.getElementById('randomToneStatus');
+    const randomToneStatus = document.getElementById(RANDOM_TONE_STATUS_ID);
     if (randomToneStatus) {
         randomToneStatus.textContent = '';
     }
