@@ -146,6 +146,71 @@ function getOperatorConfig(config: RandomConfig, operatorIndex: number): Operato
 }
 
 /**
+ * YM2151 algorithm (CON 0-7) carrier/modulator definitions.
+ *
+ * Carrier operators per ALG:
+ *   CON=0: OP3 only         (OP0→OP1→OP2→OP3→OUT, FB on OP0)
+ *   CON=1: OP3 only         ((OP0,OP1)→OP2→OP3→OUT, FB on OP0)
+ *   CON=2: OP3 only         (OP0→OP2→OP3, OP1→OP3→OUT, FB on OP0)
+ *   CON=3: OP3 only         (OP0→OP1→OP3, OP2→OP3→OUT, FB on OP0)
+ *   CON=4: OP2, OP3         (OP0→OP1→OP2→OUT, OP3→OUT, FB on OP0)
+ *   CON=5: OP1, OP2, OP3    (OP0→{OP1,OP2,OP3}→OUT, FB on OP0)
+ *   CON=6: OP1, OP2, OP3    (OP0→OP1→OUT, OP2→OUT, OP3→OUT, FB on OP0)
+ *   CON=7: OP0,OP1,OP2,OP3  (all carriers, FB on OP0)
+ *
+ * Modulation stage count = (number of external modulators in chain) + (1 if FB present).
+ * Modulator TL = stage_count * 0x08.
+ *
+ *   CON=0: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=1: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=2: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=3: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=4: stage count 3 (2 mods + FB) → modulator TL = 0x18  (for OP2's chain)
+ *   CON=5: stage count 2 (1 mod  + FB) → modulator TL = 0x10
+ *   CON=6: stage count 2 (1 mod  + FB) → modulator TL = 0x10
+ *   CON=7: stage count 0 (no external modulators) → no modulator TL applied
+ */
+
+/** Carrier operator indices per CON (0-7). */
+const CARRIERS_PER_CON: ReadonlyArray<ReadonlyArray<number>> = [
+    [3],           // CON=0
+    [3],           // CON=1
+    [3],           // CON=2
+    [3],           // CON=3
+    [2, 3],        // CON=4
+    [1, 2, 3],     // CON=5
+    [1, 2, 3],     // CON=6
+    [0, 1, 2, 3],  // CON=7
+];
+
+/** Modulator TL value per CON (stage_count * 0x08). */
+const MODULATOR_TL_PER_CON: ReadonlyArray<number> = [
+    0x20, // CON=0: stage count 4
+    0x20, // CON=1: stage count 4
+    0x20, // CON=2: stage count 4
+    0x20, // CON=3: stage count 4
+    0x18, // CON=4: stage count 3
+    0x10, // CON=5: stage count 2
+    0x10, // CON=6: stage count 2
+    0x00, // CON=7: no external modulators
+];
+
+/**
+ * Return true if the given operator is a carrier for the specified CON value.
+ */
+function isCarrierOp(con: number, operatorIndex: number): boolean {
+    return (CARRIERS_PER_CON[con] ?? []).includes(operatorIndex);
+}
+
+/**
+ * Return the fixed TL value for a modulator operator given the CON value.
+ * Carrier operators always use TL=0, so this is only called for modulators.
+ */
+function getModulatorTLForCON(con: number): number {
+    return MODULATOR_TL_PER_CON[con] ?? 0x00;
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -164,13 +229,18 @@ export function generateRandomTone(): void {
     runWithRenderingOverlay(() => {
         const lines: string[] = [];
         
+        // Generate CON first so we can determine carrier/modulator roles for TL assignment
+        const con = randomValue(config.global.CON) ?? 0;
+        const modulatorTL = getModulatorTLForCON(con);
+        
         // Generate random parameters for each operator
         for (let i = 0; i < 4; i++) {
             const opConfig = getOperatorConfig(config, i);
             const parts: string[] = [];
             
-            const tl = formatParam('TL', randomValue(opConfig.TL));
-            if (tl) parts.push(tl);
+            // Carriers keep TL=0; modulators use a fixed TL based on modulation stage count
+            const tlValue = isCarrierOp(con, i) ? 0 : modulatorTL;
+            parts.push(`TL=${tlValue.toString(16).toUpperCase().padStart(2, '0')}`);
             
             const ar = formatParam('AR', randomValue(opConfig.AR));
             if (ar) parts.push(ar);
@@ -199,11 +269,10 @@ export function generateRandomTone(): void {
             lines.push(parts.join(' '));
         }
         
-        // Generate global parameters
+        // Generate global parameters (CON already determined above)
         const globalParts: string[] = [];
         
-        const con = randomValue(config.global.CON);
-        if (con !== undefined) globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
         
         const fl = randomValue(config.global.FL);
         if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
