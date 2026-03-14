@@ -146,6 +146,80 @@ function getOperatorConfig(config: RandomConfig, operatorIndex: number): Operato
 }
 
 /**
+ * YM2151 algorithm (CON 0-7) carrier/modulator definitions.
+ *
+ * Carrier operators per CON:
+ *   CON=0: OP3 only         (OP0→OP1→OP2→OP3→OUT, FB on OP0)
+ *   CON=1: OP3 only         ((OP0,OP1)→OP2→OP3→OUT, FB on OP0)
+ *   CON=2: OP3 only         (OP0→OP2→OP3, OP1→OP3→OUT, FB on OP0)
+ *   CON=3: OP3 only         (OP0→OP1→OP3, OP2→OP3→OUT, FB on OP0)
+ *   CON=4: OP2, OP3         (OP0→OP1→OP2→OUT, OP3→OUT, FB on OP0)
+ *   CON=5: OP1, OP2, OP3    (OP0→{OP1,OP2,OP3}→OUT, FB on OP0)
+ *   CON=6: OP1, OP2, OP3    (OP0→OP1→OUT, OP2→OUT, OP3→OUT, FB on OP0)
+ *   CON=7: OP0,OP1,OP2,OP3  (all carriers, FB on OP0)
+ *
+ * Modulation stage count = (number of external modulators in chain) + (1 if FB present).
+ * Modulator TL = stage_count * 0x08.
+ *
+ *   CON=0: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=1: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=2: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=3: stage count 4 (3 mods + FB) → modulator TL = 0x20
+ *   CON=4: stage count 3 (2 mods + FB) → modulator TL = 0x18  (for OP2's chain)
+ *   CON=5: stage count 2 (1 mod  + FB) → modulator TL = 0x10
+ *   CON=6: stage count 2 (1 mod  + FB) → modulator TL = 0x10
+ *   CON=7: stage count 0 (no external modulators) → no modulator TL applied
+ */
+
+/** Carrier operator indices per CON (0-7). */
+const CARRIERS_PER_CON: ReadonlyArray<ReadonlyArray<number>> = [
+    [3],           // CON=0
+    [3],           // CON=1
+    [3],           // CON=2
+    [3],           // CON=3
+    [2, 3],        // CON=4
+    [1, 2, 3],     // CON=5
+    [1, 2, 3],     // CON=6
+    [0, 1, 2, 3],  // CON=7
+];
+
+/** Modulator TL value per CON (stage_count * 0x08). */
+const MODULATOR_TL_PER_CON: ReadonlyArray<number> = [
+    0x20, // CON=0: stage count 4
+    0x20, // CON=1: stage count 4
+    0x20, // CON=2: stage count 4
+    0x20, // CON=3: stage count 4
+    0x18, // CON=4: stage count 3
+    0x10, // CON=5: stage count 2
+    0x10, // CON=6: stage count 2
+    0x00, // CON=7: no external modulators
+];
+
+/**
+ * Return true if the given operator is a carrier for the specified CON value.
+ */
+function isCarrierOp(con: number, operatorIndex: number): boolean {
+    return (CARRIERS_PER_CON[con] ?? []).includes(operatorIndex);
+}
+
+/**
+ * Return the fixed TL value for a modulator operator given the CON value.
+ * Carrier operators always use TL=0, so this is only called for modulators.
+ */
+function getModulatorTLForCON(con: number): number {
+    return MODULATOR_TL_PER_CON[con] ?? 0x00;
+}
+
+/**
+ * Read the current CON value from the tone editor textarea.
+ * Returns the clamped (0–7) value, or 7 (all-carriers default) if not present.
+ */
+function getEditorCON(toneEditor: HTMLTextAreaElement): number {
+    const match = toneEditor.value.match(/CON=([0-9A-Fa-f]+)/i);
+    return match ? (parseInt(match[1], 16) & 0x7) : 7;
+}
+
+/**
  * Generate random tone and update editor
  */
 export function generateRandomTone(): void {
@@ -164,12 +238,19 @@ export function generateRandomTone(): void {
     runWithRenderingOverlay(() => {
         const lines: string[] = [];
         
+        // Generate CON first so we can determine carrier/modulator roles for TL assignment.
+        // Clamp to 0-7 to match the YM2151 hardware behaviour (same masking as event generation).
+        const conRaw = randomValue(config.global.CON);
+        const con = conRaw !== undefined ? (conRaw & 0x7) : getEditorCON(toneEditor);
+        const modulatorTL = getModulatorTLForCON(con);
+        
         // Generate random parameters for each operator
         for (let i = 0; i < 4; i++) {
             const opConfig = getOperatorConfig(config, i);
             const parts: string[] = [];
             
-            const tl = formatParam('TL', randomValue(opConfig.TL));
+            // Carriers keep TL=0; modulators use a fixed TL based on modulation stage count
+            const tl = formatParam('TL', isCarrierOp(con, i) ? 0 : modulatorTL);
             if (tl) parts.push(tl);
             
             const ar = formatParam('AR', randomValue(opConfig.AR));
@@ -199,11 +280,15 @@ export function generateRandomTone(): void {
             lines.push(parts.join(' '));
         }
         
-        // Generate global parameters
+        // Generate global parameters (CON already determined above)
         const globalParts: string[] = [];
         
-        const con = randomValue(config.global.CON);
-        if (con !== undefined) globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        // Only emit CON= when a range was configured; otherwise keep the editor's current value
+        if (conRaw !== undefined) {
+            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        } else if (toneEditor.value.match(/CON=/i)) {
+            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+        }
         
         const fl = randomValue(config.global.FL);
         if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
