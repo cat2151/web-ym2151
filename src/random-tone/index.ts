@@ -50,9 +50,17 @@ export async function loadRandomConfig(): Promise<void> {
 }
 
 /**
+ * Get default random configuration as a JSON string.
+ * Useful for displaying or editing the config in an external tool.
+ */
+export function getDefaultConfigJSON(): string {
+    return JSON.stringify(getDefaultConfig(), null, 2);
+}
+
+/**
  * Get default random configuration
  */
-function getDefaultConfig(): RandomConfig {
+export function getDefaultConfig(): RandomConfig {
     return {
         commonOperatorParams: {
             TL: { min: 0, max: 0 },
@@ -210,13 +218,118 @@ function getModulatorTLForCON(con: number): number {
     return MODULATOR_TL_PER_CON[con] ?? 0x00;
 }
 
+
 /**
- * Read the current CON value from the tone editor textarea.
- * Returns the clamped (0–7) value, or 7 (all-carriers default) if not present.
+ * Generate a random tone string from the given configuration.
+ *
+ * This is a pure function with no DOM dependencies.
+ * External repositories (e.g. bluesky-text-to-audio) can import and call this
+ * directly without needing a browser environment.
+ *
+ * @param config - RandomConfig describing parameter ranges.
+ * @param currentContent - Optional current tone-editor string used to preserve
+ *   the existing CON and NOTE values when they are not randomised.
+ * @returns The generated tone string in the same format as the tone editor.
  */
-function getEditorCON(toneEditor: HTMLTextAreaElement): number {
-    const match = toneEditor.value.match(/CON=([0-9A-Fa-f]+)/i);
-    return match ? (parseInt(match[1], 16) & 0x7) : 7;
+export function generateRandomToneString(config: RandomConfig, currentContent?: string): string {
+    const lines: string[] = [];
+
+    // Determine CON: randomise when a range is configured, else read from currentContent.
+    const conRaw = randomValue(config.global.CON);
+    let con: number;
+    if (conRaw !== undefined) {
+        // Clamp to 0-7 to match YM2151 hardware behaviour.
+        con = conRaw & 0x7;
+    } else {
+        // Fall back to the CON value embedded in the current content string.
+        // If no CON value is found, default to 7 (all-carriers: every OP is a carrier, no modulation).
+        const match = currentContent?.match(/CON=([0-9A-Fa-f]+)/i);
+        con = match ? (parseInt(match[1], 16) & 0x7) : 7;
+    }
+    const modulatorTL = getModulatorTLForCON(con);
+
+    // Generate random parameters for each operator.
+    for (let i = 0; i < 4; i++) {
+        const opConfig = getOperatorConfig(config, i);
+        const parts: string[] = [];
+
+        // Carriers keep TL=0; modulators use a fixed TL based on modulation stage count.
+        const tl = formatParam('TL', isCarrierOp(con, i) ? 0 : modulatorTL);
+        if (tl) parts.push(tl);
+
+        const ar = formatParam('AR', randomValue(opConfig.AR));
+        if (ar) parts.push(ar);
+
+        const dr = formatParam('DR', randomValue(opConfig.DR));
+        if (dr) parts.push(dr);
+
+        const sr = formatParam('SR', randomValue(opConfig.SR));
+        if (sr) parts.push(sr);
+
+        const rr = formatParam('RR', randomValue(opConfig.RR));
+        if (rr) parts.push(rr);
+
+        const sl = formatParam('SL', randomValue(opConfig.SL));
+        if (sl) parts.push(sl);
+
+        const ks = randomValue(opConfig.KS);
+        if (ks !== undefined) parts.push(`KS=${ks.toString(16).toUpperCase()}`);
+
+        const mul = formatParam('MUL', randomValue(opConfig.MUL));
+        if (mul) parts.push(mul);
+
+        const dt1 = randomValue(opConfig.DT1);
+        if (dt1 !== undefined) parts.push(`DT1=${dt1.toString(16).toUpperCase()}`);
+
+        lines.push(parts.join(' '));
+    }
+
+    // Generate global parameters (CON already determined above).
+    const globalParts: string[] = [];
+
+    // Emit CON= when a range was configured or when the current content already contains CON=.
+    if (conRaw !== undefined) {
+        globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+    } else if (currentContent?.match(/CON=/i)) {
+        globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
+    }
+
+    const fl = randomValue(config.global.FL);
+    if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
+
+    // Handle NOTE parameter.
+    const noteConfig = config.global.NOTE;
+    if (noteConfig) {
+        const hasMinMax = 'min' in noteConfig && 'max' in noteConfig;
+        const isEnabled = 'enabled' in noteConfig && noteConfig.enabled;
+
+        if (hasMinMax) {
+            const note = randomValue(noteConfig as ParamRange);
+            if (note !== undefined) {
+                globalParts.push(`NOTE=${note.toString(16).toUpperCase().padStart(2, '0')}`);
+            }
+        } else if (!isEnabled) {
+            // Keep current NOTE value if NOTE randomization is disabled.
+            const noteMatch = currentContent?.match(/NOTE=([0-9A-F]+)/i);
+            if (noteMatch) {
+                globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
+            } else {
+                // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A.
+                globalParts.push('NOTE=4A');
+            }
+        }
+        // If enabled=true but no range, skip NOTE (invalid config).
+    } else {
+        const noteMatch = currentContent?.match(/NOTE=([0-9A-F]+)/i);
+        if (noteMatch) {
+            globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
+        } else {
+            globalParts.push('NOTE=4A');
+        }
+    }
+
+    lines.push(globalParts.join(' '));
+    return lines.join('\n');
 }
 
 /**
@@ -236,104 +349,7 @@ export function generateRandomTone(): void {
     const config = currentConfig;
 
     runWithRenderingOverlay(() => {
-        const lines: string[] = [];
-        
-        // Generate CON first so we can determine carrier/modulator roles for TL assignment.
-        // Clamp to 0-7 to match the YM2151 hardware behaviour (same masking as event generation).
-        const conRaw = randomValue(config.global.CON);
-        const con = conRaw !== undefined ? (conRaw & 0x7) : getEditorCON(toneEditor);
-        const modulatorTL = getModulatorTLForCON(con);
-        
-        // Generate random parameters for each operator
-        for (let i = 0; i < 4; i++) {
-            const opConfig = getOperatorConfig(config, i);
-            const parts: string[] = [];
-            
-            // Carriers keep TL=0; modulators use a fixed TL based on modulation stage count
-            const tl = formatParam('TL', isCarrierOp(con, i) ? 0 : modulatorTL);
-            if (tl) parts.push(tl);
-            
-            const ar = formatParam('AR', randomValue(opConfig.AR));
-            if (ar) parts.push(ar);
-            
-            const dr = formatParam('DR', randomValue(opConfig.DR));
-            if (dr) parts.push(dr);
-            
-            const sr = formatParam('SR', randomValue(opConfig.SR));
-            if (sr) parts.push(sr);
-            
-            const rr = formatParam('RR', randomValue(opConfig.RR));
-            if (rr) parts.push(rr);
-            
-            const sl = formatParam('SL', randomValue(opConfig.SL));
-            if (sl) parts.push(sl);
-            
-            const ks = randomValue(opConfig.KS);
-            if (ks !== undefined) parts.push(`KS=${ks.toString(16).toUpperCase()}`);
-            
-            const mul = formatParam('MUL', randomValue(opConfig.MUL));
-            if (mul) parts.push(mul);
-            
-            const dt1 = randomValue(opConfig.DT1);
-            if (dt1 !== undefined) parts.push(`DT1=${dt1.toString(16).toUpperCase()}`);
-            
-            lines.push(parts.join(' '));
-        }
-        
-        // Generate global parameters (CON already determined above)
-        const globalParts: string[] = [];
-        
-        // Only emit CON= when a range was configured; otherwise keep the editor's current value
-        if (conRaw !== undefined) {
-            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
-        } else if (toneEditor.value.match(/CON=/i)) {
-            globalParts.push(`CON=${con.toString(16).toUpperCase()}`);
-        }
-        
-        const fl = randomValue(config.global.FL);
-        if (fl !== undefined) globalParts.push(`FL=${fl.toString(16).toUpperCase()}`);
-        
-        // Handle NOTE parameter
-        const noteConfig = config.global.NOTE;
-        if (noteConfig) {
-            // Check if NOTE is a ParamRange (has min/max) or enabled flag
-            const hasMinMax = 'min' in noteConfig && 'max' in noteConfig;
-            const isEnabled = 'enabled' in noteConfig && noteConfig.enabled;
-            
-            if (hasMinMax) {
-                // Generate random NOTE value when ParamRange is provided
-                const note = randomValue(noteConfig as ParamRange);
-                if (note !== undefined) {
-                    globalParts.push(`NOTE=${note.toString(16).toUpperCase().padStart(2, '0')}`);
-                }
-            } else if (!isEnabled) {
-                // Keep current NOTE value if NOTE randomization is disabled
-                const currentContent = toneEditor.value;
-                const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
-                if (noteMatch) {
-                    globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
-                } else {
-                    // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
-                    globalParts.push('NOTE=4A');
-                }
-            }
-            // If enabled=true but no range, skip NOTE (invalid config)
-        } else {
-            // No NOTE config, keep current value
-            const currentContent = toneEditor.value;
-            const noteMatch = currentContent.match(/NOTE=([0-9A-F]+)/i);
-            if (noteMatch) {
-                globalParts.push(`NOTE=${noteMatch[1].toUpperCase()}`);
-            } else {
-                // Default to A4: MIDI note 69 (0x45) maps to YM2151 KC value 0x4A
-                globalParts.push('NOTE=4A');
-            }
-        }
-        
-        lines.push(globalParts.join(' '));
-        
-        // Update tone editor
-        toneEditor.value = lines.join('\n');
+        toneEditor.value = generateRandomToneString(config, toneEditor.value);
         
         // Trigger change event to update JSON
         if (window.onToneEditorChange) {
