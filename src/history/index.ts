@@ -17,6 +17,5 @@ export {
     toggleFavoriteFromHistory,
     deleteHistoryEntry,
     clearHistoryAndRefresh,
-    isPlayingFromHistory,
-    clearPlayingFromHistory
+    consumeHistoryPlay
 } from './historyUI';

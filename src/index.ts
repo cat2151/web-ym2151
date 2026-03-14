@@ -42,8 +42,7 @@ import {
     refreshHistoryUI,
     addToHistory,
     clearHistoryAndRefresh,
-    isPlayingFromHistory,
-    clearPlayingFromHistory
+    consumeHistoryPlay
 } from './history';
 import {
     toggleFavoritesSection,
@@ -74,6 +73,7 @@ declare global {
         toggleHistorySection: typeof toggleHistorySection;
         refreshHistoryUI: typeof refreshHistoryUI;
         addToHistoryAndRefresh: (toneEditor: string, jsonEditor: string) => void;
+        consumeHistoryPlay: () => boolean;
         clearHistoryAndRefresh: typeof clearHistoryAndRefresh;
         toggleFavoritesSection: typeof toggleFavoritesSection;
         refreshFavoritesUI: typeof refreshFavoritesUI;
@@ -107,13 +107,10 @@ if (typeof window !== 'undefined') {
     window.toggleHistorySection = toggleHistorySection;
     window.refreshHistoryUI = refreshHistoryUI;
     window.addToHistoryAndRefresh = (toneEditor: string, jsonEditor: string) => {
-        if (isPlayingFromHistory()) {
-            clearPlayingFromHistory();
-            return;
-        }
         addToHistory(toneEditor, jsonEditor);
         refreshHistoryUI();
     };
+    window.consumeHistoryPlay = consumeHistoryPlay;
     window.clearHistoryAndRefresh = clearHistoryAndRefresh;
     window.toggleFavoritesSection = toggleFavoritesSection;
     window.refreshFavoritesUI = refreshFavoritesUI;

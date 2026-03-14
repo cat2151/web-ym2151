@@ -95,6 +95,12 @@ function calculateMaxAmplitude(audioData: AudioData): number {
  * Play audio from current JSON editor content
  */
 export function playAudio(): void {
+    // Consume the "playing from history" counter at the very start so the flag
+    // is cleared even if playback exits early (null audio data, empty JSON, etc.).
+    const fromHistory = typeof (window as any).consumeHistoryPlay === 'function'
+        ? (window as any).consumeHistoryPlay() as boolean
+        : false;
+
     // Interrupt any background caching so it doesn't compete with playback
     cancelIdleRendering();
 
@@ -157,12 +163,14 @@ export function playAudio(): void {
 
     Module._free_buffer();
 
-    // Add to history and refresh UI
-    const toneEl = document.getElementById('toneEditor') as HTMLTextAreaElement | null;
-    const jsonEl = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
-    if (toneEl && jsonEl && jsonEl.value.trim()) {
-        if (typeof (window as any).addToHistoryAndRefresh === 'function') {
-            (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
+    // Add to history and refresh UI (skip when playback was initiated from history)
+    if (!fromHistory) {
+        const toneEl = document.getElementById('toneEditor') as HTMLTextAreaElement | null;
+        const jsonEl = document.getElementById('jsonEditor') as HTMLTextAreaElement | null;
+        if (toneEl && jsonEl && jsonEl.value.trim()) {
+            if (typeof (window as any).addToHistoryAndRefresh === 'function') {
+                (window as any).addToHistoryAndRefresh(toneEl.value, jsonEl.value);
+            }
         }
     }
 }
