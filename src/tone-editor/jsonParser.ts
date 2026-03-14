@@ -34,12 +34,16 @@ export function parseJsonToToneEditor(events: YM2151Event[]): string {
         // Operator registers
         else {
             const bases = [0x40, 0x60, 0x80, 0xA0, 0xC0, 0xE0];
+            // YM2151 hardware operator register order: OP1, OP3, OP2, OP4
+            // Display order is: OP1, OP2, OP3, OP4 (user-friendly, matching ym2151-tone-editor)
+            // This mapping converts from hardware register index to display row index
+            const O1_O4_FROM_REG = [0, 2, 1, 3];
             
             for (const base of bases) {
                 if (addr >= base && addr < base + 0x20) {
                     const opIndex = Math.floor((addr - base) / 8);
                     if (opIndex >= 0 && opIndex < 4) {
-                        const op = operators[opIndex];
+                        const op = operators[O1_O4_FROM_REG[opIndex]];
                         
                         if (base === 0x40) {
                             // DT1/MUL
@@ -84,7 +88,7 @@ export function parseJsonToToneEditor(events: YM2151Event[]): string {
         const mul = op.MUL !== undefined ? op.MUL : 0x01;
         const dt1 = op.DT1 !== undefined ? op.DT1 : 3;
         
-        text += `TL=${toHex(tl).substring(2)} AR=${toHex(ar).substring(2)} DR=${toHex(dr).substring(2)} SR=${toHex(sr).substring(2)} RR=${toHex(rr).substring(2)} SL=${toHex(sl).substring(2)} KS=${ks} MUL=${toHex(mul).substring(2)} DT1=${dt1}\n`;
+        text += `TL=${toHex(tl).substring(2)} MUL=${toHex(mul).substring(2)} AR=${toHex(ar).substring(2)} DR=${toHex(dr).substring(2)} SL=${toHex(sl).substring(2)} SR=${toHex(sr).substring(2)} RR=${toHex(rr).substring(2)} DT1=${dt1} KS=${ks}\n`;
     }
     
     text += `CON=${con.toString(16).toUpperCase()} FL=${fl.toString(16).toUpperCase()} NOTE=${toHex(note).substring(2)}`;
