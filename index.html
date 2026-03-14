@@ -6,56 +6,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="realtime-visualizer" aria-label="Realtime waveform and spectrum display">
-        <div class="visualizer-row">
-            <div class="visualizer-panel">
-                <div class="visualizer-label">Waveform</div>
-                <canvas id="realtimeWaveform" width="380" height="120" aria-label="Realtime waveform"></canvas>
-            </div>
-            <div class="visualizer-panel">
-                <div class="visualizer-label">FFT</div>
-                <canvas id="realtimeFFT" width="380" height="120" aria-label="Realtime frequency spectrum"></canvas>
-            </div>
-        </div>
-        <div class="visualizer-config">
-            <label for="waveformScaleMode"><strong>Waveform vertical scaling:</strong></label>
-            <select id="waveformScaleMode">
-                <option value="frame-dynamic" selected>Frame-based (expand to 95%)</option>
-                <option value="buffer-max">Normalize by overall maximum amplitude</option>
-            </select>
-        </div>
-    </div>
-
-    <h1>YM2151 JSON Editor</h1>
-    
-    <div class="controls">
-        <label for="presetSelect"><strong>Load Preset JSON: </strong></label>
-        <select id="presetSelect" onchange="handlePresetChange()">
-            <option value="" disabled selected>Loading presets...</option>
-        </select>
-        <br><br>
-        
-        <label for="presetToneSelect"><strong>Load Preset Tone: </strong></label>
-        <select id="presetToneSelect" onchange="handlePresetToneChange()">
-            <option value="" disabled selected>Loading preset tones...</option>
-        </select>
-        <br><br>
-        
-        <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button>
-        <button onclick="playAudio()">Play</button>
-        <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
-        <span class="waveform-preview">
-            <canvas id="waveformPreview" width="320" height="80" role="img" aria-label="Rendered waveform preview">Rendered waveform preview</canvas>
-        </span>
-        <span id="durationInfo" class="duration-display"></span>
-        <br><br>
-        
-        <label>
-            <input type="checkbox" id="autoPlayCheckbox">
-            Auto-play on edit
-        </label>
-    </div>
-
     <div class="random-controls">
         <button 
             id="randomConfigToggleBtn" 
@@ -82,40 +32,29 @@
         </div>
     </div>
 
-    <label class="editor-label" for="mmlInput">MML Input (Music Macro Language):</label>
-    <textarea id="mmlInput" spellcheck="false" placeholder="Enter MML notation (e.g., 'cdefgab' for scale, 'c;e;g' for chord). Press Play to convert and play."></textarea>
-
-    <label class="editor-label" for="combinedMML">Concatenated MML (Tone JSON + MML):</label>
-    <textarea id="combinedMML" spellcheck="false" placeholder="Tone JSON concatenated with MML will appear here after playing. Can be used for development or editing MML with embedded tone JSON." readonly></textarea>
-
-    <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
-    <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params). Load a preset tone to see format examples."></textarea>
-
-    <label class="editor-label" for="registersEditor">Registers Format (YM2151 tone JSON):</label>
-    <textarea id="registersEditor" spellcheck="false" placeholder='{"type":"YM2151 tone","note_number":74,"registers":"..."}'></textarea>
-    
-    <label class="editor-label" for="jsonEditor">Edit Events JSON:</label>
-    <textarea id="jsonEditor" spellcheck="false"></textarea>
-    
-    <div class="info" id="info">
-        Initializing...
-    </div>
-    
-    <div class="oscilloscope-container">
-        <button 
-            id="oscilloscopeToggleBtn" 
-            class="oscilloscope-toggle-btn" 
-            aria-controls="oscilloscopeContent" 
-            aria-expanded="false"
-            onclick="toggleOscilloscopeSection()"
-            title="Show/hide waveform visualizer">
-            <span class="toggle-icon" aria-hidden="true"></span>
-            <span class="toggle-text">Show Waveform Visualizer</span>
-        </button>
-        
-        <div id="oscilloscopeContent" class="oscilloscope-content" aria-hidden="true" style="display: none;">
-            <canvas id="oscilloscope" width="800" height="400" aria-label="Waveform visualization canvas"></canvas>
+    <div class="realtime-visualizer" aria-label="Realtime waveform and spectrum display">
+        <div class="visualizer-row">
+            <div class="visualizer-panel">
+                <div class="visualizer-label">Waveform</div>
+                <canvas id="realtimeWaveform" width="380" height="120" aria-label="Realtime waveform"></canvas>
+            </div>
+            <div class="visualizer-panel">
+                <div class="visualizer-label">FFT</div>
+                <canvas id="realtimeFFT" width="380" height="120" aria-label="Realtime frequency spectrum"></canvas>
+            </div>
         </div>
+    </div>
+
+    <h1>YM2151 JSON Editor</h1>
+    
+    <div class="controls">
+        <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button>
+        <button onclick="playAudio()">Play</button>
+        <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
+        <span class="waveform-preview">
+            <canvas id="waveformPreview" width="320" height="80" role="img" aria-label="Rendered waveform preview">Rendered waveform preview</canvas>
+        </span>
+        <span id="durationInfo" class="duration-display"></span>
     </div>
 
     <div class="history-controls">
@@ -156,6 +95,25 @@
             </div>
             <div id="favoritesList" class="history-list"></div>
         </div>
+    </div>
+
+    <label class="editor-label" for="mmlInput">MML Input (Music Macro Language):</label>
+    <textarea id="mmlInput" spellcheck="false" placeholder="Enter MML notation (e.g., 'cdefgab' for scale, 'c;e;g' for chord). Press Play to convert and play."></textarea>
+
+    <label class="editor-label" for="combinedMML">Concatenated MML (Tone JSON + MML):</label>
+    <textarea id="combinedMML" spellcheck="false" placeholder="Tone JSON concatenated with MML will appear here after playing. Can be used for development or editing MML with embedded tone JSON." readonly></textarea>
+
+    <label class="editor-label" for="toneEditor">Simple Tone Editor (auto-updates JSON below):</label>
+    <textarea id="toneEditor" spellcheck="false" placeholder="Enter tone parameters (one line per operator, then global params). Load a preset tone to see format examples."></textarea>
+
+    <label class="editor-label" for="registersEditor">Registers Format (YM2151 tone JSON):</label>
+    <textarea id="registersEditor" spellcheck="false" placeholder='{"type":"YM2151 tone","note_number":74,"registers":"..."}'></textarea>
+    
+    <label class="editor-label" for="jsonEditor">Edit Events JSON:</label>
+    <textarea id="jsonEditor" spellcheck="false"></textarea>
+    
+    <div class="info" id="info">
+        Initializing...
     </div>
     
     <!-- Load cat-oscilloscope library locally -->

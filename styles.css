@@ -28,17 +28,6 @@ body {
     color: #cde2ff;
     margin-bottom: 4px;
 }
-.visualizer-config {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    color: #cde2ff;
-}
-.visualizer-config label {
-    font-size: 13px;
-}
 .realtime-visualizer canvas {
     width: 100%;
     display: block;
@@ -82,7 +71,7 @@ textarea {
     border: 1px solid #ccc;
 }
 #toneEditor {
-    height: 150px;
+    height: 120px;
     background: #f8fff8;
 }
 #registersEditor {
@@ -91,9 +80,15 @@ textarea {
     font-size: 12px;
 }
 #mmlInput {
-    height: 100px;
+    height: 80px;
     background: #fffef8;
     border: 2px solid #f0ad4e;
+}
+#combinedMML {
+    height: 80px;
+}
+#jsonEditor {
+    height: 80px;
 }
 .info { margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
 h1 { margin-bottom: 5px; }
