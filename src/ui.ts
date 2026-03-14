@@ -111,7 +111,7 @@ export function renderWaveformPreview(samples: Float32Array, sampleRate: number)
 const RENDERING_OVERLAY_ID = 'renderOverlay';
 const RENDERING_BODY_CLASS = 'rendering';
 const RENDERING_TEXT_SELECTOR = '.render-overlay__text';
-const RENDERING_TARGET_IDS = ['presetSelect', 'presetToneSelect'];
+const RENDERING_TARGET_IDS: string[] = [];
 
 function toggleRenderingTargets(disabled: boolean): void {
     RENDERING_TARGET_IDS.forEach(id => {

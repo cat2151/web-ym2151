@@ -10,33 +10,13 @@ import { onToneEditorChange, onRegistersEditorChange } from './tone-editor';
 import { setupKeyboardShortcuts } from './keyboard';
 import { AUTOSAVE_DEBOUNCE_MS } from './storage/constants';
 import { OPM_SAMPLE_RATE } from './constants';
-import { initializeAutoPlayCheckbox, triggerAutoPlay } from './autoplay';
+import { triggerAutoPlay } from './autoplay';
 import { initializeRandomToneGenerator } from './random-tone';
 import { initializeOscilloscope } from './oscilloscope';
 import {
     initializeRealtimeVisualizer,
     setWaveformScalingMode,
-    WaveformScalingMode
 } from './audio/realtimeVisualizer';
-
-function initializeWaveformScalingConfig(): void {
-    const select = document.getElementById('waveformScaleMode') as HTMLSelectElement | null;
-    if (!select) {
-        return;
-    }
-
-    const applyMode = (value: string) => {
-        const mode: WaveformScalingMode = value === 'buffer-max' ? 'buffer-max' : 'frame-dynamic';
-        setWaveformScalingMode(mode);
-    };
-
-    applyMode(select.value);
-
-    select.addEventListener('change', event => {
-        const target = event.target as HTMLSelectElement;
-        applyMode(target.value);
-    });
-}
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -51,15 +31,12 @@ export function initializeApplication(): void {
             `Waiting for presets...`;
     }
     
-    // Initialize auto-play checkbox
-    initializeAutoPlayCheckbox();
-    
     // Initialize random tone generator
     initializeRandomToneGenerator();
 
-    // Initialize realtime visualizer canvases
+    // Initialize realtime visualizer canvases (fixed to frame-dynamic / 95% scaling)
     initializeRealtimeVisualizer();
-    initializeWaveformScalingConfig();
+    setWaveformScalingMode('frame-dynamic');
     
     // Initialize oscilloscope when library is loaded
     // Check periodically if the library is available (max 50 retries = ~5 seconds)
