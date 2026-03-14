@@ -18,6 +18,9 @@
     "typescript": "^5.3.3",
     "vitest": "^4.1.0"
   },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "keywords": [
     "ym2151",
     "opm",
