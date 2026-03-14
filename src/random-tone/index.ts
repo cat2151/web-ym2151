@@ -50,6 +50,14 @@ export async function loadRandomConfig(): Promise<void> {
 }
 
 /**
+ * Get default random configuration as a JSON string.
+ * Useful for displaying or editing the config in an external tool.
+ */
+export function getDefaultConfigJSON(): string {
+    return JSON.stringify(getDefaultConfig(), null, 2);
+}
+
+/**
  * Get default random configuration
  */
 export function getDefaultConfig(): RandomConfig {

@@ -2,6 +2,12 @@
   "name": "web-ym2151",
   "version": "1.0.0",
   "description": "Browser-based YM2151 sound chip emulator and tone editor",
+  "exports": {
+    "./random-tone": {
+      "import": "./dist/random-tone/index.js",
+      "types": "./dist/random-tone/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc && node fix-imports.js && tsc -p demo-library/tsconfig.json",
     "watch": "tsc --watch",
