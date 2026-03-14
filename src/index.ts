@@ -41,7 +41,9 @@ import {
     toggleHistorySection,
     refreshHistoryUI,
     addToHistory,
-    clearHistoryAndRefresh
+    clearHistoryAndRefresh,
+    isPlayingFromHistory,
+    clearPlayingFromHistory
 } from './history';
 import {
     toggleFavoritesSection,
@@ -105,6 +107,10 @@ if (typeof window !== 'undefined') {
     window.toggleHistorySection = toggleHistorySection;
     window.refreshHistoryUI = refreshHistoryUI;
     window.addToHistoryAndRefresh = (toneEditor: string, jsonEditor: string) => {
+        if (isPlayingFromHistory()) {
+            clearPlayingFromHistory();
+            return;
+        }
         addToHistory(toneEditor, jsonEditor);
         refreshHistoryUI();
     };
