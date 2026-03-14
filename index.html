@@ -48,7 +48,7 @@
     <h1>YM2151 JSON Editor</h1>
     
     <div class="controls">
-        <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button>
+        <button onclick="generateRandomTone()" title="Generate a random tone">🎲 Random Tone</button><span id="randomToneStatus" class="random-tone-status" aria-live="polite"></span>
         <button onclick="playAudio()">Play</button>
         <button onclick="exportWav()" title="Export the generated audio as a WAV file">Export WAV</button>
         <span class="waveform-preview">

@@ -5,7 +5,6 @@
 
 import { RandomConfig, ParamRange, OperatorRandomConfig } from './types';
 import { playWithMMLFallback } from '../mml/playback';
-import { runWithRenderingOverlay } from '../ui';
 
 let currentConfig: RandomConfig | null = null;
 let configTextarea: HTMLTextAreaElement | null = null;
@@ -332,6 +331,22 @@ export function generateRandomToneString(config: RandomConfig, currentContent?: 
     return lines.join('\n');
 }
 
+const RANDOM_TONE_STATUS_ID = 'randomToneStatus';
+
+function showRandomToneBalloon(message: string): void {
+    const el = document.getElementById(RANDOM_TONE_STATUS_ID);
+    if (el) {
+        el.textContent = message;
+    }
+}
+
+export function hideRandomToneBalloon(): void {
+    const el = document.getElementById(RANDOM_TONE_STATUS_ID);
+    if (el) {
+        el.textContent = '';
+    }
+}
+
 /**
  * Generate random tone and update editor
  */
@@ -346,19 +361,19 @@ export function generateRandomTone(): void {
         console.error('Tone editor not found');
         return;
     }
-    const config = currentConfig;
+    
+    showRandomToneBalloon('⏳ Now generating...');
 
-    runWithRenderingOverlay(() => {
-        toneEditor.value = generateRandomToneString(config, toneEditor.value);
-        
-        // Trigger change event to update JSON
-        if (window.onToneEditorChange) {
-            window.onToneEditorChange();
-        }
-        
-        // Auto-play the generated tone
-        playWithMMLFallback(false);
-    }, 'Now rendering random tone...');
+    const config = currentConfig;
+    toneEditor.value = generateRandomToneString(config, toneEditor.value);
+    
+    // Trigger change event to update JSON
+    if (window.onToneEditorChange) {
+        window.onToneEditorChange();
+    }
+    
+    // Auto-play the generated tone
+    playWithMMLFallback(false);
 }
 
 /**

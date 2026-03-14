@@ -131,6 +131,14 @@ export function playAudio(): void {
     }, { once: true });
     source.start();
 
+    // Clear the random tone status balloon now that playback has started.
+    // We access the DOM directly by ID to avoid a circular import
+    // (random-tone → mml/playback → audio → audioPlayer).
+    const randomToneStatus = document.getElementById('randomToneStatus');
+    if (randomToneStatus) {
+        randomToneStatus.textContent = '';
+    }
+
     renderWaveformPreview(audioData.left, OPM_SAMPLE_RATE);
     
     // Update oscilloscope if it's visible
