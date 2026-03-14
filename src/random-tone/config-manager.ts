@@ -34,6 +34,10 @@ function parseConfigFromTextarea(): void {
 
     try {
         const parsed = JSON.parse(configTextarea.value);
+        if (!validateConfig(parsed)) {
+            console.error('Invalid config structure in textarea');
+            return;
+        }
         currentConfig = parsed;
         console.log('Config updated from textarea');
     } catch (error) {
@@ -64,7 +68,11 @@ export async function loadRandomConfig(): Promise<void> {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        currentConfig = await response.json();
+        const loaded = await response.json();
+        if (!validateConfig(loaded)) {
+            throw new Error('Loaded config has invalid structure');
+        }
+        currentConfig = loaded;
 
         // Update textarea with loaded config
         updateConfigTextarea();
@@ -72,7 +80,7 @@ export async function loadRandomConfig(): Promise<void> {
         console.log('Random config loaded successfully');
     } catch (error) {
         console.error('Error loading random config:', error);
-        // Use default config if loading fails
+        // Use default config if loading fails or is invalid
         currentConfig = getDefaultConfig();
         updateConfigTextarea();
     }

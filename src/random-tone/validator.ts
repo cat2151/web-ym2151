@@ -14,9 +14,14 @@ export function validateOperatorRanges(params: unknown): params is OperatorRando
 
     const rangeProps = ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1'];
     for (const prop of rangeProps) {
-        const paramObj = params as Record<string, any>;
-        if (paramObj[prop]) {
-            if (typeof paramObj[prop].min !== 'number' || typeof paramObj[prop].max !== 'number') {
+        const paramObj = params as Record<string, unknown>;
+        if (prop in paramObj) {
+            const val = paramObj[prop];
+            if (val === null || typeof val !== 'object') {
+                return false;
+            }
+            const range = val as { min?: unknown; max?: unknown };
+            if (typeof range.min !== 'number' || typeof range.max !== 'number') {
                 return false;
             }
         }
@@ -77,15 +82,23 @@ export function validateConfig(config: unknown): config is RandomConfig {
     // Check global ranges
     const globalRangeProps = ['CON', 'FL'];
     for (const prop of globalRangeProps) {
-        if (cfg.global[prop]) {
-            if (typeof cfg.global[prop].min !== 'number' || typeof cfg.global[prop].max !== 'number') {
+        if (prop in cfg.global) {
+            const val = cfg.global[prop];
+            if (val === null || typeof val !== 'object') {
+                return false;
+            }
+            const range = val as { min?: unknown; max?: unknown };
+            if (typeof range.min !== 'number' || typeof range.max !== 'number') {
                 return false;
             }
         }
     }
 
     // Check NOTE if present (can be either {enabled: boolean} or ParamRange)
-    if (cfg.global.NOTE) {
+    if ('NOTE' in cfg.global && cfg.global.NOTE !== undefined) {
+        if (cfg.global.NOTE === null || typeof cfg.global.NOTE !== 'object') {
+            return false;
+        }
         const hasEnabled = 'enabled' in cfg.global.NOTE && typeof cfg.global.NOTE.enabled === 'boolean';
         const hasMinMax = 'min' in cfg.global.NOTE && 'max' in cfg.global.NOTE &&
                           typeof cfg.global.NOTE.min === 'number' && typeof cfg.global.NOTE.max === 'number';

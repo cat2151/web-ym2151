@@ -9,7 +9,12 @@ import { getCurrentConfig } from './config-manager';
 import { generateRandomToneString } from './generator';
 
 export * from './generator';
-export * from './config-manager';
+export {
+    loadRandomConfig,
+    exportRandomConfig,
+    importRandomConfig,
+    initializeRandomToneGenerator
+} from './config-manager';
 
 function showRandomToneBalloon(message: string): void {
     const el = document.getElementById(RANDOM_TONE_STATUS_ID);
