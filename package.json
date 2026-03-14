@@ -11,10 +11,12 @@
   "scripts": {
     "build": "tsc && node fix-imports.js && tsc -p demo-library/tsconfig.json",
     "watch": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.1.0"
   },
   "keywords": [
     "ym2151",

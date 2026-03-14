@@ -1,50 +1,72 @@
 /**
  * Tests for MIDI to YM2151 conversion
- * 
- * Run with: npm test (if test framework is set up)
- * Or verify manually by running: ts-node src/midi/noteTable.test.ts
  */
 
+import { describe, it, expect } from 'vitest';
 import { midiToKcKf, midiToKcHex, NOTE_TABLE } from './noteTable';
 
-console.log('Testing MIDI to YM2151 conversion...\n');
+describe('NOTE_TABLE', () => {
+    it('has 12 entries (one per semitone)', () => {
+        expect(NOTE_TABLE.length).toBe(12);
+    });
 
-// Test NOTE_TABLE
-console.log('NOTE_TABLE:', NOTE_TABLE);
-console.log('Expected: [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]');
-console.log('Skipped codes: 3, 7, 11, 15\n');
+    it('matches the expected YM2151 note codes', () => {
+        expect([...NOTE_TABLE]).toEqual([0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14]);
+    });
 
-// Test MIDI note 60 (Middle C / C4)
-console.log('Test 1: MIDI note 60 (Middle C / C4)');
-const [kc60, kf60] = midiToKcKf(60);
-console.log(`  midiToKcKf(60) = [0x${kc60.toString(16)}, ${kf60}]`);
-console.log(`  midiToKcHex(60) = ${midiToKcHex(60)}`);
-console.log(`  Expected: KC=0x2E (octave 2, note 14=C)\n`);
+    it('does not contain skipped codes 3, 7, 11, 15', () => {
+        for (const code of [3, 7, 11, 15]) {
+            expect(NOTE_TABLE).not.toContain(code);
+        }
+    });
+});
 
-// Test MIDI note 69 (A4 / 440Hz)
-console.log('Test 2: MIDI note 69 (A4 / 440Hz)');
-const [kc69, kf69] = midiToKcKf(69);
-console.log(`  midiToKcKf(69) = [0x${kc69.toString(16)}, ${kf69}]`);
-console.log(`  midiToKcHex(69) = ${midiToKcHex(69)}`);
-console.log(`  Expected: KC=0x4A (octave 4, note 10=A)\n`);
+describe('midiToKcKf', () => {
+    it('converts MIDI note 60 (Middle C / C4) correctly', () => {
+        const [kc, kf] = midiToKcKf(60);
+        expect(kc).toBe(0x2E);
+        expect(kf).toBe(0);
+    });
 
-// Test MIDI note 61 (C#4)
-console.log('Test 3: MIDI note 61 (C#4)');
-const [kc61, kf61] = midiToKcKf(61);
-console.log(`  midiToKcKf(61) = [0x${kc61.toString(16)}, ${kf61}]`);
-console.log(`  midiToKcHex(61) = ${midiToKcHex(61)}`);
-console.log(`  Expected: KC=0x40 (octave 4, note 0=C#)\n`);
+    it('converts MIDI note 69 (A4 / 440Hz) correctly', () => {
+        const [kc, kf] = midiToKcKf(69);
+        expect(kc).toBe(0x3A);
+        expect(kf).toBe(0);
+    });
 
-// Test C Major Scale (C4-D4-E4-F4-G4-A4-B4-C5)
-console.log('Test 4: C Major Scale (MIDI notes 60-72)');
-const cMajorScale = [60, 62, 64, 65, 67, 69, 71, 72];
-const noteNames = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
-console.log('  MIDI Note | Name | YM2151 KC');
-console.log('  ----------|------|----------');
-for (let i = 0; i < cMajorScale.length; i++) {
-    const midi = cMajorScale[i];
-    const hex = midiToKcHex(midi);
-    console.log(`  ${midi.toString().padStart(9)} | ${noteNames[i].padEnd(4)} | ${hex}`);
-}
-console.log('\n  Expected C Major Scale YM2151 values:');
-console.log('  C4=0x2E, D4=0x31, E4=0x34, F4=0x35, G4=0x38, A4=0x3A, B4=0x3D, C5=0x3E');
+    it('converts MIDI note 61 (C#4) correctly', () => {
+        const [kc, kf] = midiToKcKf(61);
+        expect(kc).toBe(0x30);
+        expect(kf).toBe(0);
+    });
+
+    it('always returns kf = 0', () => {
+        for (const midi of [0, 36, 60, 69, 72, 96, 127]) {
+            const [, kf] = midiToKcKf(midi);
+            expect(kf).toBe(0);
+        }
+    });
+});
+
+describe('midiToKcHex', () => {
+    it('returns uppercase hex string with 0x prefix', () => {
+        const result = midiToKcHex(60);
+        expect(result).toMatch(/^0x[0-9A-F]{2}$/);
+    });
+
+    it('converts C Major Scale (MIDI notes 60-72) to expected YM2151 KC values', () => {
+        const cMajorScale: Array<[number, string]> = [
+            [60, '0x2E'], // C4
+            [62, '0x31'], // D4
+            [64, '0x34'], // E4
+            [65, '0x35'], // F4
+            [67, '0x38'], // G4
+            [69, '0x3A'], // A4
+            [71, '0x3D'], // B4
+            [72, '0x3E'], // C5
+        ];
+        for (const [midi, expected] of cMajorScale) {
+            expect(midiToKcHex(midi)).toBe(expected);
+        }
+    });
+});
