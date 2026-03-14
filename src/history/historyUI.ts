@@ -14,6 +14,16 @@ const SECTION_ID = 'historyContent';
 const BTN_ID = 'historyToggleBtn';
 const LIST_ID = 'historyList';
 
+let _historyPlayCount = 0;
+
+export function consumeHistoryPlay(): boolean {
+    if (_historyPlayCount > 0) {
+        _historyPlayCount--;
+        return true;
+    }
+    return false;
+}
+
 /**
  * Toggle the history section visibility.
  */
@@ -166,6 +176,7 @@ export function playHistoryEntry(id: string): void {
     if (!entry) { return; }
     loadEditorContent(entry.toneEditor, entry.jsonEditor);
     if (typeof (window as any).playJsonAudio === 'function') {
+        _historyPlayCount++;
         (window as any).playJsonAudio();
     }
 }
