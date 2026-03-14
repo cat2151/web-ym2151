@@ -22,10 +22,15 @@ export function generateEvents(
     const rlFlCon = 0xC0 | ((globalParams.fl & 0x7) << 3) | (globalParams.con & 0x7);
     events.push({ time: 0.0, addr: "0x20", data: toHex(rlFlCon) });
     
+    // YM2151 hardware operator register order: OP1, OP3, OP2, OP4
+    // Display order is: OP1, OP2, OP3, OP4 (user-friendly, matching ym2151-tone-editor)
+    // This mapping converts from display order index to hardware register index
+    const REG_FROM_O1_O4 = [0, 2, 1, 3];
+
     // For each operator (0,1,2,3) on Channel 0
     for (let op = 0; op < 4; op++) {
         const params = operators[op];
-        const opOffset = op * 8;
+        const opOffset = REG_FROM_O1_O4[op] * 8;
         
         // DT1/MUL (0x40 + opOffset)
         const dt1 = params.DT1 ?? 3;
