@@ -58,8 +58,8 @@ export function kcToMidi(kc: number): number {
     return (ymOctave + 2) * 12 + noteInOctave + 1;
 }
 
-/** Default KC value used by the tone editor when no note has been set. Equals A5 (MIDI 81). */
-const DEFAULT_KC_TONE_EDITOR = 0x4A;
+/** Default KC value when no note has been set. Equals A4 (440 Hz, MIDI 69). */
+const DEFAULT_KC_TONE_EDITOR = 0x3A;
 
 function showRandomToneBalloon(message: string): void {
     const el = document.getElementById(RANDOM_TONE_STATUS_ID);
