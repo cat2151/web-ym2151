@@ -17,6 +17,8 @@ export interface AudioData {
     frames: number;
     duration: number;
     frequencyEstimate?: number;
+    baseFrequency?: number;   // KC-derived frequency without MUL scaling
+    operatorMuls?: number[];  // MUL value per operator in display order (OP1,OP2,OP3,OP4); 0.5 for MUL=0
 }
 
 function parseHexByte(value: string | number): number | null {
@@ -64,6 +66,37 @@ function extractMinMul(events: YM2151Event[]): number | null {
     });
 
     return minMul;
+}
+
+/**
+ * Extract MUL value for each operator in display order (OP1, OP2, OP3, OP4).
+ * Hardware register bases: OP1=0x40, OP2=0x50, OP3=0x48, OP4=0x58.
+ * Returns 4-element array; defaults to MUL=1 for operators without a register write.
+ */
+function extractMulsAllOperators(events: YM2151Event[]): number[] {
+    // Hardware MUL register bases in display order (OP1, OP2, OP3, OP4): 0x40, 0x50, 0x48, 0x58
+    const OP_REG_BASES = [0x40, 0x50, 0x48, 0x58];
+    const muls: (number | null)[] = [null, null, null, null];
+
+    events.forEach(evt => {
+        const addrValue = parseHexByte(evt.addr);
+        const dataValue = parseHexByte(evt.data);
+        if (addrValue === null || dataValue === null) {
+            return;
+        }
+
+        const opBase = addrValue & 0xf8;
+        const opIndex = OP_REG_BASES.indexOf(opBase);
+        if (opIndex === -1) {
+            return;
+        }
+
+        const mulRaw = dataValue & 0x0f;
+        muls[opIndex] = mulRaw === 0 ? 0.5 : mulRaw;
+    });
+
+    // Default unset operators to MUL=1 (hardware default)
+    return muls.map(m => m ?? 1);
 }
 
 function findLatestKc(events: YM2151Event[]): number | null {
@@ -120,6 +153,9 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
 
     const durationSec = calculateDuration(events);
     const estimatedFrequency = estimateFrequencyFromEvents(events);
+    const kcValue = findLatestKc(events);
+    const baseFreq = kcValue !== null ? kcToFrequencyHz(kcValue) : null;
+    const operatorMuls = extractMulsAllOperators(events);
     const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
 
     const STRUCT_SIZE = 8;
@@ -159,7 +195,9 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
         right: rawRight,
         frames: actualFrames,
         duration: durationSec,
-        frequencyEstimate: estimatedFrequency ?? undefined
+        frequencyEstimate: estimatedFrequency ?? undefined,
+        baseFrequency: baseFreq ?? undefined,
+        operatorMuls
     };
 }
 
@@ -227,6 +265,9 @@ export function generateAudioBuffers(): AudioData | null {
     const durationSec = calculateDuration(currentEvents);
     updateDurationDisplay(currentEvents);
     const estimatedFrequency = estimateFrequencyFromEvents(currentEvents);
+    const kcValue = findLatestKc(currentEvents);
+    const baseFreq = kcValue !== null ? kcToFrequencyHz(kcValue) : null;
+    const operatorMuls = extractMulsAllOperators(currentEvents);
 
     // Generate samples at OPM sample rate
     const numFramesRaw = Math.floor(OPM_SAMPLE_RATE * durationSec);
@@ -270,6 +311,8 @@ export function generateAudioBuffers(): AudioData | null {
         right: rawRight,
         frames: actualFrames,
         duration: durationSec,
-        frequencyEstimate: estimatedFrequency ?? undefined
+        frequencyEstimate: estimatedFrequency ?? undefined,
+        baseFrequency: baseFreq ?? undefined,
+        operatorMuls
     };
 }

@@ -127,7 +127,7 @@ export function playAudio(): void {
 
     const source = audioContext.createBufferSource();
     source.buffer = audioBuffer;
-    startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate);
+    startRealtimeVisualization(source, audioContext, maxAmplitude, audioData.frequencyEstimate, audioData.baseFrequency, audioData.operatorMuls);
     // Resume background caching 1.5 seconds after all active playbacks have ended
     activePlaybackCount++;
     source.addEventListener('ended', () => {
