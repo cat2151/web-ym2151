@@ -64,6 +64,7 @@ export interface OperatorParams {
     MUL?: number;
     DT1?: number;
     DT2?: number;
+    AME?: number;
 }
 
 /**

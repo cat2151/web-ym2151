@@ -61,7 +61,7 @@ describe('parseParamLine', () => {
 describe('getDefaultOperatorParams', () => {
     it('returns an object with all required keys', () => {
         const params = getDefaultOperatorParams();
-        for (const key of ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1', 'DT2']) {
+        for (const key of ['TL', 'AR', 'DR', 'SR', 'RR', 'SL', 'KS', 'MUL', 'DT1', 'DT2', 'AME']) {
             expect(params).toHaveProperty(key);
         }
     });
@@ -78,6 +78,7 @@ describe('getDefaultOperatorParams', () => {
         expect(params.MUL).toBe(0x01);
         expect(params.DT1).toBe(3);
         expect(params.DT2).toBe(0);
+        expect(params.AME).toBe(0);
     });
 
     it('returns a new object each call (no shared state)', () => {

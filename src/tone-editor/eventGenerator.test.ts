@@ -17,6 +17,7 @@ const defaultOperator: OperatorParams = {
     MUL: 0x01,
     DT1: 3,
     DT2: 0,
+    AME: 0,
 };
 
 const defaultGlobal: GlobalParams = {
@@ -131,5 +132,20 @@ describe('generateEvents', () => {
         const val = parseInt(dt2SrEvt!.data, 16);
         expect((val >> 6) & 0x3).toBe(2); // DT2=2
         expect(val & 0x1F).toBe(0x05);    // SR=0x05
+    });
+
+    it('encodes AME into bit [7] of register 0xA0 for OP1', () => {
+        const ops: OperatorParams[] = [
+            { ...defaultOperator, AME: 1, DR: 0x0A },
+            defaultOperator,
+            defaultOperator,
+            defaultOperator,
+        ];
+        const events = generateEvents(ops, defaultGlobal);
+        const ameDrEvt = events.find(e => e.addr === '0xA0');
+        expect(ameDrEvt).toBeDefined();
+        const val = parseInt(ameDrEvt!.data, 16);
+        expect((val >> 7) & 0x1).toBe(1); // AME=1
+        expect(val & 0x1F).toBe(0x0A);    // DR=0x0A
     });
 });

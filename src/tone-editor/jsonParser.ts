@@ -57,7 +57,8 @@ export function parseJsonToToneEditor(events: YM2151Event[]): string {
                             op.KS = (data >> 6) & 0x3;
                             op.AR = data & 0x1F;
                         } else if (base === 0xA0) {
-                            // D1R (DR)
+                            // AMS-EN/D1R (DR)
+                            op.AME = (data >> 7) & 0x1;
                             op.DR = data & 0x1F;
                         } else if (base === 0xC0) {
                             // DT2/D2R (SR)
@@ -89,8 +90,9 @@ export function parseJsonToToneEditor(events: YM2151Event[]): string {
         const mul = op.MUL !== undefined ? op.MUL : 0x01;
         const dt1 = op.DT1 !== undefined ? op.DT1 : 3;
         const dt2 = op.DT2 !== undefined ? op.DT2 : 0;
+        const ame = op.AME !== undefined ? op.AME : 0;
         
-        text += `TL=${toHex(tl).substring(2)} MUL=${toHex(mul).substring(2)} AR=${toHex(ar).substring(2)} DR=${toHex(dr).substring(2)} SL=${toHex(sl).substring(2)} SR=${toHex(sr).substring(2)} RR=${toHex(rr).substring(2)} DT1=${dt1} DT2=${dt2} KS=${ks}\n`;
+        text += `TL=${toHex(tl).substring(2)} MUL=${toHex(mul).substring(2)} AR=${toHex(ar).substring(2)} DR=${toHex(dr).substring(2)} SL=${toHex(sl).substring(2)} SR=${toHex(sr).substring(2)} RR=${toHex(rr).substring(2)} DT1=${dt1} DT2=${dt2} AME=${ame} KS=${ks}\n`;
     }
     
     text += `CON=${con.toString(16).toUpperCase()} FL=${fl.toString(16).toUpperCase()} NOTE=${toHex(note).substring(2)}`;
