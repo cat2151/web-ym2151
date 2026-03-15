@@ -17,6 +17,7 @@ const defaultOperator: OperatorParams = {
     KS: 0,
     MUL: 0x01,
     DT1: 3,
+    DT2: 0,
 };
 
 const defaultGlobal: GlobalParams = {
@@ -52,7 +53,7 @@ describe('parseJsonToToneEditor', () => {
         expect(lastLine).toMatch(/NOTE=/);
     });
 
-    it('each operator line contains TL=, AR=, DR=', () => {
+    it('each operator line contains TL=, AR=, DR=, DT2=', () => {
         const ops = [defaultOperator, defaultOperator, defaultOperator, defaultOperator];
         const events = generateEvents(ops, defaultGlobal);
         const result = parseJsonToToneEditor(events);
@@ -61,6 +62,7 @@ describe('parseJsonToToneEditor', () => {
             expect(line).toMatch(/TL=/);
             expect(line).toMatch(/AR=/);
             expect(line).toMatch(/DR=/);
+            expect(line).toMatch(/DT2=/);
         }
     });
 
@@ -105,5 +107,15 @@ describe('parseJsonToToneEditor', () => {
         const result = parseJsonToToneEditor([]);
         expect(typeof result).toBe('string');
         expect(result.split('\n').length).toBe(5);
+    });
+
+    it('round-trips DT2 value for OP1', () => {
+        const op1: OperatorParams = { ...defaultOperator, DT2: 3, SR: 0x0A };
+        const ops = [op1, defaultOperator, defaultOperator, defaultOperator];
+        const events = generateEvents(ops, defaultGlobal);
+        const result = parseJsonToToneEditor(events);
+        const firstOpLine = result.split('\n')[0];
+        expect(firstOpLine).toMatch(/DT2=3/);
+        expect(firstOpLine).toMatch(/SR=0A/);
     });
 });

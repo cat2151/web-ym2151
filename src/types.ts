@@ -63,6 +63,7 @@ export interface OperatorParams {
     KS?: number;
     MUL?: number;
     DT1?: number;
+    DT2?: number;
 }
 
 /**

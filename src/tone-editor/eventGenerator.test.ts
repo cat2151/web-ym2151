@@ -16,6 +16,7 @@ const defaultOperator: OperatorParams = {
     KS: 0,
     MUL: 0x01,
     DT1: 3,
+    DT2: 0,
 };
 
 const defaultGlobal: GlobalParams = {
@@ -115,5 +116,20 @@ describe('generateEvents', () => {
         const ops = [emptyOp, emptyOp, emptyOp, emptyOp];
         // Should not throw
         expect(() => generateEvents(ops, defaultGlobal)).not.toThrow();
+    });
+
+    it('encodes DT2 into bits [7:6] of register 0xC0 for OP1', () => {
+        const ops: OperatorParams[] = [
+            { ...defaultOperator, DT2: 2, SR: 0x05 },
+            defaultOperator,
+            defaultOperator,
+            defaultOperator,
+        ];
+        const events = generateEvents(ops, defaultGlobal);
+        const dt2SrEvt = events.find(e => e.addr === '0xC0');
+        expect(dt2SrEvt).toBeDefined();
+        const val = parseInt(dt2SrEvt!.data, 16);
+        expect((val >> 6) & 0x3).toBe(2); // DT2=2
+        expect(val & 0x1F).toBe(0x05);    // SR=0x05
     });
 });
