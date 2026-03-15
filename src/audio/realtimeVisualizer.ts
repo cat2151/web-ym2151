@@ -38,6 +38,10 @@ const WAVEFORM_COLOR = '#4a90e2';
 const FFT_COLOR = '#f6a821';
 const FFT_MARKER_COLOR = '#cde2ff';
 const BACKGROUND_COLOR = '#0b0b0f';
+const FFT_FREQ_LABEL_HEIGHT = 12; // px reserved at the bottom of FFT canvas for frequency labels
+const FFT_FREQ_LABELS = [500, 1000, 2000, 5000, 10000, 20000]; // Hz
+const FFT_FREQ_LABEL_MIN_GAP = 2; // minimum px gap between adjacent frequency labels
+const FFT_HARMONIC_MIN_SPACING = 20; // minimum pixel gap between harmonic markers
 
 function ensureCanvasContexts(): void {
     if (!waveformCanvas) {
@@ -189,6 +193,10 @@ function drawFFT(): void {
     const width = fftCanvas.width;
     const height = fftCanvas.height;
     const sampleRate = connectedContext?.sampleRate ?? 48000;
+    const nyquist = sampleRate / 2;
+
+    // Reserve the bottom strip for frequency labels
+    const barAreaHeight = height - FFT_FREQ_LABEL_HEIGHT;
 
     clearCanvas(fftCtx, width, height);
 
@@ -215,17 +223,37 @@ function drawFFT(): void {
 
         const avgValue = count > 0 ? sum / count : 0;
         const normalized = avgValue / 255;
-        const barHeight = normalized * height;
-        const y = height - barHeight;
+        const barHeight = normalized * barAreaHeight;
+        const y = barAreaHeight - barHeight;
 
         fftCtx.fillRect(x, y, barWidth, barHeight);
         x += barWidth;
     }
 
+    // Draw frequency labels at the bottom strip
+    if (nyquist > 0) {
+        fftCtx.fillStyle = FFT_MARKER_COLOR;
+        fftCtx.font = '9px Arial';
+        fftCtx.textBaseline = 'bottom';
+
+        let lastLabelRight = -Infinity;
+        for (const freq of FFT_FREQ_LABELS) {
+            if (freq >= nyquist) break;
+            const xPos = (freq / nyquist) * width;
+            const label = freq >= 1000 ? `${freq / 1000}k` : `${freq}`;
+            const labelWidth = fftCtx.measureText(label).width;
+            const labelX = xPos - labelWidth / 2;
+            if (labelX < lastLabelRight + FFT_FREQ_LABEL_MIN_GAP) continue; // skip overlapping labels
+            if (labelX + labelWidth > width) break;    // skip off-screen labels
+            fftCtx.fillRect(Math.round(xPos), barAreaHeight, 1, 2); // tick mark
+            fftCtx.fillText(label, labelX, height);
+            lastLabelRight = labelX + labelWidth;
+        }
+    }
+
     const baseFrequency = preferredFrequency;
     if (!baseFrequency || baseFrequency <= 0 || sampleRate <= 0) return;
 
-    const nyquist = sampleRate / 2;
     if (nyquist <= 0 || baseFrequency >= nyquist) return;
 
     let maxHarmonic = Math.min(Math.floor(nyquist / baseFrequency), 12);
@@ -234,11 +262,21 @@ function drawFFT(): void {
     }
     if (maxHarmonic <= 0) return;
 
+    // Calculate thinning step so markers don't overlap; always show maxHarmonic
+    const pixelsPerHarmonic = (baseFrequency / nyquist) * width;
+    let step = 1;
+    while (step < maxHarmonic && pixelsPerHarmonic * step < FFT_HARMONIC_MIN_SPACING) {
+        step++;
+    }
+
     fftCtx.fillStyle = FFT_MARKER_COLOR;
     fftCtx.font = '10px Arial';
     fftCtx.textBaseline = 'top';
 
     for (let harmonic = 1; harmonic <= maxHarmonic; harmonic++) {
+        // Show multiples of step, and always show the highest harmonic (x12 or maxHarmonic)
+        if (harmonic % step !== 0 && harmonic !== maxHarmonic) continue;
+
         const freq = baseFrequency * harmonic;
         const xPos = (freq / nyquist) * width;
         const clampedX = Math.min(Math.max(xPos, 0), width - 1);
@@ -246,7 +284,7 @@ function drawFFT(): void {
         const textWidth = fftCtx.measureText(text).width;
         const labelX = Math.min(Math.max(clampedX - textWidth / 2, 0), width - textWidth);
 
-        fftCtx.fillRect(Math.round(clampedX), 12, 1, height - 14);
+        fftCtx.fillRect(Math.round(clampedX), 12, 1, barAreaHeight - 14);
         fftCtx.fillText(text, labelX, 2);
     }
 }
