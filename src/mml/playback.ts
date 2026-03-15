@@ -60,16 +60,23 @@ export function parseCombinedMMLContent(content: string): { toneJson: string | n
     const trimmed = content.trim();
     if (trimmed.startsWith('{')) {
         const newlineIndex = trimmed.indexOf('\n');
-        if (newlineIndex !== -1) {
-            const firstLine = trimmed.substring(0, newlineIndex).trim();
-            const rest = trimmed.substring(newlineIndex + 1).trim();
+        // Try the first line when a newline exists, otherwise try the entire content
+        const candidates: Array<{ candidate: string; rest: string }> =
+            newlineIndex !== -1
+                ? [
+                      { candidate: trimmed.substring(0, newlineIndex).trim(), rest: trimmed.substring(newlineIndex + 1).trim() },
+                  ]
+                : [{ candidate: trimmed, rest: '' }];
+
+        for (const { candidate, rest } of candidates) {
             try {
-                const parsed = JSON.parse(firstLine) as Record<string, unknown>;
+                const parsed = JSON.parse(candidate) as Record<string, unknown>;
                 if (
                     typeof parsed.registers === 'string' &&
+                    parsed.registers.length > 0 &&
                     (parsed.type === undefined || parsed.type === 'YM2151 tone')
                 ) {
-                    return { toneJson: firstLine, mml: rest };
+                    return { toneJson: candidate, mml: rest };
                 }
             } catch (_e) {
                 // Not valid tone JSON, treat as regular MML

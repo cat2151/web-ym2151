@@ -156,8 +156,13 @@ export function setupEditorListeners(): void {
                     }
                 }
 
-                // Trigger MML playback
-                triggerAutoPlay();
+                // Trigger MML playback only when content is ready:
+                // - if it starts with '{', a valid tone JSON header must have been found
+                // - otherwise it's plain MML which is always safe to play
+                const contentStartsWithJson = content.trim().startsWith('{');
+                if (!contentStartsWithJson || toneJson !== null) {
+                    triggerAutoPlay();
+                }
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
