@@ -4,7 +4,6 @@
  */
 
 import { RandomConfig } from './types';
-import { getDefaultConfig } from './generator';
 import { validateConfig } from './validator';
 
 let currentConfig: RandomConfig | null = null;
@@ -80,8 +79,8 @@ export async function loadRandomConfig(): Promise<void> {
         console.log('Random config loaded successfully');
     } catch (error) {
         console.error('Error loading random config:', error);
-        // Use default config if loading fails or is invalid
-        currentConfig = getDefaultConfig();
+        // Config load failed; leave currentConfig as null (generation uses the library instead)
+        currentConfig = null;
         updateConfigTextarea();
     }
 }
