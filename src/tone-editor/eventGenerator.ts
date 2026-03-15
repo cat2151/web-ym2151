@@ -49,12 +49,16 @@ export function generateEvents(
         events.push({ time: 0.0, addr: toHex(0x80 + opOffset), data: toHex(ksAr) });
         
         // AMS-EN/D1R (0xA0 + opOffset)
+        const ame = params.AME ?? 0;
         const dr = params.DR ?? 0x10;
-        events.push({ time: 0.0, addr: toHex(0xA0 + opOffset), data: toHex(dr & 0x1F) });
+        const ameDr = ((ame & 0x1) << 7) | (dr & 0x1F);
+        events.push({ time: 0.0, addr: toHex(0xA0 + opOffset), data: toHex(ameDr) });
         
         // DT2/D2R (0xC0 + opOffset)
+        const dt2 = params.DT2 ?? 0;
         const sr = params.SR ?? 0x00;
-        events.push({ time: 0.0, addr: toHex(0xC0 + opOffset), data: toHex(sr & 0x1F) });
+        const dt2Sr = ((dt2 & 0x3) << 6) | (sr & 0x1F);
+        events.push({ time: 0.0, addr: toHex(0xC0 + opOffset), data: toHex(dt2Sr) });
         
         // D1L/RR (0xE0 + opOffset)
         const sl = params.SL ?? 0x00;

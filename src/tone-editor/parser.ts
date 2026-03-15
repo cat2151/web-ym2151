@@ -39,6 +39,8 @@ export function getDefaultOperatorParams(): OperatorParams {
         SL: 0x00,
         KS: 0,
         MUL: 0x01,
-        DT1: 3
+        DT1: 3,
+        DT2: 0,
+        AME: 0
     };
 }
