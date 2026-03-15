@@ -33,6 +33,8 @@ const FRAME_TARGET_AMPLITUDE = 0.95; // Use 95% of canvas height
 const BUFFER_TARGET_AMPLITUDE = 0.8; // Use 80% of canvas height
 let bufferMaxAmplitude: number = 1.0; // Maximum amplitude across entire buffer
 let preferredFrequency: number | null = null;
+let preferredBaseFrequency: number | null = null;
+let preferredOperatorMuls: number[] | null = null;
 
 const WAVEFORM_COLOR = '#4a90e2';
 const FFT_COLOR = '#f6a821';
@@ -41,7 +43,13 @@ const BACKGROUND_COLOR = '#0b0b0f';
 const FFT_FREQ_LABEL_HEIGHT = 12; // px reserved at the bottom of FFT canvas for frequency labels
 const FFT_FREQ_LABELS = [500, 1000, 2000, 5000, 10000, 20000]; // Hz
 const FFT_FREQ_LABEL_MIN_GAP = 2; // minimum px gap between adjacent frequency labels
-const FFT_HARMONIC_MIN_SPACING = 20; // minimum pixel gap between harmonic markers
+// Monokai palette colors for OP1, OP2, OP3, OP4
+const OPERATOR_COLORS = ['#f92672', '#a6e22e', '#66d9e8', '#fd971f'];
+
+/** Format a MUL value (0.5 or 1–15) as a display label such as '1/2x' or '4x'. */
+function formatMulLabel(mul: number): string {
+    return mul === 0.5 ? '1/2x' : `${mul}x`;
+}
 
 function ensureCanvasContexts(): void {
     if (!waveformCanvas) {
@@ -251,46 +259,26 @@ function drawFFT(): void {
         }
     }
 
-    const baseFrequency = preferredFrequency;
-    if (!baseFrequency || baseFrequency <= 0 || sampleRate <= 0) return;
+    const baseFrequency = preferredBaseFrequency;
+    if (!baseFrequency || baseFrequency <= 0 || !preferredOperatorMuls || nyquist <= 0) return;
 
-    if (nyquist <= 0 || baseFrequency >= nyquist) return;
-
-    let maxHarmonic = Math.min(Math.floor(nyquist / baseFrequency), 12);
-    while (maxHarmonic > 0 && baseFrequency * maxHarmonic >= nyquist) {
-        maxHarmonic--;
-    }
-    if (maxHarmonic <= 0) return;
-
-    // Build the set of harmonics to display by scanning right-to-left from maxHarmonic.
-    // This guarantees maxHarmonic is always visible and every pair of adjacent shown
-    // markers is at least FFT_HARMONIC_MIN_SPACING pixels apart.
-    const harmonicsToShow = new Set<number>([maxHarmonic]);
-    let lastShownX = (baseFrequency * maxHarmonic / nyquist) * width;
-    for (let harmonic = maxHarmonic - 1; harmonic >= 1; harmonic--) {
-        const xPos = (baseFrequency * harmonic / nyquist) * width;
-        if (lastShownX - xPos >= FFT_HARMONIC_MIN_SPACING) {
-            harmonicsToShow.add(harmonic);
-            lastShownX = xPos;
-        }
-    }
-
-    fftCtx.fillStyle = FFT_MARKER_COLOR;
     fftCtx.font = '10px Arial';
     fftCtx.textBaseline = 'top';
 
-    for (let harmonic = 1; harmonic <= maxHarmonic; harmonic++) {
-        if (!harmonicsToShow.has(harmonic)) continue;
+    for (let opIdx = 0; opIdx < preferredOperatorMuls.length; opIdx++) {
+        const mul = preferredOperatorMuls[opIdx];
+        const opFreq = baseFrequency * mul;
+        if (opFreq <= 0 || opFreq >= nyquist) continue;
 
-        const freq = baseFrequency * harmonic;
-        const xPos = (freq / nyquist) * width;
+        const xPos = (opFreq / nyquist) * width;
         const clampedX = Math.min(Math.max(xPos, 0), width - 1);
-        const text = `${harmonic}x`;
-        const textWidth = fftCtx.measureText(text).width;
-        const labelX = Math.min(Math.max(clampedX - textWidth / 2, 0), width - textWidth);
+        const label = formatMulLabel(mul);
+        const labelWidth = fftCtx.measureText(label).width;
+        const labelX = Math.min(Math.max(clampedX - labelWidth / 2, 0), width - labelWidth);
 
+        fftCtx.fillStyle = OPERATOR_COLORS[opIdx % OPERATOR_COLORS.length];
         fftCtx.fillRect(Math.round(clampedX), 12, 1, barAreaHeight - 14);
-        fftCtx.fillText(text, labelX, 2);
+        fftCtx.fillText(label, labelX, 2);
     }
 }
 
@@ -332,13 +320,17 @@ export function initializeRealtimeVisualizer(): void {
  * @param source - The audio source to visualize
  * @param context - The audio context
  * @param maxAmplitude - Optional maximum amplitude from entire buffer for consistent normalization
- * @param frequencyHint - Optional base frequency hint derived from register data
+ * @param frequencyHint - Optional MUL-scaled frequency estimate used for waveform cycle alignment
+ * @param baseFrequency - Optional KC-derived base frequency (without MUL scaling) used for FFT operator markers
+ * @param operatorMuls - Optional 4-element array of MUL values in display order (OP1-OP4); used for FFT operator markers
  */
 export function startRealtimeVisualization(
     source: AudioBufferSourceNode,
     context: AudioContext,
     maxAmplitude?: number,
-    frequencyHint?: number
+    frequencyHint?: number,
+    baseFrequency?: number,
+    operatorMuls?: number[]
 ): void {
     ensureCanvasContexts();
     const analyser = ensureAnalyser(context);
@@ -355,6 +347,8 @@ export function startRealtimeVisualization(
         bufferMaxAmplitude = 1.0; // Reset to default if not provided
     }
     preferredFrequency = frequencyHint && frequencyHint > 0 ? frequencyHint : null;
+    preferredBaseFrequency = baseFrequency && baseFrequency > 0 ? baseFrequency : null;
+    preferredOperatorMuls = operatorMuls && operatorMuls.length > 0 ? operatorMuls : null;
 
     if (!analyser) {
         // Fallback: ensure audio still plays even if analyser cannot be created
@@ -419,6 +413,8 @@ export function stopRealtimeVisualization(): void {
         animationFrameId = null;
     }
     preferredFrequency = null;
+    preferredBaseFrequency = null;
+    preferredOperatorMuls = null;
 
     if (currentSource && analyserNode) {
         try {
