@@ -7,7 +7,7 @@ import { convertMMLToYM2151JSON, initializeMMLConverter, isMMLConverterReady } f
 import { clearAudioCache, playAudioWithOverlay, playAudio } from '../audio';
 import { updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
-import { parseToneEditorToJson, eventsToToneJsonString } from '../tone-editor';
+import { parseToneEditorToJson, eventsToToneJsonString, onRegistersEditorChange } from '../tone-editor';
 
 /**
  * Get MML input textarea element
@@ -53,6 +53,54 @@ function getToneInitializationEvents(): YM2151Event[] {
 }
 
 /**
+ * Parse content that may have a leading tone JSON on the first line.
+ * Returns the tone JSON string (or null) and the MML text.
+ */
+export function parseCombinedMMLContent(content: string): { toneJson: string | null; mml: string } {
+    const trimmed = content.trim();
+    if (trimmed.startsWith('{')) {
+        const newlineIndex = trimmed.indexOf('\n');
+        // Try the first line when a newline exists, otherwise try the entire content
+        const candidates: Array<{ candidate: string; rest: string }> =
+            newlineIndex !== -1
+                ? [
+                      { candidate: trimmed.substring(0, newlineIndex).trim(), rest: trimmed.substring(newlineIndex + 1).trim() },
+                  ]
+                : [{ candidate: trimmed, rest: '' }];
+
+        for (const { candidate, rest } of candidates) {
+            try {
+                const parsed = JSON.parse(candidate) as Record<string, unknown>;
+                if (
+                    typeof parsed.registers === 'string' &&
+                    parsed.registers.length > 0 &&
+                    (parsed.type === undefined || parsed.type === 'YM2151 tone')
+                ) {
+                    return { toneJson: candidate, mml: rest };
+                }
+            } catch (_e) {
+                // Not valid tone JSON, treat as regular MML
+            }
+        }
+    }
+    return { toneJson: null, mml: trimmed };
+}
+
+/**
+ * Apply a tone JSON string to the registers editor and update all related editors.
+ * Returns true if the tone JSON was successfully applied.
+ */
+function applyToneJsonString(toneJson: string): boolean {
+    const registersEditor = document.getElementById('registersEditor') as HTMLTextAreaElement | null;
+    if (registersEditor) {
+        registersEditor.value = toneJson;
+        onRegistersEditorChange();
+        return true;
+    }
+    return false;
+}
+
+/**
  * Play MML input by converting to YM2151 JSON and playing
  */
 export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<void> {
@@ -68,8 +116,17 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
     let mml = mmlInput.value.trim();
     if (!mml) {
         mml = 'c';
-        mmlInput.value = mml;
     }
+
+    // Handle embedded tone JSON at the start of MML input
+    const parsed = parseCombinedMMLContent(mml);
+    if (parsed.toneJson) {
+        applyToneJsonString(parsed.toneJson);
+        mml = parsed.mml || 'c';
+    }
+
+    // Update mmlInput to reflect normalised value (trimmed / extracted MML)
+    mmlInput.value = mml;
 
     // Initialize WASM if not already done
     if (!isMMLConverterReady()) {

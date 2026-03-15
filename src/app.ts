@@ -14,6 +14,7 @@ import {
     initializeRealtimeVisualizer,
     setWaveformScalingMode,
 } from './audio/realtimeVisualizer';
+import { parseCombinedMMLContent } from './mml/playback';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -125,6 +126,41 @@ export function setupEditorListeners(): void {
 
                 // Trigger auto-play only when registers JSON is valid
                 if (isValidRegistersJson) {
+                    triggerAutoPlay();
+                }
+            }, AUTOSAVE_DEBOUNCE_MS);
+        });
+    }
+
+    const combinedMMLEditor = document.getElementById('combinedMML');
+    if (combinedMMLEditor) {
+        let combinedTimeoutId: number | null = null;
+        combinedMMLEditor.addEventListener('input', function() {
+            if (combinedTimeoutId) clearTimeout(combinedTimeoutId);
+            combinedTimeoutId = window.setTimeout(() => {
+                const content = (combinedMMLEditor as HTMLTextAreaElement).value;
+                const { toneJson, mml } = parseCombinedMMLContent(content);
+
+                // Update mmlInput with the MML portion
+                const mmlInput = document.getElementById('mmlInput') as HTMLTextAreaElement | null;
+                if (mmlInput) {
+                    mmlInput.value = mml;
+                }
+
+                // Apply tone JSON to editors if present
+                if (toneJson) {
+                    const regEditor = document.getElementById('registersEditor') as HTMLTextAreaElement | null;
+                    if (regEditor) {
+                        regEditor.value = toneJson;
+                        onRegistersEditorChange();
+                    }
+                }
+
+                // Trigger MML playback only when content is ready:
+                // - if it starts with '{', a valid tone JSON header must have been found
+                // - otherwise it's plain MML which is always safe to play
+                const contentStartsWithJson = content.trim().startsWith('{');
+                if (!contentStartsWithJson || toneJson !== null) {
                     triggerAutoPlay();
                 }
             }, AUTOSAVE_DEBOUNCE_MS);
