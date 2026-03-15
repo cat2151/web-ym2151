@@ -320,7 +320,9 @@ export function initializeRealtimeVisualizer(): void {
  * @param source - The audio source to visualize
  * @param context - The audio context
  * @param maxAmplitude - Optional maximum amplitude from entire buffer for consistent normalization
- * @param frequencyHint - Optional base frequency hint derived from register data
+ * @param frequencyHint - Optional MUL-scaled frequency estimate used for waveform cycle alignment
+ * @param baseFrequency - Optional KC-derived base frequency (without MUL scaling) used for FFT operator markers
+ * @param operatorMuls - Optional 4-element array of MUL values in display order (OP1-OP4); used for FFT operator markers
  */
 export function startRealtimeVisualization(
     source: AudioBufferSourceNode,

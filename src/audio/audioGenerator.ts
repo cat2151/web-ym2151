@@ -70,7 +70,8 @@ function extractMinMul(events: YM2151Event[]): number | null {
 
 /**
  * Extract MUL value for each operator in display order (OP1, OP2, OP3, OP4).
- * Hardware register bases: OP1=0x40, OP2=0x50, OP3=0x48, OP4=0x58.
+ * Note: YM2151 hardware register order is OP1,OP3,OP2,OP4, so the DT1/MUL register
+ * base addresses in display order are 0x40 (OP1), 0x50 (OP2), 0x48 (OP3), 0x58 (OP4).
  * Returns 4-element array; defaults to MUL=1 for operators without a register write.
  */
 function extractMulsAllOperators(events: YM2151Event[]): number[] {
