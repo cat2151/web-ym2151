@@ -14,6 +14,7 @@ import {
     initializeRealtimeVisualizer,
     setWaveformScalingMode,
 } from './audio/realtimeVisualizer';
+import { parseCombinedMMLContent } from './mml/playback';
 
 /**
  * Initialize the application when Emscripten runtime is ready
@@ -127,6 +128,36 @@ export function setupEditorListeners(): void {
                 if (isValidRegistersJson) {
                     triggerAutoPlay();
                 }
+            }, AUTOSAVE_DEBOUNCE_MS);
+        });
+    }
+
+    const combinedMMLEditor = document.getElementById('combinedMML');
+    if (combinedMMLEditor) {
+        let combinedTimeoutId: number | null = null;
+        combinedMMLEditor.addEventListener('input', function() {
+            if (combinedTimeoutId) clearTimeout(combinedTimeoutId);
+            combinedTimeoutId = window.setTimeout(() => {
+                const content = (combinedMMLEditor as HTMLTextAreaElement).value;
+                const { toneJson, mml } = parseCombinedMMLContent(content);
+
+                // Update mmlInput with the MML portion
+                const mmlInput = document.getElementById('mmlInput') as HTMLTextAreaElement | null;
+                if (mmlInput) {
+                    mmlInput.value = mml;
+                }
+
+                // Apply tone JSON to editors if present
+                if (toneJson) {
+                    const regEditor = document.getElementById('registersEditor') as HTMLTextAreaElement | null;
+                    if (regEditor) {
+                        regEditor.value = toneJson;
+                        onRegistersEditorChange();
+                    }
+                }
+
+                // Trigger MML playback
+                triggerAutoPlay();
             }, AUTOSAVE_DEBOUNCE_MS);
         });
     }
