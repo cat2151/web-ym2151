@@ -27,14 +27,20 @@ let wasmInitPromise: Promise<(seed: number, note: number) => string> | null = nu
 function getGenerateRandomToneRegisters(): Promise<(seed: number, note: number) => string> {
     if (!wasmInitPromise) {
         wasmInitPromise = (async () => {
-            // @ts-ignore: Runtime browser dynamic import of external URL –
-            // TypeScript cannot verify the external module structure at compile time.
-            const mod = await import(LIBRARY_URL) as {
-                default: (input?: unknown) => Promise<unknown>;
-                generate_random_tone_registers: (seed: number, note: number) => string;
-            };
-            await mod.default();
-            return mod.generate_random_tone_registers;
+            try {
+                // @ts-ignore: Runtime browser dynamic import of external URL –
+                // TypeScript cannot verify the external module structure at compile time.
+                const mod = await import(LIBRARY_URL) as {
+                    default: (input?: unknown) => Promise<unknown>;
+                    generate_random_tone_registers: (seed: number, note: number) => string;
+                };
+                await mod.default();
+                return mod.generate_random_tone_registers;
+            } catch (e) {
+                // Reset so the next call can retry (handles transient network/CORS issues).
+                wasmInitPromise = null;
+                throw e;
+            }
         })();
     }
     return wasmInitPromise;
@@ -52,8 +58,8 @@ export function kcToMidi(kc: number): number {
     return (ymOctave + 2) * 12 + noteInOctave + 1;
 }
 
-/** Default KC value (A4, matching the tone-editor default). */
-const DEFAULT_KC_A4 = 0x4A;
+/** Default KC value used by the tone editor when no note has been set. Equals A5 (MIDI 81). */
+const DEFAULT_KC_TONE_EDITOR = 0x4A;
 
 function showRandomToneBalloon(message: string): void {
     const el = document.getElementById(RANDOM_TONE_STATUS_ID);
@@ -90,7 +96,7 @@ export function generateRandomTone(): void {
     // Preserve the current note: read the KC value from the tone editor and convert to MIDI.
     const currentContent = toneEditor.value;
     const noteMatch = currentContent.match(/NOTE=([0-9A-Fa-f]+)/i);
-    const currentKc = noteMatch ? parseInt(noteMatch[1], 16) : DEFAULT_KC_A4;
+    const currentKc = noteMatch ? parseInt(noteMatch[1], 16) : DEFAULT_KC_TONE_EDITOR;
     const currentMidiNote = kcToMidi(currentKc);
 
     getGenerateRandomToneRegisters()

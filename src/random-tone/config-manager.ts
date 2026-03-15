@@ -18,11 +18,12 @@ export function getCurrentConfig(): RandomConfig | null {
 }
 
 /**
- * Update config textarea with current configuration
+ * Update config textarea with current configuration.
+ * Clears the textarea when currentConfig is null to avoid showing stale data.
  */
 function updateConfigTextarea(): void {
-    if (!configTextarea || !currentConfig) return;
-    configTextarea.value = JSON.stringify(currentConfig, null, 2);
+    if (!configTextarea) return;
+    configTextarea.value = currentConfig ? JSON.stringify(currentConfig, null, 2) : '';
 }
 
 /**
