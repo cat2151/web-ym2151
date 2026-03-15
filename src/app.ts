@@ -132,6 +132,17 @@ export function setupEditorListeners(): void {
         });
     }
 
+    const mmlInput = document.getElementById('mmlInput');
+    if (mmlInput) {
+        let mmlTimeoutId: number | null = null;
+        mmlInput.addEventListener('input', function() {
+            if (mmlTimeoutId) clearTimeout(mmlTimeoutId);
+            mmlTimeoutId = window.setTimeout(() => {
+                triggerAutoPlay();
+            }, AUTOSAVE_DEBOUNCE_MS);
+        });
+    }
+
     const combinedMMLEditor = document.getElementById('combinedMML');
     if (combinedMMLEditor) {
         let combinedTimeoutId: number | null = null;
