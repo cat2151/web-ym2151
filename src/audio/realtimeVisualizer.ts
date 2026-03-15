@@ -244,7 +244,7 @@ function drawFFT(): void {
             const labelWidth = fftCtx.measureText(label).width;
             const labelX = xPos - labelWidth / 2;
             if (labelX < lastLabelRight + FFT_FREQ_LABEL_MIN_GAP) continue; // skip overlapping labels
-            if (labelX + labelWidth > width) break;    // skip off-screen labels
+            if (labelX + labelWidth > width) break;    // labels are ascending, so all remaining are off-screen
             fftCtx.fillRect(Math.round(xPos), barAreaHeight, 1, 2); // tick mark
             fftCtx.fillText(label, labelX, height);
             lastLabelRight = labelX + labelWidth;
@@ -262,11 +262,17 @@ function drawFFT(): void {
     }
     if (maxHarmonic <= 0) return;
 
-    // Calculate thinning step so markers don't overlap; always show maxHarmonic
-    const pixelsPerHarmonic = (baseFrequency / nyquist) * width;
-    let step = 1;
-    while (step < maxHarmonic && pixelsPerHarmonic * step < FFT_HARMONIC_MIN_SPACING) {
-        step++;
+    // Build the set of harmonics to display by scanning right-to-left from maxHarmonic.
+    // This guarantees maxHarmonic is always visible and every pair of adjacent shown
+    // markers is at least FFT_HARMONIC_MIN_SPACING pixels apart.
+    const harmonicsToShow = new Set<number>([maxHarmonic]);
+    let lastShownX = (baseFrequency * maxHarmonic / nyquist) * width;
+    for (let harmonic = maxHarmonic - 1; harmonic >= 1; harmonic--) {
+        const xPos = (baseFrequency * harmonic / nyquist) * width;
+        if (lastShownX - xPos >= FFT_HARMONIC_MIN_SPACING) {
+            harmonicsToShow.add(harmonic);
+            lastShownX = xPos;
+        }
     }
 
     fftCtx.fillStyle = FFT_MARKER_COLOR;
@@ -274,8 +280,7 @@ function drawFFT(): void {
     fftCtx.textBaseline = 'top';
 
     for (let harmonic = 1; harmonic <= maxHarmonic; harmonic++) {
-        // Show multiples of step, and always show the highest harmonic (x12 or maxHarmonic)
-        if (harmonic % step !== 0 && harmonic !== maxHarmonic) continue;
+        if (!harmonicsToShow.has(harmonic)) continue;
 
         const freq = baseFrequency * harmonic;
         const xPos = (freq / nyquist) * width;
