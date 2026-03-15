@@ -46,9 +46,9 @@ const FFT_FREQ_LABEL_MIN_GAP = 2; // minimum px gap between adjacent frequency l
 // Monokai palette colors for OP1, OP2, OP3, OP4
 const OPERATOR_COLORS = ['#f92672', '#a6e22e', '#66d9e8', '#fd971f'];
 
-/** Format a MUL value (0.5 or 1–15) as a display label such as '½x' or '4x'. */
+/** Format a MUL value (0.5 or 1–15) as a display label such as '1/2x' or '4x'. */
 function formatMulLabel(mul: number): string {
-    return mul === 0.5 ? '½x' : `${mul}x`;
+    return mul === 0.5 ? '1/2x' : `${mul}x`;
 }
 
 function ensureCanvasContexts(): void {
