@@ -4,7 +4,6 @@
  */
 
 import { RandomConfig } from './types';
-import { getDefaultConfig } from './generator';
 import { validateConfig } from './validator';
 
 let currentConfig: RandomConfig | null = null;
@@ -19,11 +18,12 @@ export function getCurrentConfig(): RandomConfig | null {
 }
 
 /**
- * Update config textarea with current configuration
+ * Update config textarea with current configuration.
+ * Clears the textarea when currentConfig is null to avoid showing stale data.
  */
 function updateConfigTextarea(): void {
-    if (!configTextarea || !currentConfig) return;
-    configTextarea.value = JSON.stringify(currentConfig, null, 2);
+    if (!configTextarea) return;
+    configTextarea.value = currentConfig ? JSON.stringify(currentConfig, null, 2) : '';
 }
 
 /**
@@ -80,8 +80,8 @@ export async function loadRandomConfig(): Promise<void> {
         console.log('Random config loaded successfully');
     } catch (error) {
         console.error('Error loading random config:', error);
-        // Use default config if loading fails or is invalid
-        currentConfig = getDefaultConfig();
+        // Config load failed; leave currentConfig as null (generation uses the library instead)
+        currentConfig = null;
         updateConfigTextarea();
     }
 }
