@@ -1,14 +1,15 @@
 import { YM2151Event } from '../types';
+import { toHex } from '../ui';
 
-function toHex(value: number): string {
-    return `0x${value.toString(16).toUpperCase().padStart(2, '0')}`;
+function parseHexAddress(addr: string): number {
+    return parseInt(addr, 16);
 }
 
 function getNoteChannels(noteEvents: YM2151Event[]): number[] {
     const channels = new Set<number>();
 
     for (const event of noteEvents) {
-        const addr = parseInt(event.addr as string);
+        const addr = parseHexAddress(event.addr);
         if (addr >= 0x28 && addr <= 0x37) {
             channels.add(addr & 0x07);
         }
@@ -23,7 +24,7 @@ function copyToneEventsToChannel(toneEvents: YM2151Event[], channel: number): YM
     }
 
     return toneEvents.map(event => {
-        const addr = parseInt(event.addr as string);
+        const addr = parseHexAddress(event.addr);
         return {
             ...event,
             addr: toHex(addr + channel)
