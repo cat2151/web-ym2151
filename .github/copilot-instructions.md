@@ -14,7 +14,7 @@
 - `demo-library/` にはライブラリ利用例があり、`npm run build` であわせてビルドされる
 - テストは Vitest (`npm test`)
 - GitHub Pages デプロイは `.github/workflows/deploy.yml` で行っている
-- デプロイ時は `npm ci` → `./setup-mml.sh` → `npm run build` → `./build.sh --build-only` → `./setup-oscilloscope.sh` の順でセットアップとビルドを行う
+- デプロイ時は `npm ci` → `./setup-mml.sh` → `npm run build` → `mymindstorm/setup-emsdk@v14` で Emscripten をセットアップ → `./build.sh --build-only` → `./setup-oscilloscope.sh` の順でセットアップとビルドを行う
 - `dist/` と `demo-library/demo-library.js` はビルド成果物で、`.gitignore` 済み
 
 ## 変更時の注意
