@@ -1,5 +1,5 @@
 import { YM2151Event } from '../types';
-import { toHex } from '../ui';
+import { toHex } from '../hex';
 
 function parseHexAddress(addr: string): number {
     return parseInt(addr, 16);
