@@ -1,69 +1,33 @@
-# Agent Instructions for Development
+# 開発時の追加指示
 
-## Testing Requirements
+このファイルには、このリポジトリ固有の内容だけを書きます。共通の harness / agent 指示と重複する一般論は書かなくてよいです。
 
-### Headless Browser Testing
+## 言語
 
-When implementing features that involve browser functionality, especially dynamic imports, DOM manipulation, or external resources:
+- ユーザー向けの説明、Issue / PR の本文、レビュー返信は日本語で書く
+- **プルリクエストのタイトルと本文は日本語で書く**
+- 進捗報告のチェックリストも日本語で書く
 
-1. **Always verify in a headless browser environment** before completing the implementation
-2. **Test the deployed version** to ensure resources load correctly from the deployed URL
-3. **Check browser console** for errors (404s, failed imports, runtime errors)
+## このリポジトリの現状
 
-#### How to Test in Headless Browser
+- アプリ本体は TypeScript で、主要なソースは `src/` にある
+- `demo-library/` にはライブラリ利用例があり、`npm run build` であわせてビルドされる
+- テストは Vitest (`npm test`)
+- GitHub Pages デプロイは `.github/workflows/deploy.yml` で行っている
+- デプロイ時は `npm ci` → `./setup-mml.sh` → `npm run build` → `./build.sh --build-only` → `./setup-oscilloscope.sh` の順でセットアップとビルドを行う
+- `dist/` と `demo-library/demo-library.js` はビルド成果物で、`.gitignore` 済み
 
-Use Playwright or Puppeteer to launch a headless browser and navigate to the deployed page:
+## 変更時の注意
 
-```javascript
-// Example with Playwright
-const { chromium } = require('playwright');
+- 外部ライブラリや静的アセットを追加・変更する場合は、`README.md` / `README.ja.md` / `MML.md` / `OSCILLOSCOPE.md` と `.github/workflows/deploy.yml` への影響を確認する
+- `setup-mml.sh` と `setup-oscilloscope.sh` で取得する配布物に依存する変更では、相対パスと GitHub Pages 配信物への含まれ方を確認する
+- cat2151 管理の配布物が 404 の場合は、ローカルビルドや代替手段で隠さず、公開物の問題として失敗を表に出す
 
-(async () => {
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-  
-  // Listen for console messages
-  page.on('console', msg => console.log('BROWSER:', msg.text()));
-  
-  // Listen for errors
-  page.on('pageerror', error => console.error('PAGE ERROR:', error));
-  
-  // Navigate to the page
-  await page.goto('https://cat2151.github.io/web-ym2151/', { waitUntil: 'networkidle' });
-  
-  // Wait for scripts to execute
-  await page.waitForLoadState('domcontentloaded');
-  
-  await browser.close();
-})();
+## よく使うコマンド
+
+```bash
+npm ci
+npm run build
+npm test
+./build.sh --server-only
 ```
-
-### Deployment Considerations
-
-When adding external libraries or resources:
-
-1. **Check if they're git-ignored**: Ensure required files are included in the deployment
-2. **Add setup steps to CI/CD**: If files need setup scripts, add them to `.github/workflows/deploy.yml`
-3. **Test the full deployment pipeline**: Verify resources are available after deployment
-4. **Document setup requirements**: Update README and relevant documentation
-5. **Fail fast on cat2151 library 404s**: When cat2151-owned library assets (e.g., smf-to-ym2151log, mmlabc-to-smf) return 404 or similar, do not build from source as a fallback. Treat it as a publishing issue, surface the failure, and notify cat2151 instead of masking it.
-
-### Common Issues to Check
-
-- 404 errors for dynamically imported modules
-- CORS issues with external resources
-- Missing files due to `.gitignore`
-- Incorrect relative paths in deployed environment
-- Missing CI/CD build steps
-
-## Implementation Checklist
-
-Before completing any feature implementation:
-
-- [ ] Functionality works in local development environment
-- [ ] Tested in headless browser (if web feature)
-- [ ] No console errors in browser
-- [ ] All required files are included in deployment
-- [ ] CI/CD workflow updated if needed
-- [ ] Documentation updated
-- [ ] Code reviewed and tested
