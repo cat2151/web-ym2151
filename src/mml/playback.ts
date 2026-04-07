@@ -8,6 +8,7 @@ import { clearAudioCache, playAudioWithOverlay, playAudio } from '../audio';
 import { updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
 import { parseToneEditorToJson, eventsToToneJsonString, onRegistersEditorChange } from '../tone-editor';
+import { mergeToneInitializationWithMMLNoteEvents } from './eventMerge';
 
 /**
  * Get MML input textarea element
@@ -195,7 +196,7 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
             ? (result.events as YM2151Event[]).filter(isNoteEvent)
             : (result.events as YM2151Event[]);
 
-        const combinedEvents = [...toneEvents, ...mmlNoteEvents];
+        const combinedEvents = mergeToneInitializationWithMMLNoteEvents(toneEvents, mmlNoteEvents);
 
         jsonEditor.value = JSON.stringify({ events: combinedEvents }, null, 2);
 
