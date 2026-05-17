@@ -105,7 +105,7 @@ export function loadFromStorage(): boolean {
                             (window as any).parseJsonToToneEditor(data.events);
                         }
                         if (typeof (window as any).updateDurationDisplay === 'function') {
-                            (window as any).updateDurationDisplay(data.events);
+                            (window as any).updateDurationDisplay(data.events, data);
                         }
                     }
                 } catch (e) {

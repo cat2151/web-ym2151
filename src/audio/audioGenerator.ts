@@ -4,7 +4,7 @@
  */
 
 import { YM2151Event } from '../types';
-import { calculateDuration, updateDurationDisplay } from '../ui';
+import { calculateDuration, getRenderDurationSeconds, updateDurationDisplay } from '../ui';
 import { OPM_SAMPLE_RATE } from '../constants';
 import { NOTE_TABLE } from '../midi/noteTable';
 
@@ -144,7 +144,10 @@ function estimateFrequencyFromEvents(events: YM2151Event[]): number | null {
  * Does NOT access the DOM – safe to call from background tasks.
  * @returns AudioData or null if generation fails
  */
-export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null {
+export function generateAudioFromEvents(
+    events: YM2151Event[],
+    renderDurationSeconds?: number
+): AudioData | null {
     if (typeof Module === 'undefined' || !Module._generate_sound) {
         return null;
     }
@@ -152,7 +155,7 @@ export function generateAudioFromEvents(events: YM2151Event[]): AudioData | null
         return null;
     }
 
-    const durationSec = calculateDuration(events);
+    const durationSec = calculateDuration(events, renderDurationSeconds);
     const estimatedFrequency = estimateFrequencyFromEvents(events);
     const kcValue = findLatestKc(events);
     const baseFreq = kcValue !== null ? kcToFrequencyHz(kcValue) : null;
@@ -213,12 +216,14 @@ export function generateAudioFromJson(jsonString: string): AudioData | null {
     }
 
     let events: YM2151Event[];
+    let renderDurationSeconds: number | undefined;
     try {
         const data = JSON.parse(jsonString);
         if (!data.events || !Array.isArray(data.events)) {
             return null;
         }
         events = data.events as YM2151Event[];
+        renderDurationSeconds = getRenderDurationSeconds(data);
         if (events.length === 0) {
             return null;
         }
@@ -226,7 +231,7 @@ export function generateAudioFromJson(jsonString: string): AudioData | null {
         return null;
     }
 
-    return generateAudioFromEvents(events);
+    return generateAudioFromEvents(events, renderDurationSeconds);
 }
 
 /**
@@ -246,13 +251,20 @@ export function generateAudioBuffers(): AudioData | null {
     }
 
     let currentEvents: YM2151Event[];
+    let currentData: unknown;
+    let renderDurationSeconds: number | undefined;
     
     try {
-        const currentData = JSON.parse(textarea.value);
-        if (!currentData.events || !Array.isArray(currentData.events)) {
+        currentData = JSON.parse(textarea.value);
+        if (
+            typeof currentData !== 'object' ||
+            currentData === null ||
+            !Array.isArray((currentData as { events?: unknown }).events)
+        ) {
             throw new Error("JSON must contain an 'events' array.");
         }
-        currentEvents = currentData.events;
+        currentEvents = (currentData as { events: YM2151Event[] }).events;
+        renderDurationSeconds = getRenderDurationSeconds(currentData);
         if (currentEvents.length === 0) {
             alert("Events array is empty.");
             return null;
@@ -263,8 +275,8 @@ export function generateAudioBuffers(): AudioData | null {
         return null;
     }
 
-    const durationSec = calculateDuration(currentEvents);
-    updateDurationDisplay(currentEvents);
+    const durationSec = calculateDuration(currentEvents, renderDurationSeconds);
+    updateDurationDisplay(currentEvents, currentData);
     const estimatedFrequency = estimateFrequencyFromEvents(currentEvents);
     const kcValue = findLatestKc(currentEvents);
     const baseFreq = kcValue !== null ? kcToFrequencyHz(kcValue) : null;

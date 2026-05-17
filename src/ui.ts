@@ -13,7 +13,18 @@ export function toHex(value: number): string {
 /**
  * Calculate duration of events in seconds
  */
-export function calculateDuration(events: Array<{ time: number | string }>): number {
+export function calculateDuration(
+    events: Array<{ time: number | string }>,
+    renderDurationSeconds?: number
+): number {
+    if (
+        renderDurationSeconds !== undefined &&
+        Number.isFinite(renderDurationSeconds) &&
+        renderDurationSeconds > 0
+    ) {
+        return renderDurationSeconds;
+    }
+
     if (!events || events.length === 0) {
         return 1.0;
     }
@@ -29,10 +40,27 @@ export function calculateDuration(events: Array<{ time: number | string }>): num
 }
 
 /**
+ * Read a valid render duration override from a top-level YM2151 JSON object.
+ */
+export function getRenderDurationSeconds(jsonRoot: unknown): number | undefined {
+    if (typeof jsonRoot !== 'object' || jsonRoot === null) {
+        return undefined;
+    }
+
+    const value = (jsonRoot as { render_duration_seconds?: unknown }).render_duration_seconds;
+    return typeof value === 'number' && Number.isFinite(value) && value > 0
+        ? value
+        : undefined;
+}
+
+/**
  * Update duration display in the UI
  */
-export function updateDurationDisplay(events: Array<{ time: number | string }>): void {
-    const d = calculateDuration(events);
+export function updateDurationDisplay(
+    events: Array<{ time: number | string }>,
+    jsonRoot?: unknown
+): void {
+    const d = calculateDuration(events, getRenderDurationSeconds(jsonRoot));
     const infoSpan = document.getElementById('durationInfo');
     if (infoSpan) {
         infoSpan.innerText = `(Calculated Duration: ${d.toFixed(2)} sec)`;

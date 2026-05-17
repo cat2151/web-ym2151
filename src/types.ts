@@ -26,6 +26,7 @@ export interface YM2151Event {
  */
 export interface JsonEditorData {
     events: YM2151Event[];
+    render_duration_seconds?: number;
 }
 
 /**

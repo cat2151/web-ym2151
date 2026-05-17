@@ -5,7 +5,7 @@
 
 import { convertMMLToYM2151JSON, initializeMMLConverter, isMMLConverterReady } from '../mml';
 import { clearAudioCache, playAudioWithOverlay, playAudio } from '../audio';
-import { updateDurationDisplay } from '../ui';
+import { getRenderDurationSeconds, updateDurationDisplay } from '../ui';
 import { YM2151Event } from '../types';
 import { parseToneEditorToJson, eventsToToneJsonString, onRegistersEditorChange } from '../tone-editor';
 
@@ -197,7 +197,12 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
 
         const combinedEvents = [...toneEvents, ...mmlNoteEvents];
 
-        jsonEditor.value = JSON.stringify({ events: combinedEvents }, null, 2);
+        const renderDurationSeconds = getRenderDurationSeconds(result);
+        const editorJson = renderDurationSeconds !== undefined
+            ? { render_duration_seconds: renderDurationSeconds, events: combinedEvents }
+            : { events: combinedEvents };
+
+        jsonEditor.value = JSON.stringify(editorJson, null, 2);
 
         // Update combined MML textarea (tone JSON + MML text)
         const combinedMMLEditor = getCombinedMMLEditor();
@@ -209,7 +214,7 @@ export async function playMMLInput(options?: { useOverlay?: boolean }): Promise<
         }
 
         // Update duration display
-        updateDurationDisplay(combinedEvents);
+        updateDurationDisplay(combinedEvents, editorJson);
 
         // Clear audio cache since we have new JSON
         clearAudioCache();

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { toHex, calculateDuration } from './ui';
+import { toHex, calculateDuration, getRenderDurationSeconds } from './ui';
 
 describe('toHex', () => {
     it('converts 0 to "0x00"', () => {
@@ -66,5 +66,33 @@ describe('calculateDuration', () => {
             { time: NaN },
         ];
         expect(calculateDuration(events)).toBe(2.0);
+    });
+
+    it('uses a valid render duration override', () => {
+        const events = [
+            { time: 0.5 },
+            { time: 2.0 },
+        ];
+        expect(calculateDuration(events, 2.5)).toBe(2.5);
+    });
+
+    it('falls back when the render duration override is invalid', () => {
+        expect(calculateDuration([{ time: 2.0 }], 0)).toBe(3.0);
+        expect(calculateDuration([{ time: 2.0 }], Infinity)).toBe(3.0);
+    });
+});
+
+describe('getRenderDurationSeconds', () => {
+    it('reads a finite positive top-level render duration', () => {
+        expect(getRenderDurationSeconds({ render_duration_seconds: 12.5 })).toBe(12.5);
+    });
+
+    it('ignores missing or invalid render durations', () => {
+        expect(getRenderDurationSeconds({})).toBeUndefined();
+        expect(getRenderDurationSeconds({ render_duration_seconds: 0 })).toBeUndefined();
+        expect(getRenderDurationSeconds({ render_duration_seconds: -1 })).toBeUndefined();
+        expect(getRenderDurationSeconds({ render_duration_seconds: Infinity })).toBeUndefined();
+        expect(getRenderDurationSeconds({ render_duration_seconds: '12.5' })).toBeUndefined();
+        expect(getRenderDurationSeconds(null)).toBeUndefined();
     });
 });
