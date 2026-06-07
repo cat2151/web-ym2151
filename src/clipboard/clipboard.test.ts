@@ -111,7 +111,6 @@ describe('copyTextToClipboard', () => {
 
 describe('initializeClipboardButtons', () => {
     it('wraps each textarea and overlays a copy button, avoiding duplicates on re-init', () => {
-        const appended: any[] = [];
         const inserted: Array<{ node: any; ref: any }> = [];
 
         const wrapper: any = {
@@ -120,7 +119,6 @@ describe('initializeClipboardButtons', () => {
             appendChild(node: any) {
                 this.children.push(node);
                 node.parentElement = wrapper;
-                appended.push(node);
                 return node;
             },
         };

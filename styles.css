@@ -113,6 +113,9 @@ h1 { margin-bottom: 5px; }
     position: relative;
     display: block;
 }
+.copy-textarea-wrapper textarea {
+    padding-right: 120px;
+}
 .copy-textarea-btn {
     position: absolute;
     top: 18px;
