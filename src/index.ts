@@ -21,6 +21,7 @@ export * from './mml';
 export * from './app';
 export * from './history';
 export * from './favorites';
+export * from './clipboard';
 
 // Import necessary functions for global scope
 import { exportWav, playAudioWithOverlay } from './audio';
@@ -49,6 +50,7 @@ import {
     refreshFavoritesUI,
     clearFavoritesAndRefresh
 } from './favorites';
+import { initializeClipboardButtons } from './clipboard';
 
 // Declare Emscripten Module interface
 declare global {
@@ -121,10 +123,12 @@ if (typeof window !== 'undefined') {
         document.addEventListener('DOMContentLoaded', () => {
             refreshHistoryUI();
             refreshFavoritesUI();
+            initializeClipboardButtons();
         });
     } else {
         refreshHistoryUI();
         refreshFavoritesUI();
+        initializeClipboardButtons();
     }
 }
 
