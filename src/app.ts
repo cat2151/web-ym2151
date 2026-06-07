@@ -150,12 +150,12 @@ export function setupEditorListeners(): void {
             if (combinedTimeoutId) clearTimeout(combinedTimeoutId);
             combinedTimeoutId = window.setTimeout(() => {
                 const content = (combinedMMLEditor as HTMLTextAreaElement).value;
-                const { toneJson, mml } = parseCombinedMMLContent(content);
+                const { toneJson, attachmentJson, mml } = parseCombinedMMLContent(content);
 
                 // Update mmlInput with the MML portion
                 const mmlInput = document.getElementById('mmlInput') as HTMLTextAreaElement | null;
                 if (mmlInput) {
-                    mmlInput.value = mml;
+                    mmlInput.value = attachmentJson ? `${attachmentJson}\n${mml}` : mml;
                 }
 
                 // Apply tone JSON to editors if present
@@ -168,10 +168,11 @@ export function setupEditorListeners(): void {
                 }
 
                 // Trigger MML playback only when content is ready:
-                // - if it starts with '{', a valid tone JSON header must have been found
+                // - if it starts with JSON, a valid tone JSON or attachment JSON header must have been found
                 // - otherwise it's plain MML which is always safe to play
-                const contentStartsWithJson = content.trim().startsWith('{');
-                if (!contentStartsWithJson || toneJson !== null) {
+                const trimmed = content.trim();
+                const contentStartsWithJson = trimmed.startsWith('{') || trimmed.startsWith('[');
+                if (!contentStartsWithJson || toneJson !== null || attachmentJson !== null) {
                     triggerAutoPlay();
                 }
             }, AUTOSAVE_DEBOUNCE_MS);

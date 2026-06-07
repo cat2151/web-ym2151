@@ -9,13 +9,14 @@ The MML input feature provides a way to specify musical sequences using text not
 ## Workflow
 
 ```
-MML Input → SMF (MIDI) → YM2151 JSON → Audio Playback
+MML Input + attachment JSON → SMF (MIDI) → YM2151 JSON → Audio Playback
 ```
 
 1. User enters MML notation (e.g., "cdefgab" for a scale)
-2. MML is converted to Standard MIDI File (SMF) format using `mmlabc-to-smf-rust`
-3. SMF is converted to YM2151 register write events using `smf-to-ym2151log-rust`
-4. YM2151 events are rendered to audio using the existing audio pipeline
+2. The current tone is converted to embedded attachment JSON at the MML stage
+3. MML is converted to Standard MIDI File (SMF) format using `mmlabc-to-smf-rust`
+4. SMF plus attachment JSON is converted to YM2151 register write events using `smf-to-ym2151log-rust`
+5. YM2151 events are rendered to audio using the existing audio pipeline
 
 ## Usage
 
@@ -33,11 +34,17 @@ MML Input → SMF (MIDI) → YM2151 JSON → Audio Playback
 cdefgab
 ```
 
-### Chords (Polyphony)
+### Multiple MML/MIDI Channels
 ```
 c;e;g
 ```
-Separate notes with `;` to play them simultaneously.
+Separate notes with `;` to play them simultaneously on separate MML/MIDI channels.
+
+### Chords (Polyphony)
+```
+'ceg'
+```
+Quoted notes play as polyphony on the same MML/MIDI channel. The YM2151 converter allocates the required YM2151 voices.
 
 ### Multi-Channel
 The conversion supports multiple MIDI channels with automatic voice allocation.
@@ -72,6 +79,7 @@ This script downloads the latest published prebuilt WASM bundles from GitHub Pag
 
 - `src/mml/index.ts` - Core MML conversion logic
 - `src/mml/playback.ts` - Integration with audio playback system
+- `src/mml/attachment.ts` - Converts the current tone to attachment JSON for MML conversion
 - `setup-mml.sh` - WASM setup script
 
 ### CI/CD Integration

@@ -3,6 +3,8 @@
  * Converts Music Macro Language (MML) to YM2151 JSON events
  */
 
+import { extractLeadingJsonBlock } from './embeddedJson';
+
 // WASM module types will be imported dynamically
 type MMLtoSMFModule = {
     parse_tree_json_to_smf: (parseTreeJson: string, mmlSource: string) => Uint8Array;
@@ -10,6 +12,7 @@ type MMLtoSMFModule = {
 
 type SMFtoYM2151Module = {
     smf_to_ym2151_json: (smfData: Uint8Array) => string;
+    smf_to_ym2151_json_with_attachment?: (smfData: Uint8Array, attachmentJson: Uint8Array) => string;
 };
 
 type TreeSitterModule = {
@@ -93,7 +96,10 @@ export async function initializeMMLConverter(): Promise<boolean> {
 }
 
 /**
- * Convert MML string to YM2151 JSON events
+ * Convert MML string to YM2151 JSON events.
+ * If the MML starts with a JSON object/array, the JSON is passed to
+ * smf-to-ym2151log as attachment JSON. The generated YM2151 JSON is not
+ * post-processed here.
  * @param mml MML string (e.g., "cdefgab" or "c;e;g" for chords)
  * @returns JSON string with YM2151 events or error
  */
@@ -104,17 +110,22 @@ export function convertMMLToYM2151JSON(mml: string): string | null {
     }
 
     try {
+        const leadingJson = extractLeadingJsonBlock(mml);
+        const mmlSource = leadingJson ? (leadingJson.rest || 'c') : mml;
+
         console.log('Parsing MML to tree-sitter JSON...');
-        const parseTreeJson = buildParseTreeJSON(mml);
+        const parseTreeJson = buildParseTreeJSON(mmlSource);
 
         // Step 1: Convert MML to SMF
         console.log('Converting MML to SMF...');
-        const smfData = mmlToSMFWasm.parse_tree_json_to_smf(JSON.stringify(parseTreeJson), mml);
+        const smfData = mmlToSMFWasm.parse_tree_json_to_smf(JSON.stringify(parseTreeJson), mmlSource);
         console.log(`✓ SMF generated (${smfData.length} bytes)`);
 
         // Step 2: Convert SMF to YM2151 JSON
         console.log('Converting SMF to YM2151 JSON...');
-        const ym2151Json = smfToYM2151Wasm.smf_to_ym2151_json(smfData);
+        const ym2151Json = leadingJson
+            ? convertSMFWithAttachment(smfData, leadingJson.json)
+            : smfToYM2151Wasm.smf_to_ym2151_json(smfData);
         console.log('✓ YM2151 JSON generated');
 
         return ym2151Json;
@@ -122,6 +133,17 @@ export function convertMMLToYM2151JSON(mml: string): string | null {
         console.error('Failed to convert MML:', error);
         return null;
     }
+}
+
+function convertSMFWithAttachment(smfData: Uint8Array, attachmentJson: string): string {
+    if (!smfToYM2151Wasm?.smf_to_ym2151_json_with_attachment) {
+        throw new Error('smf_to_ym2151_json_with_attachment is not available in the loaded WASM module');
+    }
+
+    return smfToYM2151Wasm.smf_to_ym2151_json_with_attachment(
+        smfData,
+        new TextEncoder().encode(attachmentJson),
+    );
 }
 
 /**
