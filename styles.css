@@ -108,6 +108,27 @@ textarea {
 h1 { margin-bottom: 5px; }
 .editor-label { margin-top: 20px; font-weight: bold; display: block; }
 
+/* Copy to clipboard buttons for textareas */
+.copy-textarea-btn {
+    display: inline-block;
+    padding: 4px 12px;
+    margin: 8px 0 0;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid #4a9070;
+    border-radius: 4px;
+    background: #eef;
+    color: #333;
+}
+.copy-textarea-btn:hover {
+    background: #dde7ff;
+}
+.copy-textarea-btn:focus {
+    outline: 2px solid #2a6040;
+    outline-offset: 2px;
+}
+
 /* Random Tone Controls */
 .random-controls { 
     margin: 20px 0; 
@@ -262,6 +283,15 @@ h1 { margin-bottom: 5px; }
         background: #2a2a2a;
         color: #e0e0e0;
         border-color: #444;
+    }
+
+    .copy-textarea-btn {
+        background: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #4a9070;
+    }
+    .copy-textarea-btn:hover {
+        background: #333a4a;
     }
 }
 
