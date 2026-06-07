@@ -39,14 +39,35 @@ export async function copyTextToClipboard(
     }
 
     if (sourceTextarea) {
+        const previousActiveElement = document.activeElement as HTMLElement | null;
+        const selectionStart = sourceTextarea.selectionStart;
+        const selectionEnd = sourceTextarea.selectionEnd;
+        const selectionDirection = sourceTextarea.selectionDirection;
+        const scrollTop = sourceTextarea.scrollTop;
+        const scrollLeft = sourceTextarea.scrollLeft;
+
         try {
             sourceTextarea.focus();
             sourceTextarea.select();
             const succeeded = document.execCommand('copy');
-            sourceTextarea.setSelectionRange(0, 0);
             return succeeded;
         } catch (error) {
             console.error('Fallback clipboard copy failed', error);
+        } finally {
+            if (selectionStart !== null && selectionEnd !== null) {
+                sourceTextarea.setSelectionRange(
+                    selectionStart,
+                    selectionEnd,
+                    selectionDirection ?? undefined
+                );
+            } else {
+                sourceTextarea.setSelectionRange(0, 0);
+            }
+            sourceTextarea.scrollTop = scrollTop;
+            sourceTextarea.scrollLeft = scrollLeft;
+            if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+                previousActiveElement.focus();
+            }
         }
     }
 
