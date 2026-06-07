@@ -112,28 +112,59 @@ h1 { margin-bottom: 5px; }
 .copy-textarea-wrapper {
     position: relative;
     display: block;
+    margin-top: 10px;
 }
-.copy-textarea-wrapper textarea {
-    padding-right: 120px;
+.copy-textarea-wrapper > textarea {
+    margin-top: 0;
 }
 .copy-textarea-btn {
     position: absolute;
-    top: 18px;
-    right: 18px;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
     z-index: 2;
-    padding: 4px 12px;
-    font-size: 13px;
+    padding: 4px 10px;
+    font-size: 12px;
     font-weight: bold;
     cursor: pointer;
-    border: 1px solid #4a9070;
-    border-radius: 4px;
-    background: #eef;
-    color: #333;
-    opacity: 0.85;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f5f5f5;
+    color: #666;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.2s 0.6s, background 0.15s, color 0.15s, border-color 0.15s;
+}
+.copy-textarea-wrapper:hover .copy-textarea-btn,
+.copy-textarea-wrapper:focus-within .copy-textarea-btn,
+.copy-textarea-btn.is-feedback {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
 }
 .copy-textarea-btn:hover {
-    background: #dde7ff;
-    opacity: 1;
+    background: #e9e9e9;
+}
+.copy-textarea-btn.is-success {
+    background: #e6f4ea;
+    color: #2d7a3a;
+    border-color: #b7dfbd;
+}
+.copy-textarea-btn.is-success:hover {
+    background: #e6f4ea;
+}
+.copy-textarea-btn.is-error {
+    background: #fff1f0;
+    color: #9f1c12;
+    border-color: #f0b8b4;
+}
+.copy-textarea-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
 }
 .copy-textarea-btn:focus {
     outline: 2px solid #2a6040;
@@ -299,10 +330,20 @@ h1 { margin-bottom: 5px; }
     .copy-textarea-btn {
         background: #2a2a2a;
         color: #e0e0e0;
-        border-color: #4a9070;
+        border-color: #555;
     }
     .copy-textarea-btn:hover {
         background: #333a4a;
+    }
+    .copy-textarea-btn.is-success {
+        background: #16351f;
+        color: #a7e3b2;
+        border-color: #3f7a4b;
+    }
+    .copy-textarea-btn.is-error {
+        background: #3a1f1f;
+        color: #f0b8b4;
+        border-color: #7d3a35;
     }
 }
 

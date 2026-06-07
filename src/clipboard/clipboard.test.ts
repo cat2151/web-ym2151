@@ -5,11 +5,13 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
     copyTextToClipboard,
+    createCopyButton,
     deriveCopyButtonLabel,
     initializeClipboardButtons,
 } from './index';
 
 afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
 });
@@ -110,6 +112,39 @@ describe('copyTextToClipboard', () => {
 });
 
 describe('initializeClipboardButtons', () => {
+    it('creates a copy button with an inline SVG icon and English label', () => {
+        const button: any = {
+            className: '',
+            type: '',
+            title: '',
+            innerHTML: '',
+            addEventListener: vi.fn(),
+            setAttribute: vi.fn(),
+        };
+        button.classList = {
+            add: vi.fn(),
+            remove: vi.fn(),
+            toggle: vi.fn(),
+            contains: (className: string) =>
+                button.className.split(/\s+/).includes(className),
+        };
+
+        vi.stubGlobal('document', {
+            querySelector: vi.fn().mockReturnValue(null),
+            createElement: vi.fn().mockReturnValue(button),
+        });
+
+        const textarea = {
+            id: 'mmlInput',
+        } as unknown as HTMLTextAreaElement;
+
+        expect(createCopyButton(textarea)).toBe(button);
+        expect(button.innerHTML).toContain('<svg');
+        expect(button.innerHTML).toContain('copy-textarea-icon');
+        expect(button.innerHTML).toContain('>Copy</span>');
+        expect(button.title).toBe('Copy');
+    });
+
     it('wraps each textarea and overlays a copy button, avoiding duplicates on re-init', () => {
         const inserted: Array<{ node: any; ref: any }> = [];
 
@@ -152,10 +187,14 @@ describe('initializeClipboardButtons', () => {
                     type: '',
                     title: '',
                     textContent: '',
+                    innerHTML: '',
                     addEventListener: vi.fn(),
                     setAttribute: vi.fn(),
                 };
                 button.classList = {
+                    add: vi.fn(),
+                    remove: vi.fn(),
+                    toggle: vi.fn(),
                     contains: (className: string) =>
                         button.className.split(/\s+/).includes(className),
                 };
