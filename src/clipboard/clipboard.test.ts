@@ -110,27 +110,45 @@ describe('copyTextToClipboard', () => {
 });
 
 describe('initializeClipboardButtons', () => {
-    it('inserts a copy button before each textarea and avoids duplicates on re-init', () => {
+    it('wraps each textarea and overlays a copy button, avoiding duplicates on re-init', () => {
+        const appended: any[] = [];
         const inserted: Array<{ node: any; ref: any }> = [];
-        const textarea = { id: '', value: '' } as HTMLTextAreaElement & {
-            previousElementSibling?: any;
-            parentNode?: any;
-        };
-        const parentNode = {
-            insertBefore(node: any, ref: any) {
-                inserted.push({ node, ref });
-                if (ref === textarea) {
-                    textarea.previousElementSibling = node;
-                }
+
+        const wrapper: any = {
+            className: '',
+            children: [] as any[],
+            appendChild(node: any) {
+                this.children.push(node);
+                node.parentElement = wrapper;
+                appended.push(node);
+                return node;
             },
         };
-        textarea.parentNode = parentNode;
-        textarea.previousElementSibling = null;
+        wrapper.classList = {
+            contains: (className: string) =>
+                wrapper.className.split(/\s+/).includes(className),
+        };
+
+        const originalParent = {
+            insertBefore(node: any, ref: any) {
+                inserted.push({ node, ref });
+            },
+        };
+
+        const textarea = {
+            id: '',
+            value: '',
+            parentElement: null as any,
+            parentNode: originalParent,
+        } as unknown as HTMLTextAreaElement;
 
         vi.stubGlobal('document', {
             querySelectorAll: vi.fn().mockReturnValue([textarea]),
             querySelector: vi.fn().mockReturnValue(null),
-            createElement: vi.fn().mockImplementation(() => {
+            createElement: vi.fn().mockImplementation((tag: string) => {
+                if (tag === 'div') {
+                    return wrapper;
+                }
                 const button: any = {
                     className: '',
                     type: '',
@@ -148,10 +166,19 @@ describe('initializeClipboardButtons', () => {
         });
 
         initializeClipboardButtons();
-        expect(inserted).toHaveLength(1);
-        expect(inserted[0].ref).toBe(textarea);
 
+        // The wrapper is inserted where the textarea was, then the textarea and
+        // the copy button are moved inside the wrapper.
+        expect(inserted).toHaveLength(1);
+        expect(inserted[0].node).toBe(wrapper);
+        expect(inserted[0].ref).toBe(textarea);
+        expect(wrapper.className).toBe('copy-textarea-wrapper');
+        expect(wrapper.children).toContain(textarea);
+        expect(wrapper.children).toHaveLength(2);
+
+        // Re-initialization should not wrap the textarea again.
         initializeClipboardButtons();
         expect(inserted).toHaveLength(1);
+        expect(wrapper.children).toHaveLength(2);
     });
 });
