@@ -109,10 +109,19 @@ h1 { margin-bottom: 5px; }
 .editor-label { margin-top: 20px; font-weight: bold; display: block; }
 
 /* Copy to clipboard buttons for textareas */
+.copy-textarea-wrapper {
+    position: relative;
+    display: block;
+}
+.copy-textarea-wrapper textarea {
+    padding-right: 120px;
+}
 .copy-textarea-btn {
-    display: inline-block;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 2;
     padding: 4px 12px;
-    margin: 8px 0 0;
     font-size: 13px;
     font-weight: bold;
     cursor: pointer;
@@ -120,9 +129,11 @@ h1 { margin-bottom: 5px; }
     border-radius: 4px;
     background: #eef;
     color: #333;
+    opacity: 0.85;
 }
 .copy-textarea-btn:hover {
     background: #dde7ff;
+    opacity: 1;
 }
 .copy-textarea-btn:focus {
     outline: 2px solid #2a6040;

@@ -4,6 +4,7 @@
  */
 
 const COPY_BUTTON_CLASS = 'copy-textarea-btn';
+const COPY_WRAPPER_CLASS = 'copy-textarea-wrapper';
 const COPY_DEFAULT_LABEL = '📋 Copy';
 const COPY_SUCCESS_LABEL = '✓ Copied!';
 const COPY_ERROR_LABEL = '⚠ Copy failed';
@@ -122,19 +123,28 @@ export function createCopyButton(textarea: HTMLTextAreaElement): HTMLButtonEleme
 }
 
 /**
- * Insert a copy-to-clipboard button before each textarea in the document.
+ * Wrap each textarea in a positioned container and overlay a
+ * copy-to-clipboard button inside the textarea (top-right corner).
  */
 export function initializeClipboardButtons(): void {
     const textareas = document.querySelectorAll<HTMLTextAreaElement>('textarea');
 
     textareas.forEach((textarea) => {
-        // Avoid adding duplicate buttons (e.g. on re-initialization).
-        const previous = textarea.previousElementSibling;
-        if (previous && previous.classList.contains(COPY_BUTTON_CLASS)) {
+        // Avoid wrapping twice (e.g. on re-initialization).
+        const parent = textarea.parentElement;
+        if (parent && parent.classList.contains(COPY_WRAPPER_CLASS)) {
             return;
         }
 
+        const wrapper = document.createElement('div');
+        wrapper.className = COPY_WRAPPER_CLASS;
+
         const button = createCopyButton(textarea);
-        textarea.parentNode?.insertBefore(button, textarea);
+
+        // Insert the wrapper where the textarea is, then move the textarea
+        // inside it and overlay the copy button on top of the textarea.
+        textarea.parentNode?.insertBefore(wrapper, textarea);
+        wrapper.appendChild(textarea);
+        wrapper.appendChild(button);
     });
 }
